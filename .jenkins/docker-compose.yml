@@ -1,0 +1,38 @@
+database:
+  image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
+  environment:
+    POSTGRES_PASSWORD: insecure
+    POSTGRES_USER: openpanorama
+
+importer:
+  build: ../web
+  links:
+    - database:database
+  volumes:
+    - /mnt/data/diva_import:/app/diva
+  environment:
+    DB_NAME: openpanorama
+    DB_PASSWORD: insecure
+  command: >
+    bash -c "/app/docker-wait.sh \
+            && python manage.py migrate \
+            && python manage.py run_import"
+
+db-backup:
+  image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
+  links:
+    - database:db
+  volumes:
+    - ./backups:/tmp/backups
+  command: >
+    bash -c "echo db:5432:openpanorama:openpanorama:insecure > ~/.pgpass \
+            && chmod 600 ~/.pgpass \
+            && pg_dump --clean \
+                        -Fc \
+                        -t openpanorama* \
+                        -t geo*  \
+                        -T django*  \
+                        -T auth*    \
+                        -U openpanorama \
+                        -h db -p 5432 \
+                        openpanorama > /tmp/backups/database.dump"

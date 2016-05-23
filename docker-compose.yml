@@ -1,0 +1,19 @@
+database:
+  image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
+  ports:
+    - "5454:5432"
+  environment:
+    POSTGRES_PASSWORD: insecure
+
+web:
+  build: ./web
+  ports:
+    - "8098:8000"
+  links:
+    - database:database
+  volumes:
+    - $PWD/reports:/app/reports
+  environment:
+    SECRET_KEY: hoi
+    DB_NAME: postgres
+    DB_PASSWORD: insecure
