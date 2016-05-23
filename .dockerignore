@@ -1,0 +1,7 @@
+.git
+.gitignore
+docker-compose.yml
+Dockerfile
+.idea
+*.iml
+passwords.env

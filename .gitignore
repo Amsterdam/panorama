@@ -1,0 +1,9 @@
+.idea
+__pycache__
+*.pyc
+reports
+*.iml
+*_dev_settings.py
+web/static/*
+.env
+.jenkins/backups
