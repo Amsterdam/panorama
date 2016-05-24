@@ -65,3 +65,96 @@ indicatie van waar gereden is, en als indicatie van de navigatiekwaliteit.
 | `heading_rms[deg]`	    | 0.208372506807263	 |               |
 
 """
+
+from contextlib import contextmanager
+import csv
+import os
+
+from django.contrib.gis.db import models as geo
+
+from . import models
+
+BATCH_SIZE = 50000
+
+
+def _wrap_row(r, headers):
+    return dict(zip(headers, r))
+
+
+@contextmanager
+def _context_reader(source):
+    if not os.path.exists(source):
+        raise ValueError("File not found: {}".format(source))
+
+    with open(source, encoding='cp1252') as f:
+        rows = csv.reader(f, delimiter='\t', quotechar=None, quoting=csv.QUOTE_NONE)
+
+        headers = next(rows)
+
+        yield (_wrap_row(r, headers) for r in rows)
+
+
+def process_csv(paths, process_row_callback):
+    models = []
+
+    for path in paths:
+        with _context_reader(path) as rows:
+            models += [result for result in (process_row_callback(r, path) for r in rows) if result]
+
+    return models
+
+
+class Import(object):
+    panorama_paths = []
+    trajectory_paths = []
+
+    def find_new_paths(self):
+        # TODO locate paths that have been changed based on last import date (sort model on timestamp?)
+        return []
+
+    def process(self):
+        self.find_new_paths()
+
+        models.Panorama.objects.bulk_create(
+            process_csv(self.panorama_paths, self.process_panorama_row),
+            batch_size=BATCH_SIZE
+        )
+
+        models.Traject.objects.bulk_create(
+            process_csv(self.trajectory_paths, self.process_traject_row),
+            batch_size=BATCH_SIZE
+        )
+
+    def process_panorama_row(self, row, path):
+        return models.Panorama(
+            timestamp=row['gps_seconds[s]'],
+            filename=row['panorama_file_name'],
+            path=path,
+            opnamelocatie=geo.PointField(
+                row['latitude[deg]'],
+                row['longitude[deg]'],
+                row['altitude_ellipsoidal[m]']
+            ),
+            roll=float(row['roll[deg]']),
+            pitch=float(row['pitch[deg]']),
+            heading=float(row['heading[deg]']),
+        )
+
+    def process_traject_row(self, row):
+        return models.Traject(
+            timestamp=row['gps_seconds[s]'],
+            opnamelocatie=geo.PointField(
+                row['latitude[deg]'],
+                row['longitude[deg]'],
+                row['altitude_ellipsoidal[m]']
+            ),
+            north_rms=float(row['north_rms[deg]']),
+            east_rms=float(row['east_rms[deg]']),
+            down_rms=float(row['down_rms[deg]']),
+            roll_rms=float(row['roll_rms[deg]']),
+            pitch_rms=float(row['pitch_rms[deg]']),
+            heading_rms=float(row['heading_rms[deg]']),
+        )
+
+    def create_thumbnails(self):
+        raise NotImplementedError
