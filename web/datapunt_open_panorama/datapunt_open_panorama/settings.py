@@ -11,6 +11,7 @@ def get_docker_host():
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PANO_DIR = os.path.abspath(os.path.join(BASE_DIR, 'panoramas'))
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default-secret")
 
