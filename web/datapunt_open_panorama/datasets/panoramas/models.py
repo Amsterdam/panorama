@@ -5,6 +5,7 @@ from django.contrib.gis.db import models as geo
 class Panorama(models.Model):
     timestamp = models.TimeField(null=True)
     filename = models.CharField(null=True, max_length=255)
+    path = models.CharField(max_length=100, null=True)
     opnamelocatie = geo.PointField(null=True, dim=3)
     roll = models.FloatField(null=True)
     pitch = models.FloatField(null=True)
