@@ -94,36 +94,38 @@ def _context_reader(source):
         yield (_wrap_row(r, headers) for r in rows)
 
 
-def process_csv(paths, process_row_callback):
+def process_csv(paths, csvfile, process_row_callback):
     models = []
 
     for path in paths:
-        with _context_reader(path) as rows:
+        with _context_reader(os.path.join(path, csvfile)) as rows:
             models += [result for result in (process_row_callback(r, path) for r in rows) if result]
 
     return models
 
 
 class Import(object):
-    panorama_paths = []
-    trajectory_paths = []
-
+    """
+    Simple import script.
+    Locate paths that have been modified since last import date.
+    """
     def find_new_paths(self):
-        # TODO locate paths that have been changed based on last import date (sort model on timestamp?)
         return []
 
     def process(self):
-        self.find_new_paths()
+        paths = self.find_new_paths()
 
         models.Panorama.objects.bulk_create(
-            process_csv(self.panorama_paths, self.process_panorama_row),
+            process_csv(paths, 'panorama1.csv', self.process_panorama_row),
             batch_size=BATCH_SIZE
         )
 
         models.Traject.objects.bulk_create(
-            process_csv(self.trajectory_paths, self.process_traject_row),
+            process_csv(paths, 'trajectory.csv', self.process_traject_row),
             batch_size=BATCH_SIZE
         )
+
+        self.create_thumbnails(paths)
 
     def process_panorama_row(self, row, path):
         return models.Panorama(
@@ -156,5 +158,5 @@ class Import(object):
             heading_rms=float(row['heading_rms[deg]']),
         )
 
-    def create_thumbnails(self):
+    def create_thumbnails(self, paths):
         raise NotImplementedError
