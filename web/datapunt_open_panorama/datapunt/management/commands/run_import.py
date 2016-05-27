@@ -1,5 +1,4 @@
 import sys
-
 from django.core.management import BaseCommand, call_command
 
 import datasets.panoramas.batch
@@ -38,4 +37,4 @@ class Command(BaseCommand):
             for job_class in self.imports[ds]:
                 job_class().process()
 
-            #call_command('create_geo_tables')
+            # call_command('create_geo_tables')

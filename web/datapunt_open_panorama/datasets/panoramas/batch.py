@@ -170,7 +170,7 @@ class ImportPanoramaJob(object):
         if not last_pano:
             msg = 'No old panoramas loaded'
 
-        log.debug('latest is: %s', msg)
+        log.debug('Latest is: %s', msg)
 
         return last_pano
 
@@ -198,7 +198,7 @@ class ImportPanoramaJob(object):
 
         return paths
 
-    def process(self, date=None):
+    def process(self):
 
         last_pano = self._get_last_pano_file()
 
@@ -220,25 +220,24 @@ class ImportPanoramaJob(object):
 
         paths = self.find_new_paths(models.Panorama, 'pano*.jpg')
 
-        # self.create_thumbnails(paths)
-
-    def process_panorama_row(self, row, path):
-
+    def _get_valid_timestamp(self, row):
         t_gps = float(row['gps_seconds[s]'])
         timestamp = datetime.utcfromtimestamp(t_gps + GPSfromUTC)
         timestamp = pytz.utc.localize(timestamp)
+        return timestamp
+
+    def process_panorama_row(self, row, path):
 
         filename = row['panorama_file_name'] + '.jpg'
-
         file_path = os.path.join(settings.BASE_DIR, path, filename)
 
         # check if pano file exists
         if not os.path.isfile(file_path):
-            log.error('Missing Pano: %s/%s', path, filename)
+            log.error('MISSING Panorama: %s/%s', path, filename)
             return None
 
         return models.Panorama(
-            timestamp=timestamp,
+            timestamp=self._get_valid_timestamp(row),
             filename=filename,
             path=path,
             opnamelocatie=Point(
@@ -253,13 +252,8 @@ class ImportPanoramaJob(object):
 
     def process_traject_row(self, row, path):
 
-        t_gps = float(row['gps_seconds[s]'])
-
-        timestamp = datetime.utcfromtimestamp(t_gps + GPSfromUTC)
-        timestamp = pytz.utc.localize(timestamp)
-
         return models.Traject(
-            timestamp=timestamp,
+            timestamp=self._get_valid_timestamp(row),
             opnamelocatie=Point(
                 float(row['latitude[deg]']),
                 float(row['longitude[deg]']),
@@ -273,5 +267,10 @@ class ImportPanoramaJob(object):
             heading_rms=float(row['heading_rms[deg]']),
         )
 
-    def create_thumbnails(self, paths):
-        raise NotImplementedError
+    def create_thumbnails(self, panorama_list):
+        """
+        SHOULD BE DONE Dynamic based on directon
+        location pano / view location
+        """
+        raise NotImplementedError()
+        # STUFF FOR LATER

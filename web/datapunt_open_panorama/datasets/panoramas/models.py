@@ -20,7 +20,8 @@ class Panorama(models.Model):
 class Traject(models.Model):
     timestamp = models.DateTimeField(null=False)
     opnamelocatie = geo.PointField(null=False, dim=3)
-    north_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
+    north_rms = models.DecimalField(
+        null=True, max_digits=20, decimal_places=14)
     east_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
     down_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
     roll_rms = models.FloatField(null=True)
