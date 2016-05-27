@@ -3,10 +3,10 @@ from django.contrib.gis.db import models as geo
 
 
 class Panorama(models.Model):
-    timestamp = models.TimeField(null=True)
-    filename = models.CharField(null=True, max_length=255)
-    path = models.CharField(max_length=100, null=True)
-    opnamelocatie = geo.PointField(null=True, dim=3)
+    timestamp = models.DateTimeField(null=False)
+    filename = models.CharField(null=False, max_length=255)
+    path = models.CharField(max_length=400, null=False)
+    opnamelocatie = geo.PointField(null=False, dim=3)
     roll = models.FloatField(null=True)
     pitch = models.FloatField(null=True)
     heading = models.FloatField(null=True)
@@ -14,12 +14,12 @@ class Panorama(models.Model):
     objects = geo.GeoManager()
 
     def __str__(self):
-        return '<Panorama %s>' % self.filename
+        return '<Panorama %s/%s>' % (self.path, self.filename)
 
 
 class Traject(models.Model):
-    timestamp = models.TimeField(null=True)
-    opnamelocatie = geo.PointField(null=True, dim=3)
+    timestamp = models.DateTimeField(null=False)
+    opnamelocatie = geo.PointField(null=False, dim=3)
     north_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
     east_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
     down_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
