@@ -62,7 +62,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-#ROOT_URLCONF = 'datapunt_open_panorama.urls'
+ROOT_URLCONF = 'datapunt_api.urls'
 
 TEMPLATES = [
     {
@@ -89,7 +89,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': os.getenv('DB_NAME', 'openpanorama'),
-        'USER': os.getenv('DB_NAME', 'postgres'),
+        'USER': os.getenv('DB_NAME', 'openpanorama'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'insecure'),
         'HOST': os.getenv('DATABASE_PORT_5432_TCP_ADDR', get_docker_host()),
         'PORT': os.getenv('DATABASE_PORT_5432_TCP_PORT', '5454'),
@@ -124,6 +124,12 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
+
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console'],
+    },
+
     'loggers': {
         'django': {
             'handlers': ['console'],
