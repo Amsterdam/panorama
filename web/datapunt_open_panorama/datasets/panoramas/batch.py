@@ -211,16 +211,27 @@ class ImportPanoramaJob(object):
             batch_size=BATCH_SIZE
         )
 
-        paths = self.find_new_paths(models.Panorama, 'pano*.jpg')
 
-    def _get_valid_timestamp(self, row):
-        t_gps = float(row['gps_seconds[s]'])
-        timestamp = datetime.utcfromtimestamp(t_gps + GPSfromUTC)
-        timestamp = pytz.utc.localize(timestamp)
+    def _convert_gps_time(self, gps_time, local=True):
+        """
+        Converts the GPS time to unix timestamp
+        Paramaters:
+        - gps_time: gps time as timestamp
+        - local: optional parmeter. wether to convert to utc or local time
+
+        Returns:
+        unix timestamp representing the date and time, either in utc or local time
+        """
+        gps_time = int(gps_time)
+        timestamp = datetime.utcfromtimestamp(gps_time + GPSfromUTC)
+        if local:
+            timestamp = pytz.utc.localize(timestamp)
         return timestamp
 
     def process_panorama_row(self, row, path):
-
+        """
+        Process a single row in the panorama photos metadata csv
+        """
         filename = row['panorama_file_name'] + '.jpg'
         file_path = os.path.join(settings.BASE_DIR, path, filename)
 
@@ -230,7 +241,7 @@ class ImportPanoramaJob(object):
             return None
 
         return models.Panorama(
-            timestamp=self._get_valid_timestamp(row),
+                timestamp=self._convert_gps_time(row['gps_seconds[s]'),
             filename=filename,
             path=path,
             opnamelocatie=Point(
@@ -244,9 +255,11 @@ class ImportPanoramaJob(object):
         )
 
     def process_traject_row(self, row, path):
-
+        """
+        Process a single row in the trajectory csv file
+        """
         return models.Traject(
-            timestamp=self._get_valid_timestamp(row),
+            timestamp=self._convert_gps_time(row['gps_seconds[s]'),
             opnamelocatie=Point(
                 float(row['latitude[deg]']),
                 float(row['longitude[deg]']),
