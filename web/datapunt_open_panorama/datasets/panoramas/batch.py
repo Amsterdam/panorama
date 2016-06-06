@@ -76,18 +76,16 @@ van de navigatiekwaliteit.
 
 
 """
-
-import logging
+# Python
+from contextlib import contextmanager
 import csv
+from datetime import datetime
+import glob
+import logging
 import os
 import os.path
-
-import subprocess
 import pytz
-
-from datetime import datetime
-from contextlib import contextmanager
-
+# Package
 from django.contrib.gis.geos import Point
 from django.conf import settings
 
@@ -99,7 +97,11 @@ BATCH_SIZE = 50000
 
 log = logging.getLogger(__name__)
 
-GPSfromUTC = (datetime(1980, 1, 6) - datetime(1970, 1, 1)).total_seconds()
+# Conversion between GPS and UTC time
+# Initial difference plus the 36 leap seconds recorded to date
+# When a new leap second is introduced the import will need to change to accommodate for it
+# or it can be ignored, assuming that 
+UTCfromGPS = 315964800 - 36 
 
 
 def _wrap_row(r, headers):
@@ -174,47 +176,38 @@ class ImportPanoramaJob(object):
 
         return last_pano
 
-    def find_new_paths(self, model, filematch, last_pano=None):
+    def find_metadata_files(self, file_match, root_dir='panoramas'):
         """
-        Check for new paths to add in database
+        Finds the csv files containing the metadata
+
+        Parameters:
+        file_match - The file searhc pattern describing the file name
+        root_dir - The starting point to for file searching
+
+        Returns:
+        A, potentailly empty, list of file names matching the search criteria
         """
-
-        if last_pano:
-            # import ipdb; ipdb.set_trace()
-            last_file = os.path.join(
-                # settings.BASE_DIR,
-                last_pano.path, last_pano.filename)
-
-            output = subprocess.Popen(
-                ['find', 'panoramas', '-name', filematch,
-                 '-newer', last_file], stdout=subprocess.PIPE)
-        else:
-            # Find all relevant panorama files.
-            output = subprocess.Popen(
-                ['find', 'panoramas', '-name', filematch],
-                stdout=subprocess.PIPE)
-
+        path = '%s/**/%s' % (root_dir, file_match)
+        files = glob.glob(path, recursive=True)
         paths = output.stdout.readlines()
-
-        return paths
+        return files
 
     def process(self):
-
-        last_pano = self._get_last_pano_file()
-
-        paths = self.find_new_paths(
-            models.Panorama, 'panorama*.csv', last_pano)
-
+        """
+        Main import process
+        The import is done type first instead of complete import of each mission.
+        First all the panorama metadata files are imported, then all the trajectory
+        files.
+        """
+        files = self.find_metadata_files('panorama*.csv')
         models.Panorama.objects.bulk_create(
-            process_csv(paths, self.process_panorama_row),
+            process_csv(files, self.process_panorama_row),
             batch_size=BATCH_SIZE
         )
 
-        paths = self.find_new_paths(
-            models.Traject, 'trajectory.csv', last_pano)
-
+        files = self.find_metadata_files('trajectory.csv')
         models.Traject.objects.bulk_create(
-            process_csv(paths, self.process_traject_row),
+            process_csv(files, self.process_traject_row),
             batch_size=BATCH_SIZE
         )
 
