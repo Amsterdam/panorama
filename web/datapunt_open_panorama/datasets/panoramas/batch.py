@@ -1,8 +1,11 @@
 """
-Basisinformatie maakt binnen een opnameseizoen dagelijks opnames. Elke opnamedag worden er 'missies' aangemaakt.
-Binnen een missie komen 1 of meerdere 'runs' voor. Een run is een aaneengesloten opname van meerdere beelden.
+Basisinformatie maakt binnen een opnameseizoen dagelijks opnames.
+Elke opnamedag worden er 'missies' aangemaakt.
+Binnen een missie komen 1 of meerdere 'runs' voor. Een run is een
+aaneengesloten opname van meerdere beelden.
 
-Basisinformatie verwerkt de ruwe opnames en de ruwe navigatiegegevens, en upload deze naar de bestandsserver van
+Basisinformatie verwerkt de ruwe opnames en de ruwe navigatiegegevens,
+en upload deze naar de bestandsserver van
 Datapunt.
 
 De mappenstructuur is `<panoserver>/YYYY/MM/DD/<missienaam>/`.
@@ -17,15 +20,18 @@ In elke map komen de volgende bestanden voor:
 5. <missienaam>_xxxxxxx.log
 
 Per dag / missie worden de volgende bestanden gegenereerd:
-Ad 1)   de beelden zelf. Er is altijd 1 Run binnen een missie. De run-nummering begint bij 0. De panorama-id is een
-        nulgebaseerd volgnummer binnen de run. Bijvoorbeeld: de tweede afbeelding binnen de 3e run heet:
-        `pano_0002_000001.jpg`.
+Ad 1)   de beelden zelf. Er is altijd 1 Run binnen een missie.
+        De run-nummering begint bij 0. De panorama-id is een
+        nulgebaseerd volgnummer binnen de run. Bijvoorbeeld:
+        de tweede afbeelding binnen de 3e run heet: `pano_0002_000001.jpg`.
 Ad 2)   opnamelocaties en metadata van de beelden
-Ad 3)   metadata van het gereden traject,inclusief de kwaliteit van de navigatie.
+Ad 3)   metadata van het gereden traject,inclusief de kwaliteit van
+        de navigatie.
 Ad 4)   aanvullende informatie over de opnametijden
 Ad 5)   procesinformatie van de missie, waaronder de missienaam
 
-Op dit moment zijn de eerste 3 bestanden relevant. De structuur van de twee csv-bestanden (2) en (3) wordt hieronder
+Op dit moment zijn de eerste 3 bestanden relevant.
+De structuur van de twee csv-bestanden (2) en (3) wordt hieronder
 toegelicht.
 
 ### panorama1.csv ###
@@ -37,44 +43,63 @@ Bevat de metadata van de opnames.
 |-------------------------- | ----------------- | --------------|
 | `gps_seconds[s]`          | 1119865163.26577  | tijd          |
 | `panorama_file_name`      | pano_0000_000000  | bestandsnaam  |
-| `latitude[deg]`	        | 52.3637434695634  | opnamelocatie |
-| `longitude[deg]`	        | 5.1860815788512   |               |
+| `latitude[deg]`           | 52.3637434695634  | opnamelocatie |
+| `longitude[deg]`          | 5.1860815788512   |               |
 | `altitude_ellipsoidal[m]` | 42.3710962571204  |               |
 | `roll[deg]`               | -2.04336774663454 | camerastand   |
 | `pitch[deg]`              | 1.8571838859381   |               |
-| `heading[deg]`            | 359.39712516717   |	            |
+| `heading[deg]`            | 359.39712516717   |               |
 
 ### trajectory.csv ###
 Tab-gescheiden
 
-Bevat de metadata van het gereden traject, inclusief de kwaliteit van de navigatie.
-Deze gegevens zijn niet nodig om de opnamelocaties en de beelden zelf te tonen, maar kunnen gebruikt worden als een
-indicatie van waar gereden is, en als indicatie van de navigatiekwaliteit.
+Bevat de metadata van het gereden traject, inclusief de kwaliteit
+van de navigatie.
+Deze gegevens zijn niet nodig om de opnamelocaties en de
+beelden zelf te tonen, maar kunnen gebruikt worden als een
+indicatie van waar gereden is, en als indicatie
+van de navigatiekwaliteit.
 
 | kolomnaam                 | voorbeeld          | betekenis     |
 |-------------------------- | ------------------ | --------------|
-| `gps_seconds[s]`	        | 1119864909.00311	 | tijd          |
-| `latitude[deg]`	        | 52.3638859873144	 | locatie       |
-| `longitude[deg]`	        | 5.18583889988423	 |               |
+| `gps_seconds[s]`          | 1119864909.00311	 | tijd          |
+| `latitude[deg]`           | 52.3638859873144	 | locatie       |
+| `longitude[deg]`          | 5.18583889988423	 |               |
 | `altitude_ellipsoidal[m]` | 42.1257964957097	 |               |
-| `north_rms[m]`	        | 0.0337018163617934 | kwaliteit     |
+| `north_rms[m]`            | 0.0337018163617934 | kwaliteit     |
 | `east_rms[m]`	            | 0.0254896778492272 |               |
 | `down_rms[m]`	            | 0.041721045361001	 |               |
-| `roll_rms[deg]`	        | 0.0294313546384066 |               |
-| `pitch_rms[deg]`	        | 0.0310816854803103 |               |
+| `roll_rms[deg]`           | 0.0294313546384066 |               |
+| `pitch_rms[deg]`          | 0.0310816854803103 |               |
 | `heading_rms[deg]`	    | 0.208372506807263	 |               |
+
+
 
 """
 
-from contextlib import contextmanager
+import logging
 import csv
 import os
+import os.path
 
-from django.contrib.gis.db import models as geo
+import subprocess
+import pytz
+
+from datetime import datetime
+from contextlib import contextmanager
+
+from django.contrib.gis.geos import Point
+from django.conf import settings
+
 
 from . import models
 
 BATCH_SIZE = 50000
+
+
+log = logging.getLogger(__name__)
+
+GPSfromUTC = (datetime(1980, 1, 6) - datetime(1970, 1, 1)).total_seconds()
 
 
 def _wrap_row(r, headers):
@@ -87,76 +112,165 @@ def _context_reader(source):
         raise ValueError("File not found: {}".format(source))
 
     with open(source, encoding='cp1252') as f:
-        rows = csv.reader(f, delimiter='\t', quotechar=None, quoting=csv.QUOTE_NONE)
+        rows = csv.reader(
+            f, delimiter='\t', quotechar=None, quoting=csv.QUOTE_NONE)
 
         headers = next(rows)
 
         yield (_wrap_row(r, headers) for r in rows)
 
 
-def process_csv(paths, csvfile, process_row_callback):
+def process_csv(paths, process_row_callback):
+
     models = []
 
-    for path in paths:
-        with _context_reader(os.path.join(path, csvfile)) as rows:
-            models += [result for result in (process_row_callback(r, path) for r in rows) if result]
+    for csvfilepath in paths:
+        csv_path = str(csvfilepath[:-1], 'UTF-8')
+        # cut off last csv file name
+        relative_path = "/".join(csv_path.split('/')[:-1])
+        full_path = "/".join([settings.BASE_DIR, csv_path])
+
+        # parse the csv
+        with _context_reader(full_path) as rows:
+
+            for model_data in rows:
+                model = process_row_callback(model_data, relative_path)
+                if model:
+                    models.append(model)
 
     return models
 
 
-class Import(object):
+class ImportPanoramaJob(object):
     """
     Simple import script.
     Locate paths that have been modified since last import date.
+
+    NOTE:
+
+    WE ASUME ONLY NEW FILES/FOLDERS ARE ADDED
+    and old files/folders are not changed
+
+    WE do not notice DELETE's
     """
-    def find_new_paths(self):
-        return []
+
+    def _get_last_pano_file(self):
+        """
+        Find the last added panorama and add it
+        """
+
+        last_pano = None
+
+        if models.Panorama.objects.count():
+            last_pano = models.Panorama.objects.latest(
+                field_name='timestamp')
+
+        msg = last_pano
+
+        if not last_pano:
+            msg = 'No old panoramas loaded'
+
+        log.debug('Latest is: %s', msg)
+
+        return last_pano
+
+    def find_new_paths(self, model, filematch, last_pano=None):
+        """
+        Check for new paths to add in database
+        """
+
+        if last_pano:
+            # import ipdb; ipdb.set_trace()
+            last_file = os.path.join(
+                # settings.BASE_DIR,
+                last_pano.path, last_pano.filename)
+
+            output = subprocess.Popen(
+                ['find', 'panoramas', '-name', filematch,
+                 '-newer', last_file], stdout=subprocess.PIPE)
+        else:
+            # Find all relevant panorama files.
+            output = subprocess.Popen(
+                ['find', 'panoramas', '-name', filematch],
+                stdout=subprocess.PIPE)
+
+        paths = output.stdout.readlines()
+
+        return paths
 
     def process(self):
-        paths = self.find_new_paths()
+
+        last_pano = self._get_last_pano_file()
+
+        paths = self.find_new_paths(
+            models.Panorama, 'panorama*.csv', last_pano)
 
         models.Panorama.objects.bulk_create(
-            process_csv(paths, 'panorama1.csv', self.process_panorama_row),
+            process_csv(paths, self.process_panorama_row),
             batch_size=BATCH_SIZE
         )
+
+        paths = self.find_new_paths(
+            models.Traject, 'trajectory.csv', last_pano)
 
         models.Traject.objects.bulk_create(
-            process_csv(paths, 'trajectory.csv', self.process_traject_row),
+            process_csv(paths, self.process_traject_row),
             batch_size=BATCH_SIZE
         )
 
-        self.create_thumbnails(paths)
+        paths = self.find_new_paths(models.Panorama, 'pano*.jpg')
+
+    def _get_valid_timestamp(self, row):
+        t_gps = float(row['gps_seconds[s]'])
+        timestamp = datetime.utcfromtimestamp(t_gps + GPSfromUTC)
+        timestamp = pytz.utc.localize(timestamp)
+        return timestamp
 
     def process_panorama_row(self, row, path):
+
+        filename = row['panorama_file_name'] + '.jpg'
+        file_path = os.path.join(settings.BASE_DIR, path, filename)
+
+        # check if pano file exists
+        if not os.path.isfile(file_path):
+            log.error('MISSING Panorama: %s/%s', path, filename)
+            return None
+
         return models.Panorama(
-            timestamp=row['gps_seconds[s]'],
-            filename=row['panorama_file_name'],
+            timestamp=self._get_valid_timestamp(row),
+            filename=filename,
             path=path,
-            opnamelocatie=geo.PointField(
-                row['latitude[deg]'],
-                row['longitude[deg]'],
-                row['altitude_ellipsoidal[m]']
+            opnamelocatie=Point(
+                float(row['latitude[deg]']),
+                float(row['longitude[deg]']),
+                float(row['altitude_ellipsoidal[m]'])
             ),
             roll=float(row['roll[deg]']),
             pitch=float(row['pitch[deg]']),
             heading=float(row['heading[deg]']),
         )
 
-    def process_traject_row(self, row):
+    def process_traject_row(self, row, path):
+
         return models.Traject(
-            timestamp=row['gps_seconds[s]'],
-            opnamelocatie=geo.PointField(
-                row['latitude[deg]'],
-                row['longitude[deg]'],
-                row['altitude_ellipsoidal[m]']
+            timestamp=self._get_valid_timestamp(row),
+            opnamelocatie=Point(
+                float(row['latitude[deg]']),
+                float(row['longitude[deg]']),
+                float(row['altitude_ellipsoidal[m]'])
             ),
-            north_rms=float(row['north_rms[deg]']),
-            east_rms=float(row['east_rms[deg]']),
-            down_rms=float(row['down_rms[deg]']),
+            north_rms=float(row['north_rms[m]']),
+            east_rms=float(row['east_rms[m]']),
+            down_rms=float(row['down_rms[m]']),
             roll_rms=float(row['roll_rms[deg]']),
             pitch_rms=float(row['pitch_rms[deg]']),
             heading_rms=float(row['heading_rms[deg]']),
         )
 
-    def create_thumbnails(self, paths):
-        raise NotImplementedError
+    def create_thumbnails(self, panorama_list):
+        """
+        SHOULD BE DONE Dynamic based on directon
+        location pano / view location
+        """
+        raise NotImplementedError()
+        # STUFF FOR LATER

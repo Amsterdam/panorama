@@ -4,6 +4,9 @@ database:
     - "5454:5432"
   environment:
     POSTGRES_PASSWORD: insecure
+    POSTGRES_DB: openpanorama
+    POSTGRES_USER: openpanorama
+
 
 web:
   build: ./web
@@ -15,5 +18,5 @@ web:
     - $PWD/reports:/app/reports
   environment:
     SECRET_KEY: hoi
-    DB_NAME: postgres
+    DB_NAME: openpanorama
     DB_PASSWORD: insecure
