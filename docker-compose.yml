@@ -8,7 +8,7 @@ database:
 web:
   build: ./web
   ports:
-    - "8098:8000"
+    - "8087:8000"
   links:
     - database:database
   volumes:
