@@ -52,7 +52,7 @@ class ImportPanoramaJob(object):
     It looks through the paths looking for metadata and trojectory files to import
     """
 
-    def find_metadata_files(self, file_match, root_dir='panoramas'):
+    def find_metadata_files(self, file_match):
         """
         Finds the csv files containing the metadata
 
@@ -63,7 +63,7 @@ class ImportPanoramaJob(object):
         Returns:
         A, potentailly empty, list of file names matching the search criteria
         """
-        path = '%s/**/%s' % (root_dir, file_match)
+        path = '%s/**/%s' % (settings.PANO_DIR, file_match)
         files = glob.glob(path, recursive=True)
         print(files)
         return files
