@@ -36,4 +36,4 @@ db-backup:
                         -T auth*    \
                         -U openpanorama \
                         -h db -p 5432 \
-                        openpanorama > /tmp/backups/openpanorama.dump"
+                        openpanorama > /tmp/backups/database.dump"
