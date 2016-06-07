@@ -13,6 +13,7 @@ importer:
   environment:
     DB_NAME: openpanorama
     DB_PASSWORD: insecure
+    OPENPANORAMA_DATA_DIR: /app/panoramas
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
