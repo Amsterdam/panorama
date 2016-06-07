@@ -66,7 +66,6 @@ class ImportPanoramaJob(object):
         """
         path = '%s/**/%s' % (settings.PANO_DIR, file_match)
         files = glob.glob(path, recursive=True)
-        print(files)
         return files
 
     def process(self):
