@@ -30,10 +30,10 @@ db-backup:
             && chmod 600 ~/.pgpass \
             && pg_dump --clean \
                         -Fc \
-                        -t openpanorama* \
+                        -t panoramas* \
                         -t geo*  \
                         -T django*  \
                         -T auth*    \
                         -U openpanorama \
                         -h db -p 5432 \
-                        openpanorama > /tmp/backups/openpanorama.dump"
+                        openpanorama > /tmp/backups/database.dump"
