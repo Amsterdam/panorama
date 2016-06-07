@@ -12,6 +12,7 @@ import os.path
 # Package
 from django.contrib.gis.geos import Point
 from django.conf import settings
+from django.utils.timezone import utc as UTC_TZ
 # Project
 from . import models
 
@@ -159,7 +160,10 @@ class ImportPanoramaJob(object):
         unix timestamp representing the date and time, either in utc or local time
         """
         gps_time = float(gps_time)
-        timestamp = datetime.utcfromtimestamp(gps_time + UTCfromGPS)
+        # utcfromtimestamp sets the tzinfo to None, which is kind of true but causes
+        # a warning from django and my lead to bugs on later code changes. Therefore
+        # the timezone is manually set to utc.
+        timestamp = datetime.utcfromtimestamp(gps_time + UTCfromGPS).replace(tzinfo=UTC_TZ)
         return timestamp
 
 
