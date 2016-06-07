@@ -109,14 +109,16 @@ class ImportPanoramaJob(object):
         """
         filename = row['panorama_file_name'] + '.jpg'
         file_path = os.path.join(settings.BASE_DIR, path, filename)
-
+        # Creating unique id from mission id and pano id
+        pano_id = '%s_%s' % (path.split('/')[-1], row['panorama_file_name'])
         # check if pano file exists
         if not os.path.isfile(file_path):
             log.error('MISSING Panorama: %s/%s', path, filename)
             return None
-
+        print (pano_id, len(pano_id))
         return models.Panorama(
-                timestamp=self._convert_gps_time(row['gps_seconds[s]']),
+            id=pano_id,
+            timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=filename,
             path=path,
             opnamelocatie=Point(

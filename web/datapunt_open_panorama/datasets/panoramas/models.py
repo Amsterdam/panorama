@@ -3,9 +3,10 @@ from django.contrib.gis.db import models as geo
 
 
 class Panorama(models.Model):
+    id = models.CharField(max_length=37, blank=False, primary_key=True)
     timestamp = models.DateTimeField(null=False)
-    filename = models.CharField(null=False, max_length=255)
-    path = models.CharField(max_length=400, null=False)
+    filename = models.CharField(max_length=255, blank=False)
+    path = models.CharField(max_length=400, blank=False)
     opnamelocatie = geo.PointField(null=False, dim=3)
     roll = models.FloatField(null=True)
     pitch = models.FloatField(null=True)
