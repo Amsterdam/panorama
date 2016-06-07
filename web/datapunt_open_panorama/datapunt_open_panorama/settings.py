@@ -80,7 +80,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'datapunt_open_panoramas.wsgi.application'
+WSGI_APPLICATION = 'datapunt_open_panorama.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
