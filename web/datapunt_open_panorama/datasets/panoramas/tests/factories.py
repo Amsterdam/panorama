@@ -11,3 +11,4 @@ class PanoramaFactory(factory.DjangoModelFactory):
 class TrajectFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Traject
+

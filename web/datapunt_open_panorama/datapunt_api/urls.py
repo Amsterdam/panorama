@@ -1,5 +1,8 @@
+# Packages
 from django.conf.urls import url, include
 from rest_framework import routers
+# Project
+from .views import PanoViewSet
 
 
 class DocumentedRouter(routers.DefaultRouter):
@@ -17,7 +20,11 @@ class DocumentedRouter(routers.DefaultRouter):
         return Datapunt.as_view()
 
 
-router = DocumentedRouter()
+# router = DocumentedRouter()
+router = routers.DefaultRouter()
+
+# Registering the API endpoints
+router.register(r'pano', PanoViewSet)
 
 
 urlpatterns = [

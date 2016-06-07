@@ -17,14 +17,6 @@ class ImportPanoTest(TransactionTestCase):
         panos = models.Panorama.objects.all()
         self.assertEqual(panos.count(), 5)
 
-        panos = models.Traject.objects.all()
-        self.assertEqual(panos.count(), 14)
+        trajecten = models.Traject.objects.all()
+        self.assertEqual(trajecten.count(), 14)
 
-        # if we tun task again. nothing should have changed
-        self.task()
-
-        panos = models.Panorama.objects.all()
-        self.assertEqual(panos.count(), 5)
-
-        panos = models.Traject.objects.all()
-        self.assertEqual(panos.count(), 14)
