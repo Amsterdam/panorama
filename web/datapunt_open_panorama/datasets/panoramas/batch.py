@@ -12,7 +12,6 @@ import os.path
 # Package
 from django.contrib.gis.geos import Point
 from django.conf import settings
-import pytz
 # Project
 from . import models
 
@@ -149,7 +148,7 @@ class ImportPanoramaJob(object):
             heading_rms=float(row['heading_rms[deg]']),
         )
 
-    def _convert_gps_time(self, gps_time, local=True):
+    def _convert_gps_time(self, gps_time):
         """
         Converts the GPS time to unix timestamp
         Paramaters:
@@ -161,8 +160,6 @@ class ImportPanoramaJob(object):
         """
         gps_time = float(gps_time)
         timestamp = datetime.utcfromtimestamp(gps_time + UTCfromGPS)
-        if local:
-            timestamp = pytz.utc.localize(timestamp)
         return timestamp
 
 
