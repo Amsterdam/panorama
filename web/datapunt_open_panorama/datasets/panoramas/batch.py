@@ -115,7 +115,7 @@ class ImportPanoramaJob(object):
         if not os.path.isfile(file_path):
             log.error('MISSING Panorama: %s/%s', path, filename)
             return None
-        print (pano_id, len(pano_id))
+
         return models.Panorama(
             id=pano_id,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
