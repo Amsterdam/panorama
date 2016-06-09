@@ -3,14 +3,15 @@ from django.contrib.gis.db import models as geo
 
 
 class Panorama(models.Model):
-    id = models.CharField(max_length=37, blank=False, primary_key=True)
-    timestamp = models.DateTimeField(null=False)
-    filename = models.CharField(max_length=255, blank=False)
-    path = models.CharField(max_length=400, blank=False)
-    opnamelocatie = geo.PointField(null=False, dim=3)
-    roll = models.FloatField(null=True)
-    pitch = models.FloatField(null=True)
-    heading = models.FloatField(null=True)
+    id = models.AutoField(primary_key=True)
+    pano_id = models.CharField(max_length=37, unique=True)
+    timestamp = models.DateTimeField()
+    filename = models.CharField(max_length=255)
+    path = models.CharField(max_length=400)
+    opnamelocatie = geo.PointField(dim=3)
+    roll = models.FloatField()
+    pitch = models.FloatField()
+    heading = models.FloatField()
 
     objects = geo.GeoManager()
 
@@ -19,15 +20,15 @@ class Panorama(models.Model):
 
 
 class Traject(models.Model):
-    timestamp = models.DateTimeField(null=False)
-    opnamelocatie = geo.PointField(null=False, dim=3)
+    timestamp = models.DateTimeField()
+    opnamelocatie = geo.PointField(dim=3)
     north_rms = models.DecimalField(
-        null=True, max_digits=20, decimal_places=14)
-    east_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
-    down_rms = models.DecimalField(null=True, max_digits=20, decimal_places=14)
-    roll_rms = models.FloatField(null=True)
-    pitch_rms = models.FloatField(null=True)
-    heading_rms = models.FloatField(null=True)
+        max_digits=20, decimal_places=14)
+    east_rms = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=14)
+    down_rms = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=14)
+    roll_rms = models.FloatField(null=True, blank=True)
+    pitch_rms = models.FloatField(null=True, blank=True)
+    heading_rms = models.FloatField(null=True, blank=True)
 
     objects = geo.GeoManager()
 
