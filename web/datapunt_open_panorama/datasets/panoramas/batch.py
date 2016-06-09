@@ -117,7 +117,7 @@ class ImportPanoramaJob(object):
             return None
 
         return models.Panorama(
-            id=pano_id,
+            pano_id=pano_id,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=filename,
             path=path,
