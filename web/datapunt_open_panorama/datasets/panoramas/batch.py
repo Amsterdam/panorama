@@ -121,7 +121,7 @@ class ImportPanoramaJob(object):
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=filename,
             path=path,
-            opnamelocatie=Point(
+            geolocation=Point(
                 float(row['latitude[deg]']),
                 float(row['longitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
@@ -137,7 +137,7 @@ class ImportPanoramaJob(object):
         """
         return models.Traject(
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
-            opnamelocatie=Point(
+            geolocation=Point(
                 float(row['latitude[deg]']),
                 float(row['longitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])

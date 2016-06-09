@@ -8,7 +8,7 @@ class Panorama(models.Model):
     timestamp = models.DateTimeField()
     filename = models.CharField(max_length=255)
     path = models.CharField(max_length=400)
-    opnamelocatie = geo.PointField(dim=3)
+    geolocation = geo.PointField(dim=3, srid=4326, spatial_index=True)
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
@@ -21,7 +21,7 @@ class Panorama(models.Model):
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()
-    opnamelocatie = geo.PointField(dim=3)
+    geolocation = geo.PointField(dim=3)
     north_rms = models.DecimalField(
         max_digits=20, decimal_places=14)
     east_rms = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=14)
