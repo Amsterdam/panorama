@@ -23,3 +23,11 @@ class PanoViewSet(viewsets.ModelViewSet):
         # Make sure a position is given, otherwise there is
         # nothing to work with
         return Response([])
+
+
+    def retrieve(self, request, pk=None):
+        print(pk)
+        pano = get_object_or_404(Panorama, pano_id=pk)
+        resp = PanoSerializer(pano)
+        return Response(resp.data)
+
