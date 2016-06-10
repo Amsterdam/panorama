@@ -1,18 +1,16 @@
-# Python
-import datetime
 # Packages
 from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import viewsets
 # Project
+from datasets.panoramas.mixins import ViewLocationMixin, DateConversionMixin
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.serializers import PanoSerializer
 
 
-class PanoViewSet(viewsets.ModelViewSet):
+class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet):
     """
     View to retrieve panos
     """
@@ -54,11 +52,13 @@ class PanoViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(geolocation__distance_lte=(pnt, D(m=max_range)))
             # Checking for time limits
             if 'vanaf' in request.query_params:
-                start_date = self._convert_to_timestamp(request.query_params['vanaf'])
-                queryset = queryset.filter(timestamp__gte=timestamp)
+                start_date = self._convert_to_date(request.query_params['vanaf'])
+                if start_date:
+                    queryset = queryset.filter(timestamp__gte=start_date)
             if 'tot' in request.query_params:
-                end_date = self._convert_to_timestamp(request.query_params['tot'])
-                queryset = queryset.filter(timestamp__lt=timestamp)
+                end_date = self._convert_to_date(request.query_params['tot'])
+                if end_date:
+                    queryset = queryset.filter(timestamp__lt=end_date)
             # Finishing up
             try:
                 pano = queryset.order_by('distance')[0]
@@ -75,75 +75,4 @@ class PanoViewSet(viewsets.ModelViewSet):
         resp = PanoSerializer(pano)
         return Response(resp.data)
 
-    def _get_request_coord(self, query_params):
-        """
-        Retrieves the coordinates to work with. It allows for either lat/lon coord,
-        for wgs84 or 'x' and 'y' for RD. Just to be on the safe side a value check
-        a value check is done to make sure that the values are within the expected
-        range. If they seem to be RD values, an attempt is made to convert them
-        to wgs84 values
-        """
-        if 'lat' in query_params and 'lon' in query_params:
-            lon = float(query_params['lon'])
-            lat = float(query_params['lat'])
-            # @TODO Doing value sanity check
-            coords = (lat, lon)
-        elif 'x' in query_params and 'y' in query_params:
-            lon = float(query_params['x'])
-            lat = float(query_params['y'])
-            # Verfing that x is smaller then y
-            if lat > lon:
-                # These should be Rd coords, convert to WGS84
-                coords = self._convert_coords(lat, lon, 28992, 4326)
-        # No good coords found
-        else:
-            return None
-        return coords
 
-    def _convert_coords(self, lon, lat, orig_srid, dest_srid):
-        """
-        Convertes a point between two coordinates
-        Parameters:
-        lon - Longitude as float
-        lat - Latitude as float
-        original_srid - The int value of the point's srid
-        dest_srid - The srid of the coordinate system to convert too
-
-        Returns
-        The new coordinates as a tuple. None if the convertion failed
-        """
-        coords = None
-        p = Point(lon, lat, srid=orig_srid)
-        p.transform(dest_srid)
-        coords = p.coords
-        return coords
-
-    def _convert_to_timestamp(self, input_date):
-        """
-        Converts input time to a timestamp.
-        Allowed input is timestamp, or string denoting a date in ISO or EU format
-
-        Parameters:
-        input_date: The input from the query params
-
-        Returns:
-        Timestamp as int if conversion is succesful. None otherwise
-        """
-        timestamp = None
-        year = None
-        date_format = '%Y-%m-%d'
-        # Looking at the length of the input
-        if len(input_date) == 4:
-            # This will be handled as a year
-            timestamp = datetime.datetime.strptime('%s-01-01' % input_date, date_format).timestamp()
-        elif '-' in input_date:
-            # A date string. Tring to get year, month, dat
-            if input_date.find('-') == 2:
-                # EU format
-                date_format = '%d-%m-%Y'
-                timestamp = datetime.datetime.strptime(input_date, date_format).timestamp()
-        else:
-            # Assume it is aleady a timestamp
-            timestamp = input_date
-        # Making sure an int is returned
-        return int(timestamp)
