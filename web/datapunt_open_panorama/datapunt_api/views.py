@@ -44,23 +44,31 @@ class PanoViewSet(viewsets.ModelViewSet):
         if coords:
             # Quering
             pnt = GEOSGeometry(('POINT(%f %f 10)' % (coords[0], coords[1])), srid=4326)
-            pano = Panorama.objects.distance(pnt)
+            queryset = Panorama.objects.distance(pnt)
             # Checking for range limit
             if 'radius' in request.query_params:
-                max_range = int(request.query_params['radius'])
+                max_range = request.query_params['radius']
+                # Making sure radius is a positive int
+                if max_range.isdigit():
+                    max_range = int(max_range)
+                    queryset = queryset.filter(geolocation__distance_lte=(pnt, D(m=max_range)))
             # Checking for time limits
             if 'vanaf' in request.query_params:
                 start_date = self._convert_to_timestamp(request.query_params['vanaf'])
-                pano = pano.filter(timestamp__gte=timestamp)
+                queryset = queryset.filter(timestamp__gte=timestamp)
             if 'tot' in request.query_params:
                 end_date = self._convert_to_timestamp(request.query_params['tot'])
-                pano = pano.filter(timestamp__lt=timestamp)
+                queryset = queryset.filter(timestamp__lt=timestamp)
             # Finishing up
-            pano = pano.order_by('distance')[0]
-            pano = PanoSerializer(pano)
+            try:
+                pano = queryset.order_by('distance')[0]
+                pano = PanoSerializer(pano).data
+            except IndexError:
+                # No results were found
+                pano = []
         else:
             pano = {'error': 'Geen coordinaten gevonden'}
-        return Response(pano.data)
+        return Response(pano)
 
     def retrieve(self, request, pk=None):
         pano = get_object_or_404(Panorama, pano_id=pk)
@@ -76,26 +84,28 @@ class PanoViewSet(viewsets.ModelViewSet):
         to wgs84 values
         """
         if 'lat' in query_params and 'lon' in query_params:
-            lat = float(query_params['lat'])
             lon = float(query_params['lon'])
+            lat = float(query_params['lat'])
             # @TODO Doing value sanity check
             coords = (lat, lon)
         elif 'x' in query_params and 'y' in query_params:
-            lat = float(query_params['x'])
-            lon = float(query_params['y'])
-            # These should be Rd coords, convert to WGS84
-            coords = self._convert_coords(lat, lon, 28992, 4326)
+            lon = float(query_params['x'])
+            lat = float(query_params['y'])
+            # Verfing that x is smaller then y
+            if lat > lon:
+                # These should be Rd coords, convert to WGS84
+                coords = self._convert_coords(lat, lon, 28992, 4326)
         # No good coords found
         else:
             return None
         return coords
 
-    def _convert_coords(self, lat, lon, orig_srid, dest_srid):
+    def _convert_coords(self, lon, lat, orig_srid, dest_srid):
         """
         Convertes a point between two coordinates
         Parameters:
-        lat - Latitude as float
         lon - Longitude as float
+        lat - Latitude as float
         original_srid - The int value of the point's srid
         dest_srid - The srid of the coordinate system to convert too
 
@@ -103,7 +113,7 @@ class PanoViewSet(viewsets.ModelViewSet):
         The new coordinates as a tuple. None if the convertion failed
         """
         coords = None
-        p = Point(lat, lon, srid=original_srid)
+        p = Point(lon, lat, srid=orig_srid)
         p.transform(dest_srid)
         coords = p.coords
         return coords
