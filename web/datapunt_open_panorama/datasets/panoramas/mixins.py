@@ -44,7 +44,6 @@ class ViewLocationMixin(object):
         if convert and convert != coord_system:
             # These should be Rd coords, convert to WGS84
             coords = self._convert_coords(lat, lon, coord_system, convert)
-        print (coords)
         return coords
 
     def _convert_coords(self, lon, lat, orig_srid, dest_srid):
