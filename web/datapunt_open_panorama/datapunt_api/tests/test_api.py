@@ -108,9 +108,8 @@ class PanoramaApiTest(APITestCase):
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'],'PANO_1_2014')
 
-def test_get_nearest_all_parameters(self):
+    def test_get_nearest_all_parameters(self):
         response = self.client.get('/pano/?lat=52.377958&lon=4.897070&radius=10000&vanaf=2014-01-01&tot=2016')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'],'PANO_1_2014')
-
