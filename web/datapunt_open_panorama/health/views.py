@@ -7,8 +7,8 @@ from django.http import HttpResponse
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 # Project
-from datasets.bag.models import Verblijfsobject
-from datasets.wkpb.models import Beperking
+# from datasets.bag.models import Verblijfsobject
+# from datasets.wkpb.models import Beperking
 
 
 log = logging.getLogger(__name__)
@@ -44,22 +44,22 @@ def health(request):
 
 def check_data(request):
     # check bag
-    try:
-        assert Verblijfsobject.objects.count() > 10
-    except:
-        log.exception("No BAG data found")
-        return HttpResponse(
-            "No BAG data found",
-            content_type="text/plain", status=500)
-
-    # check wkpb
-    try:
-        assert Beperking.objects.count() > 10
-    except:
-        log.exception("No WKPD data found")
-        return HttpResponse(
-            "No WKPD data found",
-            content_type="text/plain", status=500)
+    # try:
+    #     assert Verblijfsobject.objects.count() > 10
+    # except:
+    #     log.exception("No BAG data found")
+    #     return HttpResponse(
+    #         "No BAG data found",
+    #         content_type="text/plain", status=500)
+    #
+    # # check wkpb
+    # try:
+    #     assert Beperking.objects.count() > 10
+    # except:
+    #     log.exception("No WKPD data found")
+    #     return HttpResponse(
+    #         "No WKPD data found",
+    #         content_type="text/plain", status=500)
 
     # check elastic
     try:
