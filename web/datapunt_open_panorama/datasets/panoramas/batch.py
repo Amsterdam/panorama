@@ -58,7 +58,7 @@ class ImportPanoramaJob(object):
         Finds the csv files containing the metadata
 
         Parameters:
-        file_match - The file searhc pattern describing the file name
+        file_match - The file search pattern describing the file name
         root_dir - The starting point to for file searching
 
         Returns:
@@ -162,7 +162,7 @@ class ImportPanoramaJob(object):
         """
         gps_time = float(gps_time)
         # utcfromtimestamp sets the tzinfo to None, which is kind of true but causes
-        # a warning from django and my lead to bugs on later code changes. Therefore
+        # a warning from django and may lead to bugs on later code changes. Therefore
         # the timezone is manually set to utc.
         timestamp = datetime.utcfromtimestamp(gps_time + UTCfromGPS).replace(tzinfo=UTC_TZ)
         return timestamp
