@@ -9,7 +9,7 @@ importer:
   links:
     - database:database
   volumes:
-    - /mnt/pano2016:/app/panoramas
+    - /mnt/pano2016:/app/panoramas/2016
   environment:
     DB_NAME: openpanorama
     DB_PASSWORD: insecure
