@@ -1,5 +1,7 @@
 from django.contrib.gis.db import models as geo
 from django.db import models
+# Project
+from datapunt_open_panorama.settings import PANO_DIR, PANO_IMAGE_URL
 
 
 class Panorama(models.Model):
@@ -17,6 +19,11 @@ class Panorama(models.Model):
 
     def __str__(self):
         return '<Panorama %s/%s>' % (self.path, self.filename)
+
+    @property
+    def img_url(self):
+        return '%s/%s/%s' %(PANO_IMAGE_URL, self.path.replace(PANO_DIR, ''), self.filename)
+
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()
