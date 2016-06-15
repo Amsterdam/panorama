@@ -62,7 +62,7 @@ class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet)
             # Finishing up
             try:
                 pano = queryset.order_by('distance')[0]
-                pano = PanoSerializer(pano).data
+                pano = PanoSerializer(pano, context={'request': request}).data
             except IndexError:
                 # No results were found
                 pano = []
@@ -72,7 +72,7 @@ class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet)
 
     def retrieve(self, request, pk=None):
         pano = get_object_or_404(Panorama, pano_id=pk)
-        resp = PanoSerializer(pano)
+        resp = PanoSerializer(pano, context={'request': request})
         return Response(resp.data)
 
 
