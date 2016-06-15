@@ -113,3 +113,8 @@ class PanoramaApiTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'],'PANO_1_2014')
+
+    def test_get_status_health(self):
+        response = self.client.get('/status/health')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Connectivity OK', str(response.content))

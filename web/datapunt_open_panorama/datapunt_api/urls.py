@@ -3,6 +3,7 @@ from django.conf.urls import url, include
 from rest_framework import routers
 # Project
 from .views import PanoViewSet
+from health import views
 
 
 class DocumentedRouter(routers.DefaultRouter):
@@ -30,4 +31,5 @@ router.register(r'pano', PanoViewSet)
 urlpatterns = [
     url(r'^auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^', include(router.urls)),
+    url(r'^status/health$', views.health),
 ]
