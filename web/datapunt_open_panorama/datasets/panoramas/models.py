@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.gis.db import models as geo
+from django.db import models
 
 
 class Panorama(models.Model):
@@ -17,7 +17,6 @@ class Panorama(models.Model):
 
     def __str__(self):
         return '<Panorama %s/%s>' % (self.path, self.filename)
-
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()
