@@ -6,8 +6,11 @@ import re
 def get_docker_host():
     d_host = os.getenv('DOCKER_HOST', None)
     if d_host:
+        if re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', d_host):
+            return d_host
+
         return re.match(r'tcp://(.*?):\d+', d_host).group(1)
-    return 'localhost'
+    return os.getenv('NAP_DB_PORT_5432_TCP_ADDR', 'localhost')
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -96,6 +99,15 @@ DATABASES = {
         'PORT': os.getenv('DATABASE_PORT_5432_TCP_PORT', '5454'),
     }
 }
+
+DSN_PANO = 'postgresql://{}:{}@{}:{}/{}'.format(
+    os.getenv('DB_NAME', 'openpanorama'),
+    os.getenv('DB_PASSWORD', 'insecure'),
+    os.getenv('DATABASE_PORT_5432_TCP_ADDR', get_docker_host()),
+    os.getenv('DATABASE_PORT_5432_TCP_PORT', 5454),
+    os.getenv('DB_NAME', 'openpanorama'),
+)
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
