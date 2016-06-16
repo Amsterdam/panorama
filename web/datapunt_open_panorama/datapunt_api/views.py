@@ -68,9 +68,7 @@ class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet)
             try:
                 conn = connect(DSN_PANO)
             except OperationalError as err:
-                self.logger.error('Error creating connection: %s' % err)
                 raise Exception('error connecting to datasource')
-                return
             try:
                 with conn.cursor(cursor_factory=DictCursor) as cur:
                     cur.execute(sql, (coords[0], coords[1]))
