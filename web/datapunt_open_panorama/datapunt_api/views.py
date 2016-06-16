@@ -1,8 +1,4 @@
-from psycopg2 import connect, OperationalError
-from psycopg2.extras import DictCursor
 # Packages
-from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -10,7 +6,6 @@ from rest_framework import viewsets
 from datasets.panoramas.mixins import ViewLocationMixin, DateConversionMixin
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.serializers import PanoSerializer
-from datapunt_open_panorama.settings import DSN_PANO
 
 
 class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet):
@@ -44,40 +39,37 @@ class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet)
         coords = self._get_request_coord(request.query_params)
         if coords:
             sql_where = []
-            sql_select = " SELECT pano_id FROM panoramas_panorama "
-            sql_distance = " ORDER BY geolocation <-> 'SRID=4326;POINT(%s %s)' limit 1 "
+            sql_params = []
+            sql_get_pano = " SELECT * FROM panoramas_panorama "
             if  'radius' in request.query_params:
                 max_range = request.query_params['radius']
                 # Making sure radius is a positive int
                 if max_range.isdigit():
                     max_range = int(max_range)
-                    sql_where.append(" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation), %s) "
-                                     % (coords[0], coords[1], max_range))
+                    sql_where.append(" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation), %s) ")
+                    sql_params.extend([coords[0], coords[1], max_range])
             if 'vanaf' in request.query_params:
                 start_date = self._convert_to_date(request.query_params['vanaf'])
                 if start_date:
-                    sql_where.append(" timestamp >= '%s' " % start_date)
+                    sql_where.append(" timestamp > %s ")
+                    sql_params.append(start_date)
             if 'tot' in request.query_params:
                 end_date = self._convert_to_date(request.query_params['tot'])
                 if end_date:
-                    sql_where.append(" timestamp <= '%s' " % end_date)
+                    sql_where.append(" timestamp <= %s ")
+                    sql_params.append(end_date)
+            sql_nearest = " ORDER BY geolocation <-> 'SRID=4326;POINT(%s %s)' limit 1 "
+            sql_params.extend([coords[0], coords[1]])
             if len(sql_where) > 0:
-                sql = sql_select + " WHERE " + " AND ".join(sql_where) + sql_distance
+                sql = sql_get_pano + " WHERE " + " AND ".join(sql_where) + sql_nearest
             else:
-                sql = sql_select + sql_distance
+                sql = sql_get_pano + sql_nearest
             try:
-                conn = connect(DSN_PANO)
-            except OperationalError as err:
-                raise Exception('error connecting to datasource')
-            try:
-                with conn.cursor(cursor_factory=DictCursor) as cur:
-                    cur.execute(sql, (coords[0], coords[1]))
-                    pano_ids = cur.fetchall()
-                    if len(pano_ids) > 0:
-                        pano_id = pano_ids[0][0]
-                        return self.retrieve(request, pano_id)
-            finally:
-                conn.close()
+                pano = Panorama.objects.raw(sql, sql_params)[0]
+                pano = PanoSerializer(pano, context={'request': request}).data
+            except IndexError:
+                # No results were found
+                pano = []
         else:
             pano = {'error': 'Geen coordinaten gevonden'}
         return Response(pano)
