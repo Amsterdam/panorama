@@ -51,6 +51,9 @@ class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet)
                 # Making sure radius is a positive int
                 if max_range.isdigit():
                     max_range = int(max_range)
+#                    sql_part1 = " ST_Buffer(ST_GeomFromText('POINT(%s %s)',4326), %s) && geolocation "
+                    sql_where.append(" ST_Buffer(ST_GeomFromText('POINT(%s %s)',4326), %s) && geolocation "
+                                     % (coords[0], coords[1], max_range))
                     sql_where.append(" ST_Distance_Sphere(geolocation, 'SRID=4326;POINT(%s %s)') <= '%s' "
                                      % (coords[0], coords[1], max_range))
             if 'vanaf' in request.query_params:
