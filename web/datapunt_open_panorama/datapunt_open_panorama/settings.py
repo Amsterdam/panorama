@@ -97,6 +97,15 @@ DATABASES = {
     }
 }
 
+DSN_PANO = 'postgresql://{}:{}@{}:{}/{}'.format(
+    os.getenv('DB_NAME', 'openpanorama'),
+    os.getenv('DB_PASSWORD', 'insecure'),
+    get_docker_host(),
+    os.getenv('DATABASE_PORT_5432_TCP_ADDR', 5454),
+    os.getenv('DB_NAME', 'openpanorama'),
+)
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
