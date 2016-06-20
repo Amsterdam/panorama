@@ -10,12 +10,15 @@ def get_docker_host():
             return d_host
 
         return re.match(r'tcp://(.*?):\d+', d_host).group(1)
-    return os.getenv('NAP_DB_PORT_5432_TCP_ADDR', 'localhost')
+    return os.getenv('DATABASE_DB_PORT_5432_TCP_ADDR', 'localhost')
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PANO_DIR = os.getenv('OPENPANORAMA_DATA_DIR', os.path.abspath(os.path.join(BASE_DIR, 'panoramas_test')))
-PANO_IMAGE_URL = os.getenv('OPENPANORAMA_IMAGE_URL', 'https://acc.atlas.amsterdam.nl/pano')
+PANO_DIR = os.getenv(
+    'OPENPANORAMA_DATA_DIR', os.path.abspath(os.path.join(
+        BASE_DIR, 'panoramas_test')))
+PANO_IMAGE_URL = os.getenv(
+    'OPENPANORAMA_IMAGE_URL', 'https://acc.atlas.amsterdam.nl/pano')
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default-secret")
 
@@ -33,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.sites',
 
     'django_jenkins',
     'django_extensions',

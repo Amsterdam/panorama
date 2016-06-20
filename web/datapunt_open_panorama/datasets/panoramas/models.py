@@ -22,16 +22,19 @@ class Panorama(models.Model):
 
     @property
     def img_url(self):
-        return '%s%s/%s' % (PANO_IMAGE_URL, self.path.replace(PANO_DIR, ''), self.filename)
+        return '%s%s/%s' % (
+            PANO_IMAGE_URL, self.path.replace(PANO_DIR, ''), self.filename)
 
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()
-    geolocation = geo.PointField(dim=3)
+    geolocation = geo.PointField(dim=3, spatial_index=True)
     north_rms = models.DecimalField(
         max_digits=20, decimal_places=14)
-    east_rms = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=14)
-    down_rms = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=14)
+    east_rms = models.DecimalField(
+        null=True, blank=True, max_digits=20, decimal_places=14)
+    down_rms = models.DecimalField(
+        null=True, blank=True, max_digits=20, decimal_places=14)
     roll_rms = models.FloatField(null=True, blank=True)
     pitch_rms = models.FloatField(null=True, blank=True)
     heading_rms = models.FloatField(null=True, blank=True)
