@@ -1,6 +1,7 @@
 """
 Batch import for the panorama dataset
 """
+
 # Python
 from contextlib import contextmanager
 import csv
@@ -9,10 +10,12 @@ import glob
 import logging
 import os
 import os.path
+
 # Package
 from django.contrib.gis.geos import Point
 from django.conf import settings
 from django.utils.timezone import utc as UTC_TZ
+
 # Project
 from . import models
 
@@ -23,7 +26,8 @@ log = logging.getLogger(__name__)
 
 # Conversion between GPS and UTC time
 # Initial difference plus the 36 leap seconds recorded to date
-# When a new leap second is introduced the import will need to change to accommodate for it
+# When a new leap second is introduced the import will need
+# to change to accommodate for it
 # or it can be ignored, assuming that
 UTCfromGPS = 315964800 - 36
 
@@ -46,11 +50,11 @@ def _context_reader(source):
         yield (_wrap_row(r, headers) for r in rows)
 
 
-
 class ImportPanoramaJob(object):
     """
     Simple import script.
-    It looks through the paths looking for metadata and trojectory files to import
+    It looks through the paths looking for metadata and
+    trojectory files to import
     """
 
     def find_metadata_files(self, file_match):
@@ -71,8 +75,10 @@ class ImportPanoramaJob(object):
     def process(self):
         """
         Main import process
-        The import is done type first instead of complete import of each mission.
-        First all the panorama metadata files are imported, then all the trajectory
+        The import is done type first instead of complete import of
+        each mission.
+        First all the panorama metadata files are imported,
+        then all the trajectory
         files.
         """
         files = self.find_metadata_files('panorama*.csv')
@@ -122,8 +128,8 @@ class ImportPanoramaJob(object):
             filename=filename,
             path=path,
             geolocation=Point(
-                float(row['latitude[deg]']),
                 float(row['longitude[deg]']),
+                float(row['latitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
             ),
             roll=float(row['roll[deg]']),
@@ -138,8 +144,8 @@ class ImportPanoramaJob(object):
         return models.Traject(
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             geolocation=Point(
-                float(row['latitude[deg]']),
                 float(row['longitude[deg]']),
+                float(row['latitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
             ),
             north_rms=float(row['north_rms[m]']),
@@ -155,18 +161,22 @@ class ImportPanoramaJob(object):
         Converts the GPS time to unix timestamp
         Paramaters:
         - gps_time: gps time as timestamp
-        - local: optional parmeter. wether to convert to utc or local time
+        - local: optional parmeter. wether to convert to utc
+          or local time
 
         Returns:
-        unix timestamp representing the date and time, either in utc or local time
+        unix timestamp representing the date and time,
+        either in utc or local time
         """
         gps_time = float(gps_time)
-        # utcfromtimestamp sets the tzinfo to None, which is kind of true but causes
-        # a warning from django and may lead to bugs on later code changes. Therefore
+        # utcfromtimestamp sets the tzinfo to None,
+        # which is kind of true but causes
+        # a warning from django and may lead to bugs on
+        # later code changes. Therefore
         # the timezone is manually set to utc.
-        timestamp = datetime.utcfromtimestamp(gps_time + UTCfromGPS).replace(tzinfo=UTC_TZ)
+        timestamp = datetime.utcfromtimestamp(
+            gps_time + UTCfromGPS).replace(tzinfo=UTC_TZ)
         return timestamp
-
 
     def create_thumbnails(self, panorama_list):
         """
