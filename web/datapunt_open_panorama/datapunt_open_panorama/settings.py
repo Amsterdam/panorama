@@ -158,6 +158,8 @@ REST_FRAMEWORK = dict(
     COERCE_DECIMAL_TO_STRING=False,
 )
 
+CORS_ORIGIN_ALLOW_ALL = True # if True, the whitelist will not be used and all origins will be accepted
+
 CORS_ORIGIN_REGEX_WHITELIST = (
     '^(https?://)?localhost(:\d+)?$',
     '^(https?://)?.*\.datapunt.amsterdam\.nl$',
