@@ -1,6 +1,9 @@
 # Python
 import datetime
+from unittest.mock import Mock
 # Packages
+from django.http import HttpResponse
+from corsheaders.middleware import CorsMiddleware
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
 import factory
@@ -118,3 +121,20 @@ class PanoramaApiTest(APITestCase):
         response = self.client.get('/status/health')
         self.assertEqual(response.status_code, 200)
         self.assertIn('Connectivity OK', str(response.content))
+
+    def test_cors(self):
+        """
+        Cross Origin Requests should be allowed.
+        """
+        request = Mock(path='https://api.datapunt.amsterdam.nl/pano/?lat=52.3779561&lon=4.8970701')
+        request.method = 'GET'
+        request.is_secure = lambda: True
+        request.META = {
+            'HTTP_REFERER': 'https://foo.google.com',
+            'HTTP_HOST': 'api.datapunt.amsterdam.nl',
+            'HTTP_ORIGIN': 'https://foo.google.com',
+        }
+        response = CorsMiddleware().process_response(request, HttpResponse())
+        self.assertTrue('access-control-allow-origin' in response._headers)
+        self.assertEquals('*', response._headers['access-control-allow-origin'][1])
+
