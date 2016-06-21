@@ -15,10 +15,10 @@ def get_docker_host():
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PANO_DIR = os.getenv(
-    'OPENPANORAMA_DATA_DIR', os.path.abspath(os.path.join(
+    'PANORAMA_DATA_DIR', os.path.abspath(os.path.join(
         BASE_DIR, 'panoramas_test')))
 PANO_IMAGE_URL = os.getenv(
-    'OPENPANORAMA_IMAGE_URL', 'https://acc.atlas.amsterdam.nl/pano')
+    'PANORAMA_IMAGE_URL', 'https://acc.atlas.amsterdam.nl/panorama')
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default-secret")
 

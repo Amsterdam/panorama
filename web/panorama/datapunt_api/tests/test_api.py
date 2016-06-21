@@ -21,104 +21,111 @@ class PanoramaApiTest(APITestCase):
         super().setUpClass()
         # Adding locations
         factories.PanoramaFactory.create(
-            pano_id = 'PANO_1_2014',
-            timestamp = factory.fuzzy.FuzzyDateTime(datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
-            filename = factory.fuzzy.FuzzyText(length=30),
-            path = factory.fuzzy.FuzzyText(length=30),
-            geolocation = Point(4.897070, 52.377956, 10),
-            roll = factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch = factory.fuzzy.FuzzyFloat(-10, 10),
-            heading = factory.fuzzy.FuzzyFloat(-10, 10),
+            pano_id='PANO_1_2014',
+            timestamp=factory.fuzzy.FuzzyDateTime(
+                datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
+            filename=factory.fuzzy.FuzzyText(length=30),
+            path=factory.fuzzy.FuzzyText(length=30),
+            geolocation=Point(4.897070, 52.377956, 10),
+            roll=factory.fuzzy.FuzzyFloat(-10, 10),
+            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
+            heading=factory.fuzzy.FuzzyFloat(-10, 10),
         )
         factories.PanoramaFactory.create(
-            pano_id = 'PANO_2_2014_CLOSE',
-            timestamp = factory.fuzzy.FuzzyDateTime(datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
-            filename = factory.fuzzy.FuzzyText(length=30),
-            path = factory.fuzzy.FuzzyText(length=30),
-            geolocation = Point(4.897072, 52.377957 ,12),
-            roll = factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch = factory.fuzzy.FuzzyFloat(-10, 10),
-            heading = factory.fuzzy.FuzzyFloat(-10, 10),
+            pano_id='PANO_2_2014_CLOSE',
+            timestamp=factory.fuzzy.FuzzyDateTime(
+                datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
+            filename=factory.fuzzy.FuzzyText(length=30),
+            path=factory.fuzzy.FuzzyText(length=30),
+            geolocation=Point(4.897072, 52.377957, 12),
+            roll=factory.fuzzy.FuzzyFloat(-10, 10),
+            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
+            heading=factory.fuzzy.FuzzyFloat(-10, 10),
         )
         factories.PanoramaFactory.create(
-            pano_id = 'PANO_3_2015_CLOSE',
-            timestamp = factory.fuzzy.FuzzyDateTime(datetime.datetime(2015, 1, 1, tzinfo=UTC_TZ), force_year=2015),
-            filename = factory.fuzzy.FuzzyText(length=30),
-            path = factory.fuzzy.FuzzyText(length=30),
-            geolocation = Point(4.897071, 52.377956, 10),
-            roll = factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch = factory.fuzzy.FuzzyFloat(-10, 10),
-            heading = factory.fuzzy.FuzzyFloat(-10, 10),
+            pano_id='PANO_3_2015_CLOSE',
+            timestamp=factory.fuzzy.FuzzyDateTime(
+                datetime.datetime(2015, 1, 1, tzinfo=UTC_TZ), force_year=2015),
+            filename=factory.fuzzy.FuzzyText(length=30),
+            path=factory.fuzzy.FuzzyText(length=30),
+            geolocation=Point(4.897071, 52.377956, 10),
+            roll=factory.fuzzy.FuzzyFloat(-10, 10),
+            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
+            heading=factory.fuzzy.FuzzyFloat(-10, 10),
         )
         factories.PanoramaFactory.create(
-            pano_id = 'PANO_4_2014_FAR',
-            timestamp = factory.fuzzy.FuzzyDateTime(datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
-            filename = factory.fuzzy.FuzzyText(length=30),
-            path = factory.fuzzy.FuzzyText(length=30),
-            geolocation = Point(4.897170, 52.577956, 10),
-            roll = factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch = factory.fuzzy.FuzzyFloat(-10, 10),
-            heading = factory.fuzzy.FuzzyFloat(-10, 10),
+            pano_id='PANO_4_2014_FAR',
+            timestamp=factory.fuzzy.FuzzyDateTime(
+                datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
+            filename=factory.fuzzy.FuzzyText(length=30),
+            path=factory.fuzzy.FuzzyText(length=30),
+            geolocation=Point(4.897170, 52.577956, 10),
+            roll=factory.fuzzy.FuzzyFloat(-10, 10),
+            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
+            heading=factory.fuzzy.FuzzyFloat(-10, 10),
         )
 
     # Tests
-    #=============
+    # =============
 
     # Get by id
     def test_get_by_pano_id(self):
-        response = self.client.get('/pano/PANO_1_2014/')
+        response = self.client.get('/panorama/PANO_1_2014/')
         # Making sure its a 200
         self.assertEqual(response.status_code, 200)
         # Malking sure data is correctly retrieved
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
         # Testing 404 on non existing id
-        response = self.client.get('/pano/PANO_NOT_DEFINED/')
+        response = self.client.get('/panorama/PANO_NOT_DEFINED/')
         self.assertEqual(response.status_code, 404)
 
     def test_get_nearest_from_afar_no_radius(self):
-        response = self.client.get('/pano/?lat=50&lon=4')
+        response = self.client.get('/panorama/?lat=50&lon=4')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'],'PANO_1_2014')
+        self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_from_afar_radius(self):
-        response = self.client.get('/pano/?lat=50&lon=4&radius=10000')
+        response = self.client.get('/panorama/?lat=50&lon=4&radius=10000')
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('pano_id', response.data)
 
     def test_get_nearest_from_afar_no_radius_year(self):
-        response = self.client.get('/pano/?lat=50&lon=4&vanaf=2015')
+        response = self.client.get('/panorama/?lat=50&lon=4&vanaf=2015')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'],'PANO_3_2015_CLOSE')
+        self.assertEqual(response.data['pano_id'], 'PANO_3_2015_CLOSE')
 
     def test_get_nearest_close_no_radius(self):
-        response = self.client.get('/pano/?lat=52.3779561&lon=4.8970701')
+        response = self.client.get('/panorama/?lat=52.3779561&lon=4.8970701')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'],'PANO_1_2014')
+        self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_close_radius(self):
-        response = self.client.get('/pano/?lat=52.3779561&lon=4.8970701&radius=1000')
+        response = self.client.get(
+            '/panorama/?lat=52.3779561&lon=4.8970701&radius=1000')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'],'PANO_1_2014')
+        self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_close_no_radius_max_date(self):
-        response = self.client.get('/pano/?lat=52.3779561&lon=4.8970701&tot=01-01-2015')
+        response = self.client.get(
+            '/panorama/?lat=52.3779561&lon=4.8970701&tot=01-01-2015')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'],'PANO_1_2014')
+        self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_all_parameters(self):
-        response = self.client.get('/pano/?lat=52.377958&lon=4.897070&radius=10000&vanaf=2014-01-01&tot=2016')
+        response = self.client.get(
+            '/panorama/?lat=52.377958&lon=4.897070&radius=10000&vanaf=2014-01-01&tot=2016')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'],'PANO_1_2014')
+        self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_status_health(self):
-        response = self.client.get('/status/health')
+        response=self.client.get('/status/health')
         self.assertEqual(response.status_code, 200)
         self.assertIn('Connectivity OK', str(response.content))
 
@@ -126,7 +133,7 @@ class PanoramaApiTest(APITestCase):
         """
         Cross Origin Requests should be allowed.
         """
-        request = Mock(path='https://api.datapunt.amsterdam.nl/pano/?lat=52.3779561&lon=4.8970701')
+        request = Mock(path='https://api.datapunt.amsterdam.nl/panorama/?lat=52.3779561&lon=4.8970701')
         request.method = 'GET'
         request.is_secure = lambda: True
         request.META = {
@@ -136,5 +143,5 @@ class PanoramaApiTest(APITestCase):
         }
         response = CorsMiddleware().process_response(request, HttpResponse())
         self.assertTrue('access-control-allow-origin' in response._headers)
-        self.assertEquals('*', response._headers['access-control-allow-origin'][1])
-
+        self.assertEquals(
+            '*', response._headers['access-control-allow-origin'][1])
