@@ -10,6 +10,7 @@ from geo_views import migrate
 class Migration(migrations.Migration):
 
     dependencies = [
+            ('sites', '0001_initial'),
             ('panoramas', '0001_initial')
     ]
 
