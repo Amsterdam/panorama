@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models as geo
 from django.db import models
 # Project
-from datapunt_open_panorama.settings import PANO_DIR, PANO_IMAGE_URL
+from panorama.settings import PANO_DIR, PANO_IMAGE_URL
 
 
 class Panorama(models.Model):

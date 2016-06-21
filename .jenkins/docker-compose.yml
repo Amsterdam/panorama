@@ -2,7 +2,7 @@ database:
   image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
   environment:
     POSTGRES_PASSWORD: insecure
-    POSTGRES_USER: openpanorama
+    POSTGRES_USER: panorama
 
 importer:
   build: ../web
@@ -11,7 +11,7 @@ importer:
   volumes:
     - /mnt/pano2016:/app/panoramas/2016
   environment:
-    DB_NAME: openpanorama
+    DB_NAME: panorama
     DB_PASSWORD: insecure
     OPENPANORAMA_DATA_DIR: /app/panoramas
   command: >
@@ -26,13 +26,13 @@ db-backup:
   volumes:
     - ./backups:/tmp/backups
   command: >
-    bash -c "echo db:5432:openpanorama:openpanorama:insecure > ~/.pgpass \
+    bash -c "echo db:5432:panorama:panorama:insecure > ~/.pgpass \
             && chmod 600 ~/.pgpass \
             && pg_dump --clean \
                         -Fc \
                         -t panoramas* \
                         -t geo*  \
                         -T auth*    \
-                        -U openpanorama \
+                        -U panorama \
                         -h db -p 5432 \
-                        openpanorama > /tmp/backups/database.dump"
+                        panorama > /tmp/backups/database.dump"

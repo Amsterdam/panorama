@@ -88,7 +88,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'datapunt_open_panorama.wsgi.application'
+WSGI_APPLICATION = 'panorama.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
@@ -96,8 +96,8 @@ WSGI_APPLICATION = 'datapunt_open_panorama.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.getenv('DB_NAME', 'openpanorama'),
-        'USER': os.getenv('DB_NAME', 'openpanorama'),
+        'NAME': os.getenv('DB_NAME', 'panorama'),
+        'USER': os.getenv('DB_NAME', 'panorama'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'insecure'),
         'HOST': os.getenv('DATABASE_PORT_5432_TCP_ADDR', get_docker_host()),
         'PORT': os.getenv('DATABASE_PORT_5432_TCP_PORT', '5454'),
