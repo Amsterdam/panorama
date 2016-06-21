@@ -32,7 +32,6 @@ db-backup:
                         -Fc \
                         -t panoramas* \
                         -t geo*  \
-                        -T django*  \
                         -T auth*    \
                         -U openpanorama \
                         -h db -p 5432 \
