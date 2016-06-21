@@ -25,7 +25,7 @@ class DocumentedRouter(routers.DefaultRouter):
 router = routers.DefaultRouter()
 
 # Registering the API endpoints
-router.register(r'pano', PanoViewSet)
+router.register(r'panorama', PanoViewSet)
 
 
 urlpatterns = [
