@@ -32,7 +32,7 @@ class ViewLocationMixin(object):
             lat = float(query_params['lat'])
             coord_system = 4326
             # @TODO Doing value sanity check
-            coords = (lat, lon)
+            coords = (lon, lat)
         elif 'x' in query_params and 'y' in query_params:
             lon = float(query_params['x'])
             lat = float(query_params['y'])
@@ -43,7 +43,7 @@ class ViewLocationMixin(object):
             return None
         if convert and convert != coord_system:
             # These should be Rd coords, convert to WGS84
-            coords = self._convert_coords(lat, lon, coord_system, convert)
+            coords = self._convert_coords(lon, lat, coord_system, convert)
         return coords
 
     def _convert_coords(self, lon, lat, orig_srid, dest_srid):
