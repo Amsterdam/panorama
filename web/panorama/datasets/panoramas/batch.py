@@ -132,6 +132,12 @@ class ImportPanoramaJob(object):
                 float(row['latitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
             ),
+
+            geolocation2D=Point(
+                float(row['longitude[deg]']),
+                float(row['latitude[deg]']),
+            ),
+
             roll=float(row['roll[deg]']),
             pitch=float(row['pitch[deg]']),
             heading=float(row['heading[deg]']),
@@ -148,6 +154,12 @@ class ImportPanoramaJob(object):
                 float(row['latitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
             ),
+
+            geolocation2D=Point(
+                float(row['longitude[deg]']),
+                float(row['latitude[deg]']),
+            ),
+
             north_rms=float(row['north_rms[m]']),
             east_rms=float(row['east_rms[m]']),
             down_rms=float(row['down_rms[m]']),
