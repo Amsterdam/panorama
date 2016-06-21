@@ -1,4 +1,4 @@
-Datapunt open panorama
+Datapunt panorama API
 ======================
 
 Project om beelden gemaakt in equirectangulaire projectie te importeren, en te ontsluiten via een API.
