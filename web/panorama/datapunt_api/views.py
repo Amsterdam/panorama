@@ -8,7 +8,7 @@ from datasets.panoramas.models import Panorama
 from datasets.panoramas.serializers import PanoSerializer
 
 
-class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet):
+class PanoramaViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet):
     """
     View to retrieve panos
     """
@@ -78,5 +78,4 @@ class PanoViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet)
         pano = get_object_or_404(Panorama, pano_id=pk)
         resp = PanoSerializer(pano, context={'request': request})
         return Response(resp.data)
-
 
