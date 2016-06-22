@@ -2,34 +2,29 @@
 from django.conf.urls import url, include
 from rest_framework import routers
 # Project
-from .views import PanoViewSet
-from health import views
+from .views import PanoramaViewSet
 
 
-class DocumentedRouter(routers.DefaultRouter):
+class PanoramaRouter(routers.DefaultRouter):
     """
+    Panorama's van Amsterdam
     """
 
     def get_api_root_view(self):
         view = super().get_api_root_view()
         cls = view.cls
 
-        class Datapunt(cls):
+        class Panorama(cls):
             pass
 
-        Datapunt.__doc__ = self.__doc__
-        return Datapunt.as_view()
+        Panorama.__doc__ = self.__doc__
+        return Panorama.as_view()
 
 
-# router = DocumentedRouter()
-router = routers.DefaultRouter()
-
-# Registering the API endpoints
-router.register(r'panorama', PanoViewSet)
-
+panorama = PanoramaRouter()
+panorama.register(r'panorama', PanoramaViewSet)
 
 urlpatterns = [
-    url(r'^auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^', include(router.urls)),
-    url(r'^status/health$', views.health),
+    url(r'^', include(panorama.urls)),
+    url(r'^status/', include('health.urls')),
 ]

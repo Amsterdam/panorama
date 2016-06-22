@@ -158,6 +158,7 @@ REST_FRAMEWORK = dict(
     ),
     DEFAULT_RENDERER_CLASSES=(
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     COERCE_DECIMAL_TO_STRING=False,
 )
