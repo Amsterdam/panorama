@@ -26,6 +26,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
+DATAPUNT_API_URL = os.getenv(
+    # note the ending /
+    'DATAPUNT_API_URL', 'https://api.datapunt.amsterdam.nl/')
 
 # Application definition
 
