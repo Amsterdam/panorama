@@ -28,15 +28,17 @@ SELECT
     pp.roll,
     pp.pitch,
     pp.heading,
+    pp.path,
+    pp.filename,
+    site.domain || 'panorama/' || pp.pano_id AS uri,
     pp.geolocation AS geometrie
 FROM
     panoramas_panorama pp,
     django_site site
 WHERE
-    site.id = 1
+    site.name = 'API Domain'
 AND
     pp.geolocation IS NOT NULL
 """
         ),
-
     ]
