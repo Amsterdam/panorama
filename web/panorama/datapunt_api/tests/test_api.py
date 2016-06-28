@@ -70,56 +70,56 @@ class PanoramaApiTest(APITestCase):
 
     # Get by id
     def test_get_by_pano_id(self):
-        response = self.client.get('/panorama/PANO_1_2014/')
+        response = self.client.get('/panorama/opnamelocatie/PANO_1_2014/')
         # Making sure its a 200
         self.assertEqual(response.status_code, 200)
         # Malking sure data is correctly retrieved
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
         # Testing 404 on non existing id
-        response = self.client.get('/panorama/PANO_NOT_DEFINED/')
+        response = self.client.get('/panorama/opnamelocatie/PANO_NOT_DEFINED/')
         self.assertEqual(response.status_code, 404)
 
     def test_get_nearest_from_afar_no_radius(self):
-        response = self.client.get('/panorama/?lat=50&lon=4')
+        response = self.client.get('/panorama/opnamelocatie/?lat=50&lon=4')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_from_afar_radius(self):
-        response = self.client.get('/panorama/?lat=50&lon=4&radius=10000')
+        response = self.client.get('/panorama/opnamelocatie/?lat=50&lon=4&radius=10000')
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('pano_id', response.data)
 
     def test_get_nearest_from_afar_no_radius_year(self):
-        response = self.client.get('/panorama/?lat=50&lon=4&vanaf=2015')
+        response = self.client.get('/panorama/opnamelocatie/?lat=50&lon=4&vanaf=2015')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_3_2015_CLOSE')
 
     def test_get_nearest_close_no_radius(self):
-        response = self.client.get('/panorama/?lat=52.3779561&lon=4.8970701')
+        response = self.client.get('/panorama/opnamelocatie/?lat=52.3779561&lon=4.8970701')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_close_radius(self):
         response = self.client.get(
-            '/panorama/?lat=52.3779561&lon=4.8970701&radius=1000')
+            '/panorama/opnamelocatie/?lat=52.3779561&lon=4.8970701&radius=1000')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_close_no_radius_max_date(self):
         response = self.client.get(
-            '/panorama/?lat=52.3779561&lon=4.8970701&tot=01-01-2015')
+            '/panorama/opnamelocatie/?lat=52.3779561&lon=4.8970701&tot=01-01-2015')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_nearest_all_parameters(self):
         response = self.client.get(
-            '/panorama/?lat=52.377958&lon=4.897070&radius=10000&vanaf=2014-01-01&tot=2016')
+            '/panorama/opnamelocatie/?lat=52.377958&lon=4.897070&radius=10000&vanaf=2014-01-01&tot=2016')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
@@ -133,7 +133,7 @@ class PanoramaApiTest(APITestCase):
         """
         Cross Origin Requests should be allowed.
         """
-        request = Mock(path='https://api.datapunt.amsterdam.nl/panorama/?lat=52.3779561&lon=4.8970701')
+        request = Mock(path='https://api.datapunt.amsterdam.nl/panorama/opnamelocatie/?lat=52.3779561&lon=4.8970701')
         request.method = 'GET'
         request.is_secure = lambda: True
         request.META = {
