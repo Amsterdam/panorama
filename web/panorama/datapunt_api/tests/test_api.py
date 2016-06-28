@@ -95,6 +95,15 @@ class PanoramaApiTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('pano_id', response.data)
 
+    def test_fieldset_to_spec(self):
+        response = self.client.get('/panorama/opnamelocatie/?lat=52.37795&lon=4.8970')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pano_id', response.data)
+        self.assertIn('geometrie', response.data)
+        self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
+        self.assertNotIn('path', response.data)
+        self.assertNotIn('geolocation', response.data)
+
     def test_get_nearest_close_no_radius(self):
         response = self.client.get('/panorama/opnamelocatie/?lat=52.37795&lon=4.8970')
         self.assertEqual(response.status_code, 200)
