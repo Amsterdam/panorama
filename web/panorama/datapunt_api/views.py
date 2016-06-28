@@ -41,13 +41,13 @@ class PanoramaViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelView
             sql_where = []
             sql_params = []
             sql_get_pano = " SELECT * FROM panoramas_panorama "
-            if  'radius' in request.query_params:
-                max_range = request.query_params['radius']
-                # Making sure radius is a positive int
-                if max_range.isdigit():
-                    max_range = int(max_range)
-                    sql_where.append(" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation), %s) ")
-                    sql_params.extend([coords[0], coords[1], max_range])
+
+            max_range = 20
+            if 'radius' in request.query_params and request.query_params['radius'].isdigit():
+                max_range = int(request.query_params['radius'])
+            sql_where.append(" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation), %s) ")
+            sql_params.extend([coords[0], coords[1], max_range])
+
             if 'vanaf' in request.query_params:
                 start_date = self._convert_to_date(request.query_params['vanaf'])
                 if start_date:
