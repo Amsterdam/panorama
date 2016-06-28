@@ -22,9 +22,9 @@ class PanoramaRouter(routers.DefaultRouter):
 
 
 panorama = PanoramaRouter()
-panorama.register(r'panorama', PanoramaViewSet)
+panorama.register(r'opnamelocatie', PanoramaViewSet)
 
 urlpatterns = [
-    url(r'^', include(panorama.urls)),
+    url(r'^panorama/', include(panorama.urls)),
     url(r'^status/', include('health.urls')),
 ]
