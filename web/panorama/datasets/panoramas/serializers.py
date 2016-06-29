@@ -27,7 +27,7 @@ class PanoSerializer(serializers.ModelSerializer):
         return super().to_representation(instance)
 
 
-class FileterdPanoSerializer(PanoSerializer):
+class FilteredPanoSerializer(PanoSerializer):
     adjacent = serializers.SerializerMethodField(source='get_adjacent')
 
     def __init__(self, instance=None, data=empty, filter=None, **kwargs):

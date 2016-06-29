@@ -134,7 +134,7 @@ class PanoramaApiTest(APITestCase):
             '/panorama/opnamelocatie/?lat=52.377958&lon=4.897070&radius=10000&vanaf=2014-01-01&tot=2016')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
+        self.assertEqual(response.data['pano_id'], 'PANO_2_2014_CLOSE')
 
     def test_get_status_health(self):
         response=self.client.get('/status/health')
