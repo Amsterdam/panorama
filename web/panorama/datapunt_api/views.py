@@ -5,7 +5,7 @@ from rest_framework import viewsets
 # Project
 from datasets.panoramas.mixins import ViewLocationMixin, DateConversionMixin
 from datasets.panoramas.models import Panorama
-from datasets.panoramas.serializers import PanoSerializer
+from datasets.panoramas.serializers import PanoSerializer, FileterdPanoSerializer
 
 
 class PanoramaViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelViewSet):
@@ -48,25 +48,31 @@ class PanoramaViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelView
             sql_where.append(" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation), %s) ")
             sql_params.extend([coords[0], coords[1], max_range])
 
+            adjacent_filter = {}
             if 'vanaf' in request.query_params:
                 start_date = self._convert_to_date(request.query_params['vanaf'])
                 if start_date:
+                    adjacent_filter['vanaf'] = start_date
                     sql_where.append(" timestamp > %s ")
                     sql_params.append(start_date)
+
             if 'tot' in request.query_params:
                 end_date = self._convert_to_date(request.query_params['tot'])
                 if end_date:
+                    adjacent_filter['tot'] = end_date
                     sql_where.append(" timestamp <= %s ")
                     sql_params.append(end_date)
+
             sql_nearest = " ORDER BY geolocation <-> 'SRID=4326;POINT(%s %s)' limit 1 "
             sql_params.extend([coords[0], coords[1]])
+
             if len(sql_where) > 0:
                 sql = sql_get_pano + " WHERE " + " AND ".join(sql_where) + sql_nearest
             else:
                 sql = sql_get_pano + sql_nearest
             try:
                 pano = Panorama.objects.raw(sql, sql_params)[0]
-                pano = PanoSerializer(pano, context={'request': request}).data
+                pano = FileterdPanoSerializer(pano, filter=adjacent_filter, context={'request': request}).data
             except IndexError:
                 # No results were found
                 pano = []
@@ -78,4 +84,3 @@ class PanoramaViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelView
         pano = get_object_or_404(Panorama, pano_id=pk)
         resp = PanoSerializer(pano, context={'request': request})
         return Response(resp.data)
-
