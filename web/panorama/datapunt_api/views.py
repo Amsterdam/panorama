@@ -40,7 +40,7 @@ class PanoramaViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelView
         if coords:
             queryset = Panorama.objects.extra(
                 select={
-                    'distance': " ST_Distance(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation)) "},
+                    'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
                 select_params=[coords[0], coords[1]])
 
             max_range = 20
