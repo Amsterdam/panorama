@@ -38,33 +38,40 @@ class PanoramaViewSet(ViewLocationMixin, DateConversionMixin, viewsets.ModelView
         # nothing to work with
         coords = self._get_request_coord(request.query_params)
         if coords:
-            queryset = Panorama.objects.extra(
-                select={
-                    'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
-                select_params=[coords[0], coords[1]])
+            sql_where = []
+            sql_params = []
+            sql_get_pano = " SELECT * FROM panoramas_panorama "
 
             max_range = 20
             if 'radius' in request.query_params and request.query_params['radius'].isdigit():
                 max_range = int(request.query_params['radius'])
-            queryset =  queryset.extra(
-                where=[" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation), %s) "],
-                params=[coords[0], coords[1], max_range])
+            sql_where.append(" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'), geography(geolocation), %s) ")
+            sql_params.extend([coords[0], coords[1], max_range])
 
             adjacent_filter = {}
             if 'vanaf' in request.query_params:
                 start_date = self._convert_to_date(request.query_params['vanaf'])
                 if start_date:
                     adjacent_filter['vanaf'] = start_date
-                    queryset = queryset.filter(timestamp__gte=start_date)
+                    sql_where.append(" timestamp > %s ")
+                    sql_params.append(start_date)
+
             if 'tot' in request.query_params:
                 end_date = self._convert_to_date(request.query_params['tot'])
                 if end_date:
                     adjacent_filter['tot'] = end_date
-                    queryset = queryset.filter(timestamp__lt=end_date)
+                    sql_where.append(" timestamp <= %s ")
+                    sql_params.append(end_date)
 
-            queryset = queryset.extra(order_by=['distance'])
+            sql_nearest = " ORDER BY geolocation <-> 'SRID=4326;POINT(%s %s)' limit 1 "
+            sql_params.extend([coords[0], coords[1]])
+
+            if len(sql_where) > 0:
+                sql = sql_get_pano + " WHERE " + " AND ".join(sql_where) + sql_nearest
+            else:
+                sql = sql_get_pano + sql_nearest
             try:
-                pano = queryset[0]
+                pano = Panorama.objects.raw(sql, sql_params)[0]
                 if adjacent_filter:
                     pano = FilteredPanoSerializer(pano, filter=adjacent_filter, context={'request': request}).data
                 else:
