@@ -83,6 +83,7 @@ class ImportPanoramaJob(object):
         """
         files = self.find_metadata_files('panorama*.csv')
         for csv_file in files:
+            log.info('READING panorama: %s', csv_file)
             models.Panorama.objects.bulk_create(
                 self.process_csv(csv_file, self.process_panorama_row),
                 batch_size=BATCH_SIZE
@@ -90,6 +91,7 @@ class ImportPanoramaJob(object):
 
         files = self.find_metadata_files('trajectory.csv')
         for csv_file in files:
+            log.info('READING trajectory: %s', csv_file)
             models.Traject.objects.bulk_create(
                 self.process_csv(csv_file, self.process_traject_row),
                 batch_size=BATCH_SIZE
