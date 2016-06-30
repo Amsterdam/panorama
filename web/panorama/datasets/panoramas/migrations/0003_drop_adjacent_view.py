@@ -4,19 +4,18 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
-from geo_views import migrate
 from .temp import constants
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('panoramas', '0001_initial')
+        ('panoramas', '0002_adjecent_panos')
     ]
 
     operations = [
-        migrate.ManageView(
-            view_name=constants.SQL_VIEWNAME_0002,
-            sql=constants.SQL_VIEW_0002
+        migrations.RunSQL(
+            "DROP VIEW {} ".format(constants.SQL_VIEWNAME_0002),
+            "CREATE VIEW {} AS {} ".format(constants.SQL_VIEWNAME_0002, constants.SQL_VIEW_0002)
         ),
     ]

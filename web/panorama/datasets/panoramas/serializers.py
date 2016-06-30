@@ -43,7 +43,3 @@ class FilteredPanoSerializer(PanoSerializer):
 
         serializer = AdjacencySerializer(instance=qs, many=True)
         return serializer.data
-
-
-
-

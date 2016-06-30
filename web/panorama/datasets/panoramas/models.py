@@ -33,19 +33,21 @@ class Adjacency(models.Model):
     to_pano = models.ForeignKey(Panorama,  related_name='from_adjacency')
     direction = models.FloatField()
     distance = models.FloatField()
-    from_height = models.FloatField()
-    to_height = models.FloatField()
+    elevation = models.FloatField()
+
+    class Meta:
+        managed = False
+        db_table = "panoramas_adjacencies"
 
     def __str__(self):
         return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.to_pano_id)
 
     @property
     def angle(self):
-        if not self.distance > 0.0 or not self.from_height or not self.to_height:
+        if not self.distance > 0.0 or not self.elevation:
             return 0.0
         else:
-            rad = atan2((self.to_height - self.from_height), self.distance)
-            return degrees(rad)
+            return degrees(atan2(self.elevation, self.distance))
 
 
 class Traject(models.Model):

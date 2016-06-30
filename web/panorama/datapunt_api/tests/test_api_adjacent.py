@@ -1,9 +1,6 @@
 # Python
 import datetime
-from unittest.mock import Mock
 # Packages
-from django.http import HttpResponse
-from corsheaders.middleware import CorsMiddleware
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
 import factory
@@ -11,6 +8,7 @@ import factory.fuzzy
 from rest_framework.test import APITestCase
 # Project
 from datasets.panoramas.tests import factories
+from datapunt.management.commands import refresh_views
 
 
 class PanoramaApiTest(APITestCase):
@@ -53,7 +51,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
         )
-
+        refresh = refresh_views.Command()
+        refresh.refresh_views()
 
     # Tests
     # =============
