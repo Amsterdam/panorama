@@ -4,7 +4,22 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+from django.conf import settings
+
 from geo_views import migrate
+
+
+def create_site(apps, *args, **kwargs):
+    Site = apps.get_model('sites', 'Site')
+    Site.objects.create(
+        domain=settings.DATAPUNT_API_URL,
+        name='API Domain'
+    )
+
+
+def delete_site(apps, *args, **kwargs):
+    Site = apps.get_model('sites', 'Site')
+    Site.objects.filter(name='API Domain').delete()
 
 
 class Migration(migrations.Migration):
@@ -15,11 +30,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(code=create_site, reverse_code=delete_site),
+
         migrate.ManageView(
-            # pp = PanoramaPhoto
-            # site.domain || 'panoramas/panorama/' || pp.pano_id || '/' AS uri,
-            # 'panoramas/panorama' AS type,
-            # site.name = 'API Domain'
             view_name="geo_panoramas_panoramafotopunt",
             sql="""
 SELECT
@@ -28,12 +41,15 @@ SELECT
     pp.roll,
     pp.pitch,
     pp.heading,
-    pp.geolocation AS geometrie
+    pp.timestamp,
+    pp.geolocation AS geometrie,
+    pp.path || pp.filename AS bestandslocatie,
+    site.domain || 'panoramas/opnamelocatie/' || pp.pano_id || '/' AS uri
 FROM
     panoramas_panorama pp,
     django_site site
 WHERE
-    site.id = 1
+    site.name = 'API Domain'
 AND
     pp.geolocation IS NOT NULL
 """

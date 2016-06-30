@@ -82,31 +82,34 @@ class ImportPanoramaJob(object):
         files.
         """
         files = self.find_metadata_files('panorama*.csv')
-        models.Panorama.objects.bulk_create(
-            self.process_csv(files, self.process_panorama_row),
-            batch_size=BATCH_SIZE
-        )
+        for csv_file in files:
+            log.info('READING panorama: %s', csv_file)
+            models.Panorama.objects.bulk_create(
+                self.process_csv(csv_file, self.process_panorama_row),
+                batch_size=BATCH_SIZE
+            )
 
         files = self.find_metadata_files('trajectory.csv')
-        models.Traject.objects.bulk_create(
-            self.process_csv(files, self.process_traject_row),
-            batch_size=BATCH_SIZE
-        )
+        for csv_file in files:
+            log.info('READING trajectory: %s', csv_file)
+            models.Traject.objects.bulk_create(
+                self.process_csv(csv_file, self.process_traject_row),
+                batch_size=BATCH_SIZE
+            )
 
-    def process_csv(self, files, process_row_callback):
+    def process_csv(self, csv_file, process_row_callback):
         """
         Process a single csv file
         """
         models = []
 
-        for csv_file in files:
-            # parse the csv
-            with _context_reader(csv_file) as rows:
-                path = os.path.dirname(csv_file)
-                for model_data in rows:
-                    model = process_row_callback(model_data, path)
-                    if model:
-                        models.append(model)
+        # parse the csv
+        with _context_reader(csv_file) as rows:
+            path = os.path.dirname(csv_file)
+            for model_data in rows:
+                model = process_row_callback(model_data, path)
+                if model:
+                    models.append(model)
         return models
 
     def process_panorama_row(self, row, path):

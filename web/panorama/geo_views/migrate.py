@@ -33,23 +33,37 @@ class ManageView(Operation):
 
         return history[-1]
 
-    def database_forwards(
-            self, app_label, schema_editor, from_state, to_state):
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
         schema_editor.execute("DROP VIEW IF EXISTS {}".format(self.view_name))
-        schema_editor.execute("CREATE VIEW {} AS {}".format(
-            self.view_name, self.sql))
+        schema_editor.execute("CREATE VIEW {} AS {}".format(self.view_name, self.sql))
 
-    def database_backwards(
-            self, app_label, schema_editor, from_state, to_state):
+    def database_backwards(self, app_label, schema_editor, from_state, to_state):
         schema_editor.execute("DROP VIEW IF EXISTS {}".format(self.view_name))
         previous = self.pop_previous_sql(app_label)
 
         if previous:
-            schema_editor.execute("CREATE VIEW {} AS {}".format(
-                self.view_name, previous))
+            schema_editor.execute("CREATE VIEW {} AS {}".format(self.view_name, previous))
 
     def state_forwards(self, app_label, state):
         self.push_history(app_label)
 
     def describe(self):
         return "Create view {}".format(self.view_name)
+
+
+
+class ManageMaterializedView(ManageView):
+
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        schema_editor.execute("DROP MATERIALIZED VIEW IF EXISTS {}".format(self.view_name))
+        schema_editor.execute("CREATE MATERIALIZED VIEW {} AS {}".format(self.view_name, self.sql))
+
+    def database_backwards(self, app_label, schema_editor, from_state, to_state):
+        schema_editor.execute("DROP MATERIALIZED VIEW IF EXISTS {}".format(self.view_name))
+        previous = self.pop_previous_sql(app_label)
+
+        if previous:
+            schema_editor.execute("CREATE MATERIALIZED VIEW {} AS {}".format(self.view_name, previous))
+
+    def describe(self):
+        return "Create materialized view {}".format(self.view_name)
