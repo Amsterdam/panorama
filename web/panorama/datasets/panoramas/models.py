@@ -1,3 +1,4 @@
+from math import atan2, degrees
 from django.contrib.gis.db import models as geo
 from django.db import models
 # Project
@@ -14,6 +15,7 @@ class Panorama(models.Model):
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
+    adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
 
     objects = geo.GeoManager()
 
@@ -24,6 +26,28 @@ class Panorama(models.Model):
     def img_url(self):
         return '%s%s/%s' % (
             PANO_IMAGE_URL, self.path.replace(PANO_DIR, ''), self.filename)
+
+
+class Adjacency(models.Model):
+    from_pano = models.ForeignKey(Panorama, related_name='to_adjacency')
+    to_pano = models.ForeignKey(Panorama,  related_name='from_adjacency')
+    direction = models.FloatField()
+    distance = models.FloatField()
+    elevation = models.FloatField()
+
+    class Meta:
+        managed = False
+        db_table = "panoramas_adjacencies"
+
+    def __str__(self):
+        return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.to_pano_id)
+
+    @property
+    def angle(self):
+        if not self.distance > 0.0 or not self.elevation:
+            return 0.0
+        else:
+            return degrees(atan2(self.elevation, self.distance))
 
 
 class Traject(models.Model):

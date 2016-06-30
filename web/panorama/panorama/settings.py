@@ -26,6 +26,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
+DATAPUNT_API_URL = os.getenv(
+    # note the ending /
+    'DATAPUNT_API_URL', 'https://api.datapunt.amsterdam.nl/')
 
 # Application definition
 
@@ -158,6 +161,7 @@ REST_FRAMEWORK = dict(
     ),
     DEFAULT_RENDERER_CLASSES=(
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     COERCE_DECIMAL_TO_STRING=False,
 )
