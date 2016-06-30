@@ -51,8 +51,7 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
         )
-        refresh = refresh_views.Command()
-        refresh.refresh_views()
+        refresh_views.Command().refresh_views()
 
     # Tests
     # =============
