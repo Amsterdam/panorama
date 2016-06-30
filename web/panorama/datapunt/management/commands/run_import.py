@@ -37,4 +37,4 @@ class Command(BaseCommand):
             for job_class in self.imports[ds]:
                 job_class().process()
 
-            # call_command('create_geo_tables')
+        call_command('refresh_views')
