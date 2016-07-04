@@ -12,6 +12,7 @@ class Panorama(models.Model):
     filename = models.CharField(max_length=255)
     path = models.CharField(max_length=400)
     geolocation = geo.PointField(dim=3, srid=4326, spatial_index=True)
+    geopoint = geo.PointField(dim=2, srid=4326, spatial_index=True)
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
