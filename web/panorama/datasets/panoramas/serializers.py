@@ -21,7 +21,7 @@ class PanoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Panorama
-        exclude = ('path','geolocation','adjacent_panos',)
+        exclude = ('path','geolocation','adjacent_panos','geopoint')
 
     def to_representation(self, instance):
         return super().to_representation(instance)
