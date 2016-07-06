@@ -1,6 +1,7 @@
 from math import atan2, degrees
 from django.contrib.gis.db import models as geo
 from django.db import models
+
 # Project
 from panorama.settings import PANO_DIR, PANO_IMAGE_URL
 
@@ -26,7 +27,7 @@ class Panorama(models.Model):
     @property
     def img_url(self):
         return '%s%s/%s' % (
-            PANO_IMAGE_URL, self.path.replace(PANO_DIR, ''), self.filename)
+            PANO_IMAGE_URL, self.path, self.filename)
 
 
 class Adjacency(models.Model):

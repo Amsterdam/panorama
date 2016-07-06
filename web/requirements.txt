@@ -25,3 +25,7 @@ sphinx-me==0.3
 sqlparse==0.1.19
 tqdm==4.4.3
 urllib3==1.15.1
+django-filter==0.13.0
+drf-extensions==0.2.8
+drf-hal-json==0.9.1
+drf-nested-fields==0.9.3
