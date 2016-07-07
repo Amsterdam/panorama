@@ -1,19 +1,15 @@
 # Python
 import datetime
 import unittest
-from unittest.mock import Mock
 # Packages
-from django.http import HttpResponse
-from corsheaders.middleware import CorsMiddleware
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
 import factory
 import factory.fuzzy
-from rest_framework.test import APITestCase
 from scipy import misc
 # Project
 from datasets.panoramas.tests import factories
-from datasets.panoramas.transform.transformer import  PanoramaTransformer
+from datasets.panoramas.transform.transformer import PanoramaTransformer
 from datasets.panoramas.models import Panorama
 
 

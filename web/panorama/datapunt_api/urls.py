@@ -3,6 +3,7 @@ from django.conf.urls import url, include
 from rest_framework import routers
 # Project
 from .views import PanoramaViewSet
+from .view_imgs import ImageViewSet, ThumbnailViewSet
 
 
 class PanoramaRouter(routers.DefaultRouter):
@@ -23,6 +24,8 @@ class PanoramaRouter(routers.DefaultRouter):
 
 panorama = PanoramaRouter()
 panorama.register(r'opnamelocatie', PanoramaViewSet)
+panorama.register(r'thumbnail', ThumbnailViewSet)
+panorama.register(r'normalized', ImageViewSet)
 
 urlpatterns = [
     url(r'^panorama/', include(panorama.urls)),
