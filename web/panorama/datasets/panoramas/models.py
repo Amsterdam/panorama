@@ -27,7 +27,7 @@ class Panorama(models.Model):
     @property
     def img_url(self):
         return '%s%s/%s' % (
-            PANO_IMAGE_URL, self.path, self.filename)
+            PANO_IMAGE_URL, self.path.replace(PANO_DIR, ''), self.filename)
 
 
 class Adjacency(models.Model):
