@@ -34,7 +34,7 @@ class Adjacency(models.Model):
     from_pano = models.ForeignKey(Panorama, related_name='to_adjacency')
     to_pano = models.ForeignKey(Panorama,  related_name='from_adjacency')
     direction = models.FloatField()
-    heading = models.FloatField()
+    heading = models.DecimalField(max_digits=20, decimal_places=2)
     distance = models.FloatField()
     elevation = models.FloatField()
 
