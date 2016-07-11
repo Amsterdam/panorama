@@ -8,6 +8,9 @@ from datasets.panoramas import models
 
 class AdjacencySerializer(serializers.ModelSerializer):
     pano_id = serializers.ReadOnlyField(source='to_pano.pano_id')
+    direction = serializers.DecimalField(max_digits=20, decimal_places=2)
+    angle = serializers.DecimalField(max_digits=20, decimal_places=2)
+    pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
         model = models.Adjacency
@@ -18,6 +21,9 @@ class PanoSerializer(serializers.ModelSerializer):
     url = serializers.ReadOnlyField(source='img_url')
     geometrie = fields.GeometryField(source='geolocation')
     adjacent = AdjacencySerializer(source='to_adjacency', many=True)
+    roll = serializers.DecimalField(max_digits=20, decimal_places=2)
+    pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
+    heading = serializers.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
         model = models.Panorama
