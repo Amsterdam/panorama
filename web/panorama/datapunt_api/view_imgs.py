@@ -1,14 +1,12 @@
 # Packages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from rest_framework.response import Response
-
 from scipy import misc
 
 from datasets.panoramas.transform.transformer import PanoramaTransformer
 from datasets.panoramas.models import Panorama
-
+from datapunt_api.views import PanoramaViewSet
 from . import datapunt_rest
 
 
@@ -37,7 +35,7 @@ class ImageViewSet(datapunt_rest.AtlasViewSet):
         return response
 
 
-class ThumbnailViewSet(datapunt_rest.AtlasViewSet):
+class ThumbnailViewSet(PanoramaViewSet):
 
     """
     View to retrieve thumbs of a panorama
@@ -55,16 +53,32 @@ class ThumbnailViewSet(datapunt_rest.AtlasViewSet):
         aspect: aspect ratio of thumbnail (width/height, min. 1) (default 4/3)
 
     """
-    queryset = Panorama.objects.all()
 
     def list(self, request):
-        return Response({'error': 'pano_id'})
+        """
+        Overloading the list view to enable in finding
+        the thumb looking at the given point
+        """
+        coords = self._get_request_coord(request.query_params)
+        if not coords:
+            return Response({'error': 'pano_id'})
 
-    def retrieve(self, request, pk=None):
+        _, queryset = self._get_filter_and_queryset(coords, request)
+
+        try:
+            pano = queryset[0]
+            heading = self._get_heading(coords, pano.geopoint)
+            return self.retrieve(request, pk=pano.pano_id, target_heading=heading)
+        except IndexError:
+            # No results were found
+            return Response([])
+
+
+    def retrieve(self, request, pk=None, target_heading=0):
+        # default query params
         target_width=750
         target_angle=80
         target_horizon=0.3
-        target_heading=0
         target_aspect=4/3
 
         if 'width' in request.query_params:
@@ -134,3 +148,8 @@ class ThumbnailViewSet(datapunt_rest.AtlasViewSet):
                 return aspect
         except ValueError:
             return default
+
+    def _get_heading(self, coords, geopoint):
+        sql = "select 1 as id, degrees(st_azimuth(ST_GeogFromText('SRID=4326;POINT(%s %s)'), ST_GeogFromText('SRID=4326;POINT(%s %s)'))) AS heading "
+        simpl = Panorama.objects.raw(sql, [geopoint[0], geopoint[1], coords[0], coords[1]])[0]
+        return simpl.heading
