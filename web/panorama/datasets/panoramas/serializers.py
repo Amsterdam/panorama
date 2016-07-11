@@ -11,7 +11,7 @@ class AdjacencySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Adjacency
-        fields = ('pano_id', 'direction', 'angle',)
+        fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch',)
 
 
 class PanoSerializer(serializers.ModelSerializer):

@@ -1,4 +1,4 @@
-from math import atan2, degrees
+from math import atan2, degrees, cos, sin, radians
 from django.contrib.gis.db import models as geo
 from django.db import models
 
@@ -34,6 +34,7 @@ class Adjacency(models.Model):
     from_pano = models.ForeignKey(Panorama, related_name='to_adjacency')
     to_pano = models.ForeignKey(Panorama,  related_name='from_adjacency')
     direction = models.FloatField()
+    heading = models.FloatField()
     distance = models.FloatField()
     elevation = models.FloatField()
 
@@ -45,12 +46,21 @@ class Adjacency(models.Model):
         return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.to_pano_id)
 
     @property
+    def direction(self):
+        return (self.heading - self.from_pano.heading) % 360
+
+    @property
     def angle(self):
+        cam_angle = self.from_pano.pitch*cos(radians(self.direction)) \
+                    - self.from_pano.roll*sin(radians(self.direction))
+        return self.pitch - cam_angle
+
+    @property
+    def pitch(self):
         if not self.distance > 0.0 or not self.elevation:
             return 0.0
         else:
             return degrees(atan2(self.elevation, self.distance))
-
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()
