@@ -86,11 +86,11 @@ class PanoramaTransformer:
         return pitch_matrix.dot(roll_matrix)
 
     def cartesian2cylindrical(self, x, y, z):
-        theta1 = arccos(z)
-        phi1 = arctan2(y, x)
+        theta = arccos(z)
+        phi = arctan2(y, x)
 
-        x1 = mod(rint(PANO_HEIGHT + PANO_HEIGHT * phi1 / pi), SOURCE_WIDTH).astype(int)
-        y1 = mod(rint(PANO_HEIGHT * theta1 / pi), PANO_HEIGHT).astype(int)
+        x1 = mod(rint(PANO_HEIGHT + PANO_HEIGHT * phi / pi), SOURCE_WIDTH).astype(int)
+        y1 = mod(rint(PANO_HEIGHT * theta / pi), PANO_HEIGHT).astype(int)
 
         return x1, y1
 

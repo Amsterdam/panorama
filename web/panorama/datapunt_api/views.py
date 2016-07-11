@@ -53,35 +53,7 @@ class PanoramaViewSet(
             # pano = {'error': 'Geen coordinaten gevonden'}
             # return Response(pano)
 
-        queryset = Panorama.objects.extra(
-            select={
-                'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
-            select_params=[coords[0], coords[1]])
-
-        max_range = 20
-        if 'radius' in request.query_params and \
-                request.query_params['radius'].isdigit():
-            max_range = int(request.query_params['radius'])
-
-        queryset = queryset.extra(
-            where=[""" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'),
-                   geography(geolocation), %s) """],
-            params=[coords[0], coords[1], max_range])
-
-        adjacent_filter = {}
-        if 'vanaf' in request.query_params:
-            start_date = self._convert_to_date(
-                    request.query_params['vanaf'])
-            if start_date:
-                adjacent_filter['vanaf'] = start_date
-                queryset = queryset.filter(timestamp__gte=start_date)
-        if 'tot' in request.query_params:
-            end_date = self._convert_to_date(request.query_params['tot'])
-            if end_date:
-                adjacent_filter['tot'] = end_date
-                queryset = queryset.filter(timestamp__lt=end_date)
-
-        queryset = queryset.extra(order_by=['distance'])
+        adjacent_filter, queryset = self._get_filter_and_queryset(coords, request)
 
         try:
             pano = queryset[0]
@@ -98,6 +70,34 @@ class PanoramaViewSet(
             return Response([])
 
         return Response(pano)
+
+    def _get_filter_and_queryset(self, coords, request):
+        queryset = Panorama.objects.extra(
+            select={
+                'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
+            select_params=[coords[0], coords[1]])
+        max_range = 20
+        if 'radius' in request.query_params and \
+                request.query_params['radius'].isdigit():
+            max_range = int(request.query_params['radius'])
+        queryset = queryset.extra(
+            where=[""" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'),
+                   geography(geolocation), %s) """],
+            params=[coords[0], coords[1], max_range])
+        adjacent_filter = {}
+        if 'vanaf' in request.query_params:
+            start_date = self._convert_to_date(
+                request.query_params['vanaf'])
+            if start_date:
+                adjacent_filter['vanaf'] = start_date
+                queryset = queryset.filter(timestamp__gte=start_date)
+        if 'tot' in request.query_params:
+            end_date = self._convert_to_date(request.query_params['tot'])
+            if end_date:
+                adjacent_filter['tot'] = end_date
+                queryset = queryset.filter(timestamp__lt=end_date)
+        queryset = queryset.extra(order_by=['distance'])
+        return adjacent_filter, queryset
 
     def retrieve(self, request, pk=None):
         pano = get_object_or_404(Panorama, pano_id=pk)
