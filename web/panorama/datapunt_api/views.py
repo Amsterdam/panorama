@@ -56,15 +56,9 @@ class PanoramaViewSet(
         adjacent_filter, queryset = self._get_filter_and_queryset(coords, request)
 
         try:
-            pano = queryset[0]
-            if adjacent_filter:
-                pano = serializers.FilteredPanoSerializer(
-                    pano, filter=adjacent_filter,
-                    context={'request': request}).data
-            else:
-                pano = serializers.PanoSerializer(
-                    pano, context={'request': request}).data
-
+            pano = serializers.FilteredPanoSerializer(
+                queryset[0], filter=adjacent_filter,
+                context={'request': request}).data
         except IndexError:
             # No results were found
             return Response([])
@@ -101,5 +95,5 @@ class PanoramaViewSet(
 
     def retrieve(self, request, pk=None):
         pano = get_object_or_404(Panorama, pano_id=pk)
-        resp = serializers.PanoSerializer(pano, context={'request': request})
+        resp = serializers.FilteredPanoSerializer(pano, context={'request': request})
         return Response(resp.data)

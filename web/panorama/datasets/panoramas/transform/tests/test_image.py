@@ -24,7 +24,7 @@ class test_transform_img(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0004_000087.jpg',
-            path='/app/panoramas_test/2016/06/09/TMX7315120208-000073/',
+            path='/app/panoramas_test/2016/06/09/TMX7315120208-000073',
             geolocation=Point(4.89593266865189,
                               52.3717022854865,
                               47.3290048856288),
@@ -37,7 +37,7 @@ class test_transform_img(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0004_000183.jpg',
-            path='/app/panoramas_test/2016/06/09/TMX7315120208-000073/',
+            path='/app/panoramas_test/2016/06/09/TMX7315120208-000073',
             geolocation=Point(4.90015282534372,
                               52.3752177982126,
                               45.951653891243),
@@ -50,7 +50,7 @@ class test_transform_img(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0005_001111.jpg',
-            path='/app/panoramas_test/2016/06/09/TMX7315120208-000073/',
+            path='/app/panoramas_test/2016/06/09/TMX7315120208-000073',
             geolocation=Point(4.88584822835825,
                               52.3856824065041,
                               47.984863370657),
@@ -63,7 +63,7 @@ class test_transform_img(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0007_000072.jpg',
-            path='/app/panoramas_test/2016/06/08/TMX7315120208-000072/',
+            path='/app/panoramas_test/2016/06/08/TMX7315120208-000072',
             geolocation=Point(4.91250404103872,
                               52.3745885115937,
                               46.1886808034033),
@@ -76,7 +76,7 @@ class test_transform_img(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0000_000853.jpg',
-            path='/app/panoramas_test/2016/04/18/TMX7315120208-000030/',
+            path='/app/panoramas_test/2016/04/18/TMX7315120208-000030',
             geolocation=Point(4.93665401561895,
                               52.3551484757251,
                               37.6860034232959),
@@ -89,7 +89,7 @@ class test_transform_img(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0002_000466.jpg',
-            path='/app/panoramas_test/2016/05/09/TMX7315120208-000038/',
+            path='/app/panoramas_test/2016/05/09/TMX7315120208-000038',
             geolocation=Point(5.02513104599607,
                               52.4096209630701,
                               43.5107887201011),
@@ -102,7 +102,7 @@ class test_transform_img(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0011_000463.jpg',
-            path='/app/panoramas_test/2016/06/06/TMX7315120208-000067/',
+            path='/app/panoramas_test/2016/06/06/TMX7315120208-000067',
             geolocation=Point(4.96113893249052,
                               52.3632599072419,
                               46.0049178628251),
