@@ -36,12 +36,12 @@ class PanoSerializer(serializers.ModelSerializer):
 class FilteredPanoSerializer(PanoSerializer):
     adjacent = serializers.SerializerMethodField(source='get_adjacent')
 
-    def __init__(self, instance=None, data=empty, filter=None, **kwargs):
+    def __init__(self, instance=None, data=empty, filter={}, **kwargs):
         self.filter = filter
         super().__init__(instance, data, **kwargs)
 
     def get_adjacent(self, instance):
-        qs = models.Adjacency.objects.filter(from_pano=instance)
+        qs = models.Adjacency.objects.filter(from_pano=instance, distance__lt=11)
         if 'vanaf' in self.filter:
             qs = qs.exclude(to_pano__timestamp__lt=self.filter['vanaf'])
         if 'tot' in self.filter:
