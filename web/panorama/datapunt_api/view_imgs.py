@@ -44,13 +44,22 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         pano_id of Panorama
 
-    Optional Parameters:
+        or:
+
+        lat/lon for wgs84 coords
+        x/y for RD coords,
+
+        in the later case, optional Parameters for finding a panorama:
+
+        radius: (int) denoting search radius in meters (default = 20m)
+
+    Optional Parameters for the thumbnail:
 
         width: in pixels (max 1600) (default 750)
         angle: in degrees horizontal (max 80), max 20px per degree (default 80)
         horizon: fraction of image that is below horizon (default 0.3)
         heading: direction to look at in degrees (default 0)
-        aspect: aspect ratio of thumbnail (width/height, min. 1) (default 4/3)
+        aspect: aspect ratio of thumbnail (width/height, min 1) (default 1.5 (3/2)
 
     """
 
@@ -73,30 +82,34 @@ class ThumbnailViewSet(PanoramaViewSet):
             # No results were found
             return Response([])
 
+    def _get_heading(self, coords, geopoint):
+        sql = "select 1 as id, degrees(st_azimuth(ST_GeogFromText('SRID=4326;POINT(%s %s)'), ST_GeogFromText('SRID=4326;POINT(%s %s)'))) AS heading "
+        simpl = Panorama.objects.raw(sql, [geopoint[0], geopoint[1], coords[0], coords[1]])[0]
+        return simpl.heading
 
     def retrieve(self, request, pk=None, target_heading=0):
         # default query params
         target_width=750
         target_angle=80
         target_horizon=0.3
-        target_aspect=4/3
+        target_aspect=1.5
 
         if 'width' in request.query_params:
-            target_width = self._get_thumb_width(request, target_width)
+            target_width = self._get_int_value(request.query_params['width'], target_width, 1, 1600)
 
         if 'angle' in request.query_params:
-            target_angle = self._get_thumb_angle(request, target_angle)
+            target_angle = self._get_int_value(request.query_params['angle'], target_angle, 0, 80)
 
         target_width, target_angle = self._match_width_angle(target_width, target_angle)
 
         if 'heading' in request.query_params:
-            target_heading = self._get_thumb_heading(request, target_heading)
+            target_heading = self._get_int_value(request.query_params['heading'], target_heading, 0, 360)
 
         if 'horizon' in request.query_params:
-            target_horizon = self._get_thumb_horizon(request, target_horizon)
+            target_horizon = self._get_float_value(request.query_params['horizon'], target_horizon, 0.0, 1.0)
 
         if 'aspect' in request.query_params:
-            target_aspect = self._get_thumb_aspect(request, target_aspect)
+            target_aspect = self._get_float_value(request.query_params['aspect'], target_aspect, lower=1.0)
 
         pano = get_object_or_404(Panorama, pano_id=pk)
         pt = PanoramaTransformer(pano)
@@ -110,16 +123,11 @@ class ThumbnailViewSet(PanoramaViewSet):
         misc.toimage(normalized_pano).save(response, "JPEG")
         return response
 
-    def _get_thumb_width(self, request, default):
-        width = request.query_params['width']
-        if width.isdigit() and 0 < int(width) < 1601:
-            return int(width)
-        return default
-
-    def _get_thumb_angle(self, request, default):
-        angle = request.query_params['angle']
-        if angle.isdigit() and 0 <= int(angle) <= 80:
-            return int(angle)
+    def _get_int_value(self, param, default, lower=None, upper=None):
+        if param.isdigit() \
+                and (not lower or lower <= int(param)) \
+                and (not upper or int(param) <= upper):
+            return int(param)
         return default
 
     def _match_width_angle(self, width, angle):
@@ -127,29 +135,12 @@ class ThumbnailViewSet(PanoramaViewSet):
             return width, round(width/20)
         return width, angle
 
-    def _get_thumb_heading(self, request, default):
-        heading = request.query_params['heading']
-        if heading.isdigit() and 0 <= int(heading) < 361:
-            return int(heading)
+    def _get_float_value(self, param, default, lower=None, upper=None):
+        try:
+            value = float(param)
+            if (not lower or lower <= value) \
+                    and (not upper or value <= upper):
+                return value
+        except ValueError:
+            return default
         return default
-
-    def _get_thumb_horizon(self, request, default):
-        try:
-            horizon = float(request.query_params['horizon'])
-            if 0.0 <= horizon <= 1.0:
-                return horizon
-        except ValueError:
-            return default
-
-    def _get_thumb_aspect(self, request, default):
-        try:
-            aspect = float(request.query_params['aspect'])
-            if aspect >= 1.0:
-                return aspect
-        except ValueError:
-            return default
-
-    def _get_heading(self, coords, geopoint):
-        sql = "select 1 as id, degrees(st_azimuth(ST_GeogFromText('SRID=4326;POINT(%s %s)'), ST_GeogFromText('SRID=4326;POINT(%s %s)'))) AS heading "
-        simpl = Panorama.objects.raw(sql, [geopoint[0], geopoint[1], coords[0], coords[1]])[0]
-        return simpl.heading

@@ -22,10 +22,10 @@ class PanoramaRouter(routers.DefaultRouter):
         return Panorama.as_view()
 
 
-panorama = PanoramaRouter()
-panorama.register(r'opnamelocatie', PanoramaViewSet)
-panorama.register(r'thumbnail', ThumbnailViewSet)
-panorama.register(r'normalized', ImageViewSet)
+panorama = routers.DefaultRouter()
+panorama.register(r'normalized', ImageViewSet, base_name='normalized')
+panorama.register(r'opnamelocatie', PanoramaViewSet, base_name='opnamelocatie')
+panorama.register(r'thumbnail', ThumbnailViewSet, base_name='thumbnail')
 
 urlpatterns = [
     url(r'^panorama/', include(panorama.urls)),
