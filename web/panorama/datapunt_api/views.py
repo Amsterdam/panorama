@@ -50,8 +50,6 @@ class PanoramaViewSet(
         coords = self._get_request_coord(request.query_params)
         if not coords:
             return super().list(self, request)
-            # pano = {'error': 'Geen coordinaten gevonden'}
-            # return Response(pano)
 
         adjacent_filter, queryset = self._get_filter_and_queryset(coords, request)
 

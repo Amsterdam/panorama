@@ -57,7 +57,7 @@ class Adjacency(models.Model):
 
     @property
     def pitch(self):
-        if not self.distance > 0.0 or not self.elevation:
+        if not self.elevation or self.distance <= 0.0:
             return 0.0
         else:
             return degrees(atan2(self.elevation, self.distance))
