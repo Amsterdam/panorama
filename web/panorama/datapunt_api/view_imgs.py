@@ -85,23 +85,23 @@ class ThumbnailViewSet(PanoramaViewSet):
             pano = queryset[0]
             heading = self._get_heading(coords, pano._geolocation_2d)
             line = LineString(coords, pano._geolocation_2d)
-            return self.retrieve(request, pano_id=pano.pano_id, target_heading=heading)
+            return self.retrieve(request, pano_id=pano.pano_id, heading=heading)
         except IndexError:
             # No results were found
             return Response([])
 
     def _get_heading(self, coords, _geolocation_2d):
         # http://gis.stackexchange.com/questions/29239/calculate-bearing-between-two-decimal-gps-coordinates
-        d_lon = radians(_geolocation_2d[0]) - radians(coords[0])
+        d_lon = radians(coords[0]) - radians(_geolocation_2d[0])
 
-        start_lat = radians(coords[1])
-        end_lat =radians(_geolocation_2d[1])
+        start_lat = radians(_geolocation_2d[1])
+        end_lat =radians(coords[1])
         d_phi = log(tan(end_lat/2.0+pi/4.0)/tan(start_lat/2.0+pi/4.0))
 
         return degrees(atan2(d_lon, d_phi)) % 360.0
 
-    def retrieve(self, request, pano_id=None, target_heading=0):
-        heading = _get_int_value(request, 'heading', default=target_heading, lower=0, upper=360)
+    def retrieve(self, request, pano_id=None, heading=0):
+        target_heading = _get_int_value(request, 'heading', default=heading, lower=0, upper=360)
 
         target_width = _get_int_value(request, 'width', default=750, lower=1, upper=1600)
         target_angle = _get_int_value(request, 'angle', default=80, lower=0, upper=80)
@@ -115,7 +115,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         normalized_pano = pt.get_translated_image(target_width=target_width,
                                                   target_angle=target_angle,
                                                   target_horizon=target_horizon,
-                                                  target_heading=heading,
+                                                  target_heading=target_heading,
                                                   target_aspect=target_aspect)
 
         response = HttpResponse(content_type="image/jpeg")
@@ -125,7 +125,7 @@ class ThumbnailViewSet(PanoramaViewSet):
     def _max_angle_per_width(self, width, angle):
         """
         source resolution is a little over 22 px / degree viewing angle
-        for thumbs we cap this at 20 px / degree viewing angle
+        for thumbnails we cap this at 20 px / degree viewing angle
         """
         if width/angle > 20:
             return width, round(width/20)
