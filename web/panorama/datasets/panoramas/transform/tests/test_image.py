@@ -13,7 +13,15 @@ from datasets.panoramas.transform.transformer import PanoramaTransformer
 from datasets.panoramas.models import Panorama
 
 
-class test_transform_img(unittest.TestCase):
+class TestTransformImg(unittest.TestCase):
+    """
+    This is more like an integration test than a unit test
+    Because it expects a mounted /app/panoramas folder, run these in the Docker container
+
+        docker exec -it panorama_web_1 ./manage.py test
+
+    look into the .gitignore-ed directory PROJECT/panoramas_test/output for a visual check on the transformations
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -111,7 +119,7 @@ class test_transform_img(unittest.TestCase):
             heading=295.567147056641,
         )
 
-    def test_transform(self):
+    def test_transform_runs_without_errors(self):
 
         images = [
             Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0],

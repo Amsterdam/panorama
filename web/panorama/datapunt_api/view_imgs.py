@@ -1,12 +1,16 @@
+from math import pi, radians, atan2, degrees, log, tan
+
 # Packages
+from django.contrib.gis.geos import LineString
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from scipy import misc
 
-from datasets.panoramas.transform.transformer import PanoramaTransformer
-from datasets.panoramas.models import Panorama
+from .queryparam_utils import _get_float_value, _get_int_value, _get_request_coord
 from datapunt_api.views import PanoramaViewSet
+from datasets.panoramas.models import Panorama
+from datasets.panoramas.transform.transformer import PanoramaTransformer
 from . import datapunt_rest
 
 
@@ -71,7 +75,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         Overloading the list view to enable in finding
         the thumb looking at the given point
         """
-        coords = self._get_request_coord(request.query_params)
+        coords = _get_request_coord(request.query_params)
         if not coords:
             return Response({'error': 'pano_id'})
 
@@ -80,70 +84,49 @@ class ThumbnailViewSet(PanoramaViewSet):
         try:
             pano = queryset[0]
             heading = self._get_heading(coords, pano._geolocation_2d)
+            line = LineString(coords, pano._geolocation_2d)
             return self.retrieve(request, pano_id=pano.pano_id, target_heading=heading)
         except IndexError:
             # No results were found
             return Response([])
 
     def _get_heading(self, coords, _geolocation_2d):
-        sql = "select 1 as id, degrees(st_azimuth(ST_GeogFromText('SRID=4326;POINT(%s %s)'), ST_GeogFromText('SRID=4326;POINT(%s %s)'))) AS heading "
-        simpl = Panorama.objects.raw(sql, [_geolocation_2d[0], _geolocation_2d[1], coords[0], coords[1]])[0]
-        return simpl.heading
+        # http://gis.stackexchange.com/questions/29239/calculate-bearing-between-two-decimal-gps-coordinates
+        d_lon = radians(_geolocation_2d[0]) - radians(coords[0])
+
+        start_lat = radians(coords[1])
+        end_lat =radians(_geolocation_2d[1])
+        d_phi = log(tan(end_lat/2.0+pi/4.0)/tan(start_lat/2.0+pi/4.0))
+
+        return degrees(atan2(d_lon, d_phi)) % 360.0
 
     def retrieve(self, request, pano_id=None, target_heading=0):
-        # default query params
-        target_width=750
-        target_angle=80
-        target_horizon=0.3
-        target_aspect=1.5
+        heading = _get_int_value(request, 'heading', default=target_heading, lower=0, upper=360)
 
-        if 'width' in request.query_params:
-            target_width = self._get_int_value(request.query_params['width'], target_width, 1, 1600)
+        target_width = _get_int_value(request, 'width', default=750, lower=1, upper=1600)
+        target_angle = _get_int_value(request, 'angle', default=80, lower=0, upper=80)
+        target_width, target_angle = self._max_angle_per_width(target_width, target_angle)
 
-        if 'angle' in request.query_params:
-            target_angle = self._get_int_value(request.query_params['angle'], target_angle, 0, 80)
-
-        target_width, target_angle = self._match_width_angle(target_width, target_angle)
-
-        if 'heading' in request.query_params:
-            target_heading = self._get_int_value(request.query_params['heading'], target_heading, 0, 360)
-
-        if 'horizon' in request.query_params:
-            target_horizon = self._get_float_value(request.query_params['horizon'], target_horizon, 0.0, 1.0)
-
-        if 'aspect' in request.query_params:
-            target_aspect = self._get_float_value(request.query_params['aspect'], target_aspect, lower=1.0)
+        target_horizon = _get_float_value(request, 'horizon', default=0.3, lower=0.0, upper=1.0)
+        target_aspect = _get_float_value(request, 'aspect', default=1.5, lower=1.0)
 
         pano = get_object_or_404(Panorama, pano_id=pano_id)
         pt = PanoramaTransformer(pano)
         normalized_pano = pt.get_translated_image(target_width=target_width,
                                                   target_angle=target_angle,
                                                   target_horizon=target_horizon,
-                                                  target_heading=target_heading,
+                                                  target_heading=heading,
                                                   target_aspect=target_aspect)
 
         response = HttpResponse(content_type="image/jpeg")
         misc.toimage(normalized_pano).save(response, "JPEG")
         return response
 
-    def _get_int_value(self, param, default, lower=None, upper=None):
-        if param.isdigit() \
-                and (not lower or lower <= int(param)) \
-                and (not upper or int(param) <= upper):
-            return int(param)
-        return default
-
-    def _match_width_angle(self, width, angle):
+    def _max_angle_per_width(self, width, angle):
+        """
+        source resolution is a little over 22 px / degree viewing angle
+        for thumbs we cap this at 20 px / degree viewing angle
+        """
         if width/angle > 20:
             return width, round(width/20)
         return width, angle
-
-    def _get_float_value(self, param, default, lower=None, upper=None):
-        try:
-            value = float(param)
-            if (not lower or lower <= value) \
-                    and (not upper or value <= upper):
-                return value
-        except ValueError:
-            return default
-        return default
