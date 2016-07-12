@@ -68,10 +68,7 @@ class PanoramaViewSet(
             select={
                 'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
             select_params=[coords[0], coords[1]])
-        max_range = 20
-        if 'radius' in request.query_params and \
-                request.query_params['radius'].isdigit():
-            max_range = int(request.query_params['radius'])
+        max_range = int(request.query_params.get('radius', 20))
         queryset = queryset.extra(
             where=[""" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'),
                    geography(geolocation), %s) """],
