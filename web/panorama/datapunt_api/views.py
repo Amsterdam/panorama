@@ -6,16 +6,14 @@ from rest_framework.response import Response
 # from rest_framework import viewsets
 # Project
 
-from datasets.panoramas.mixins import ViewLocationMixin, DateConversionMixin
+from .queryparam_utils import _get_request_coord, _convert_to_date
 from datasets.panoramas.models import Panorama
 from datasets.panoramas import serializers
 
 from . import datapunt_rest
 
 
-class PanoramaViewSet(
-        datapunt_rest.AtlasViewSet,
-        ViewLocationMixin, DateConversionMixin):
+class PanoramaViewSet(datapunt_rest.AtlasViewSet):
 
     """
     View to retrieve panoramas
@@ -47,7 +45,7 @@ class PanoramaViewSet(
         pano = []
         # Make sure a position is given, otherwise there is
         # nothing to work with
-        coords = self._get_request_coord(request.query_params)
+        coords = _get_request_coord(request.query_params)
         if not coords:
             return super().list(self, request)
 
@@ -74,17 +72,14 @@ class PanoramaViewSet(
                    geography(geolocation), %s) """],
             params=[coords[0], coords[1], max_range])
         adjacent_filter = {}
-        if 'vanaf' in request.query_params:
-            start_date = self._convert_to_date(
-                request.query_params['vanaf'])
-            if start_date:
-                adjacent_filter['vanaf'] = start_date
-                queryset = queryset.filter(timestamp__gte=start_date)
-        if 'tot' in request.query_params:
-            end_date = self._convert_to_date(request.query_params['tot'])
-            if end_date:
-                adjacent_filter['tot'] = end_date
-                queryset = queryset.filter(timestamp__lt=end_date)
+        start_date = _convert_to_date(request, 'vanaf')
+        if start_date is not None:
+            adjacent_filter['vanaf'] = start_date
+            queryset = queryset.filter(timestamp__gte=start_date)
+        end_date = _convert_to_date(request, 'tot')
+        if end_date is not None:
+            adjacent_filter['tot'] = end_date
+            queryset = queryset.filter(timestamp__lt=end_date)
         queryset = queryset.extra(order_by=['distance'])
         return adjacent_filter, queryset
 

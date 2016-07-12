@@ -3,7 +3,7 @@ from math import sqrt
 from datasets.panoramas.transform.transformer import PanoramaTransformer
 
 
-class test_transformer(unittest.TestCase):
+class TestTransformer(unittest.TestCase):
 
     def test_cylindrical2cartesion(self):
         t = PanoramaTransformer(None)

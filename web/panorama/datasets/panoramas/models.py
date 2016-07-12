@@ -3,7 +3,7 @@ from django.contrib.gis.db import models as geo
 from django.db import models
 from django.contrib.gis.geos import Point
 # Project
-from panorama.settings import PANO_DIR, PANO_IMAGE_URL
+from django.conf import settings
 
 
 class Panorama(models.Model):
@@ -39,7 +39,7 @@ class Panorama(models.Model):
     @property
     def img_url(self):
         return '%s%s/%s' % (
-            PANO_IMAGE_URL, self.path.replace(PANO_DIR, ''), self.filename)
+            settings.PANO_IMAGE_URL, self.path.replace(settings.PANO_DIR, ''), self.filename)
 
 
 class Adjacency(models.Model):

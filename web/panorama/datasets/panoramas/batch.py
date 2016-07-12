@@ -19,7 +19,7 @@ from django.utils.timezone import utc as UTC_TZ
 
 # Project
 from . import models
-from panorama.settings import PANO_DIR
+from django.conf import settings
 
 BATCH_SIZE = 50000
 
@@ -131,7 +131,7 @@ class ImportPanoramaJob(object):
             pano_id=pano_id,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=filename,
-            path=path.replace(PANO_DIR, ''),
+            path=path.replace(settings.PANO_DIR, ''),
             geolocation=Point(
                 float(row['longitude[deg]']),
                 float(row['latitude[deg]']),
