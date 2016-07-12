@@ -79,15 +79,15 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         try:
             pano = queryset[0]
-            heading = self._get_heading(coords, pano.geopoint)
+            heading = self._get_heading(coords, pano._geolocation_2d)
             return self.retrieve(request, pano_id=pano.pano_id, target_heading=heading)
         except IndexError:
             # No results were found
             return Response([])
 
-    def _get_heading(self, coords, geopoint):
+    def _get_heading(self, coords, _geolocation_2d):
         sql = "select 1 as id, degrees(st_azimuth(ST_GeogFromText('SRID=4326;POINT(%s %s)'), ST_GeogFromText('SRID=4326;POINT(%s %s)'))) AS heading "
-        simpl = Panorama.objects.raw(sql, [geopoint[0], geopoint[1], coords[0], coords[1]])[0]
+        simpl = Panorama.objects.raw(sql, [_geolocation_2d[0], _geolocation_2d[1], coords[0], coords[1]])[0]
         return simpl.heading
 
     def retrieve(self, request, pano_id=None, target_heading=0):

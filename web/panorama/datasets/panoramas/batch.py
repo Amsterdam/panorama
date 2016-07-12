@@ -137,10 +137,6 @@ class ImportPanoramaJob(object):
                 float(row['latitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
             ),
-            geopoint=Point(
-                float(row['longitude[deg]']),
-                float(row['latitude[deg]'])
-            ),
             roll=float(row['roll[deg]']),
             pitch=float(row['pitch[deg]']),
             heading=float(row['heading[deg]']),
