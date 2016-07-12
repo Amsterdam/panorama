@@ -20,6 +20,7 @@ class ImageViewSet(datapunt_rest.AtlasViewSet):
         pano_id of Panorama
 
     """
+    lookup_field = 'pano_id'
     queryset = Panorama.objects.all()
 
     def list(self, request):
@@ -62,6 +63,8 @@ class ThumbnailViewSet(PanoramaViewSet):
         aspect: aspect ratio of thumbnail (width/height, min 1) (default 1.5 (3/2)
 
     """
+
+    lookup_field = 'pano_id'
 
     def list(self, request):
         """

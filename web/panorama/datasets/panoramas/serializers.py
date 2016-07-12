@@ -17,8 +17,18 @@ class AdjacencySerializer(serializers.ModelSerializer):
         fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch',)
 
 
+class ImageLinksSerializer(serializers.ModelSerializer):
+    raw = serializers.ReadOnlyField(source='img_url')
+    normalized = serializers.HyperlinkedIdentityField(view_name='normalized-detail', lookup_field='pano_id', format='html')
+    thumbnail = serializers.HyperlinkedIdentityField(view_name='thumbnail-detail', lookup_field='pano_id', format='html')
+
+    class Meta:
+        model = models.Panorama
+        fields = ('raw', 'normalized', 'thumbnail')
+
+
 class PanoSerializer(serializers.ModelSerializer):
-    url = serializers.ReadOnlyField(source='img_url')
+    images = serializers.SerializerMethodField(source='get_images')
     geometrie = fields.GeometryField(source='geolocation')
     adjacent = AdjacencySerializer(source='to_adjacency', many=True)
     roll = serializers.DecimalField(max_digits=20, decimal_places=2)
@@ -31,6 +41,10 @@ class PanoSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return super().to_representation(instance)
+
+    def get_images(self, instance):
+        serializer = ImageLinksSerializer(instance=instance, context={'request': self.context['request']})
+        return serializer.data
 
 
 class FilteredPanoSerializer(PanoSerializer):
