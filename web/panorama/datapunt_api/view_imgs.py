@@ -26,8 +26,8 @@ class ImageViewSet(datapunt_rest.AtlasViewSet):
     def list(self, request):
         return Response({'error': 'pano_id'})
 
-    def retrieve(self, request, pk=None):
-        pano = get_object_or_404(Panorama, pano_id=pk)
+    def retrieve(self, request, pano_id=None):
+        pano = get_object_or_404(Panorama, pano_id=pano_id)
         pt = PanoramaTransformer(pano)
         normalized_pano = pt.get_translated_image(target_width=4000)
 
@@ -80,7 +80,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         try:
             pano = queryset[0]
             heading = self._get_heading(coords, pano.geopoint)
-            return self.retrieve(request, pk=pano.pano_id, target_heading=heading)
+            return self.retrieve(request, pano_id=pano.pano_id, target_heading=heading)
         except IndexError:
             # No results were found
             return Response([])
@@ -90,7 +90,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         simpl = Panorama.objects.raw(sql, [geopoint[0], geopoint[1], coords[0], coords[1]])[0]
         return simpl.heading
 
-    def retrieve(self, request, pk=None, target_heading=0):
+    def retrieve(self, request, pano_id=None, target_heading=0):
         # default query params
         target_width=750
         target_angle=80
@@ -114,7 +114,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         if 'aspect' in request.query_params:
             target_aspect = self._get_float_value(request.query_params['aspect'], target_aspect, lower=1.0)
 
-        pano = get_object_or_404(Panorama, pano_id=pk)
+        pano = get_object_or_404(Panorama, pano_id=pano_id)
         pt = PanoramaTransformer(pano)
         normalized_pano = pt.get_translated_image(target_width=target_width,
                                                   target_angle=target_angle,
