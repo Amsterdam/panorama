@@ -11,10 +11,11 @@ class AdjacencySerializer(serializers.ModelSerializer):
     direction = serializers.DecimalField(max_digits=20, decimal_places=2)
     angle = serializers.DecimalField(max_digits=20, decimal_places=2)
     pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
+    distance = serializers.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
         model = models.Adjacency
-        fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch',)
+        fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch', 'distance',)
 
 
 class ImageLinksSerializer(serializers.ModelSerializer):
