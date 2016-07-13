@@ -36,10 +36,12 @@ class Panorama(models.Model):
     def __str__(self):
         return '<Panorama %s/%s>' % (self.path, self.filename)
 
+    def get_full_path(self):
+        return '%s/%s/%s' % (settings.PANO_DIR, self.path, self.filename)
+
     @property
     def img_url(self):
-        return '%s%s/%s' % (
-            settings.PANO_IMAGE_URL, self.path.replace(settings.PANO_DIR, ''), self.filename)
+        return '%s/%s/%s' % (settings.PANO_IMAGE_URL, self.path, self.filename)
 
 
 class Adjacency(models.Model):
