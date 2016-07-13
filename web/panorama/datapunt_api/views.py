@@ -6,7 +6,7 @@ from rest_framework.response import Response
 # from rest_framework import viewsets
 # Project
 
-from .queryparam_utils import _get_request_coord, _convert_to_date
+from .queryparam_utils import _get_request_coord, _convert_to_date, _get_int_value
 from datasets.panoramas.models import Panorama
 from datasets.panoramas import serializers
 
@@ -66,7 +66,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             select={
                 'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
             select_params=[coords[0], coords[1]])
-        max_range = int(request.query_params.get('radius', 20))
+        max_range = _get_int_value(request, 'radius', 20)
         queryset = queryset.extra(
             where=[""" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'),
                    geography(geolocation), %s) """],
