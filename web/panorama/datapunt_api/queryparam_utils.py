@@ -7,11 +7,7 @@ import datetime
 from django.contrib.gis.geos import Point
 from django.utils.datastructures import MultiValueDictKeyError
 
-"""
-Add support for location in handling in the view
-retrieve the coords, and possible convert to another
-                        coordination system
-"""
+
 def _get_request_coord(query_params, convert=4326):
     """
     Retrieves the coordinates to work with. It allows for either lat/lon coord,
@@ -43,10 +39,7 @@ def _get_request_coord(query_params, convert=4326):
         coords = _convert_coords(lon, lat, coord_system, convert)
     return coords
 
-"""
-Add support for location in handling in the view
-_ convert coords - convert coords from one system to another
-"""
+
 def _convert_coords(lon, lat, orig_srid, dest_srid):
     """
     Convertes a point between two coordinates
@@ -64,9 +57,6 @@ def _convert_coords(lon, lat, orig_srid, dest_srid):
     return p.coords
 
 
-"""
-Help convert a string to a date object
-"""
 def _convert_to_date(request, param_name):
     """
     Converts input time to a date object.
@@ -113,6 +103,7 @@ def _convert_to_date(request, param_name):
         date_obj = None
     return date_obj
 
+
 def _get_int_value(request, param_name, default, lower=None, upper=None):
     try:
         value = int(request.query_params[param_name])
@@ -122,6 +113,7 @@ def _get_int_value(request, param_name, default, lower=None, upper=None):
     except (ValueError, MultiValueDictKeyError):
         pass
     return default
+
 
 def _get_float_value(request, param_name, default, lower=None, upper=None):
     try:

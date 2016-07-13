@@ -83,20 +83,21 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         try:
             pano = queryset[0]
-            heading = self._get_heading(coords, pano._geolocation_2d)
-            line = LineString(coords, pano._geolocation_2d)
+            heading = self._get_heading(pano.geolocation, coords)
             return self.retrieve(request, pano_id=pano.pano_id, heading=heading)
         except IndexError:
             # No results were found
             return Response([])
 
-    def _get_heading(self, coords, _geolocation_2d):
+    def _get_heading(self, from_coords, to_coords):
         # http://gis.stackexchange.com/questions/29239/calculate-bearing-between-two-decimal-gps-coordinates
-        d_lon = radians(coords[0]) - radians(_geolocation_2d[0])
+        from_lon = radians(from_coords[0])
+        to_lon = radians(to_coords[0])
+        d_lon = to_lon - from_lon
 
-        start_lat = radians(_geolocation_2d[1])
-        end_lat =radians(coords[1])
-        d_phi = log(tan(end_lat/2.0+pi/4.0)/tan(start_lat/2.0+pi/4.0))
+        from_lat = radians(from_coords[1])
+        to_lat =radians(to_coords[1])
+        d_phi = log(tan(to_lat/2.0+pi/4.0)/tan(from_lat/2.0+pi/4.0))
 
         return degrees(atan2(d_lon, d_phi)) % 360.0
 
