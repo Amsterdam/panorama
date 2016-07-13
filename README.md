@@ -25,3 +25,5 @@ Use `docker-compose` to start a local database.
 or
 
 	docker-compose up
+
+test
