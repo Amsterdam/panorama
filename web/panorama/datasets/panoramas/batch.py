@@ -19,7 +19,6 @@ from django.utils.timezone import utc as UTC_TZ
 
 # Project
 from . import models
-from django.conf import settings
 
 BATCH_SIZE = 50000
 
