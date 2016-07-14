@@ -8,7 +8,11 @@ from django.contrib.gis.geos import Point
 from django.utils.datastructures import MultiValueDictKeyError
 
 
-def _get_request_coord(query_params, convert=4326):
+SRID_WSG84 = 4326
+SRID_RD = 28992
+
+
+def _get_request_coord(query_params):
     """
     Retrieves the coordinates to work with. It allows for either lat/lon coord,
     for wgs84 or 'x' and 'y' for RD. Just to be on the safe side a value check
@@ -17,27 +21,19 @@ def _get_request_coord(query_params, convert=4326):
 
     Parameters:
     query_params - the query parameters dict from which to retrieve the coords
-    convert - optional parameter. If set an attempt is made to convert to that
-                set
+
+    Returns coordinates in WSG84 longitude,latitude
     """
     if 'lat' in query_params and 'lon' in query_params:
         lon = float(query_params['lon'])
         lat = float(query_params['lat'])
-        coord_system = 4326
-        # @TODO Doing value sanity check
-        coords = (lon, lat)
+        return lon, lat
     elif 'x' in query_params and 'y' in query_params:
-        lon = float(query_params['x'])
-        lat = float(query_params['y'])
-        coord_system = 28992
-        # Verfing that x is smaller then y
-    # No good coords found
+        x = float(query_params['x'])
+        y = float(query_params['y'])
+        return _convert_coords(x, y, SRID_RD, SRID_WSG84)
     else:
         return None
-    if convert and convert != coord_system:
-        # These should be Rd coords, convert to WGS84
-        coords = _convert_coords(lon, lat, coord_system, convert)
-    return coords
 
 
 def _convert_coords(lon, lat, orig_srid, dest_srid):
