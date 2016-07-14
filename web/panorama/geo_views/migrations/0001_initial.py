@@ -43,7 +43,8 @@ SELECT
     pp.heading,
     pp.timestamp,
     pp.geolocation AS geometrie,
-    pp.path || pp.filename AS bestandslocatie,
+    'https://acc.atlas.amsterdam.nl/panorama' || pp.path || '/' ||
+    pp.filename AS url,
     site.domain || 'panoramas/opnamelocatie/' || pp.pano_id || '/' AS uri
 FROM
     panoramas_panorama pp,

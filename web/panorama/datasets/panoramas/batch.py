@@ -2,6 +2,7 @@
 Batch import for the panorama dataset
 """
 
+
 # Python
 from contextlib import contextmanager
 import csv
@@ -129,13 +130,12 @@ class ImportPanoramaJob(object):
             pano_id=pano_id,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=filename,
-            path=path,
+            path=path.replace(settings.PANO_DIR, ''),
             geolocation=Point(
                 float(row['longitude[deg]']),
                 float(row['latitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
             ),
-
             roll=float(row['roll[deg]']),
             pitch=float(row['pitch[deg]']),
             heading=float(row['heading[deg]']),
