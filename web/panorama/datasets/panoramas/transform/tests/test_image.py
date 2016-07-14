@@ -136,13 +136,13 @@ class TestTransformImg(unittest.TestCase):
             output_path = "/app/panoramas_test/2016/output/"+img.filename[:-4]
             for direction in [0, 90, 180, 270]:
                 img1 = it.get_translated_image(target_width=900,
-                                               target_angle=80,
+                                               target_fov=80,
                                                target_horizon=0.3,
                                                target_heading=direction,
                                                target_aspect=4/3)
                 misc.imsave(output_path+"_{}.jpg".format(direction), img1)
                 img1 = it.get_translated_image(target_width=450,
-                                               target_angle=80,
+                                               target_fov=80,
                                                target_horizon=0.3,
                                                target_heading=direction,
                                                target_aspect=4/3)

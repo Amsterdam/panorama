@@ -61,7 +61,7 @@ class ThumbnailViewSet(PanoramaViewSet):
     Optional Parameters for the thumbnail:
 
         width: in pixels (max 1600) (default 750)
-        angle: in degrees horizontal (max 80), max 20px per degree (default 80)
+        fov: field of view in degrees horizontal (max 80, default 80), max 20px width per degree
         horizon: fraction of image that is below horizon (default 0.3)
         heading: direction to look at in degrees (default 0)
         aspect: aspect ratio of thumbnail (width/height, min 1) (default 1.5 (3/2)
@@ -105,8 +105,8 @@ class ThumbnailViewSet(PanoramaViewSet):
         target_heading = _get_int_value(request, 'heading', default=heading, lower=0, upper=360)
 
         target_width = _get_int_value(request, 'width', default=750, lower=1, upper=1600)
-        target_angle = _get_int_value(request, 'angle', default=80, lower=0, upper=80)
-        target_width, target_angle = self._max_angle_per_width(target_width, target_angle)
+        target_fov = _get_int_value(request, 'fov', default=80, lower=0, upper=80)
+        target_width, target_fov = self._max_fov_per_width(target_width, target_fov)
 
         target_horizon = _get_float_value(request, 'horizon', default=0.3, lower=0.0, upper=1.0)
         target_aspect = _get_float_value(request, 'aspect', default=1.5, lower=1.0)
@@ -114,7 +114,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         pano = get_object_or_404(Panorama, pano_id=pano_id)
         pt = PanoramaTransformer(pano)
         normalized_pano = pt.get_translated_image(target_width=target_width,
-                                                  target_angle=target_angle,
+                                                  target_fov=target_fov,
                                                   target_horizon=target_horizon,
                                                   target_heading=target_heading,
                                                   target_aspect=target_aspect)
@@ -123,11 +123,11 @@ class ThumbnailViewSet(PanoramaViewSet):
         misc.toimage(normalized_pano).save(response, "JPEG")
         return response
 
-    def _max_angle_per_width(self, width, angle):
+    def _max_fov_per_width(self, width, fov):
         """
-        source resolution is a little over 22 px / degree viewing angle
-        for thumbnails we cap this at 20 px / degree viewing angle
+        source resolution is a little over 22 px / degree field of view
+        for thumbnails we cap this at 20 px /  degree field of view
         """
-        if width/angle > 20:
+        if width/fov > 20:
             return width, round(width/20)
-        return width, angle
+        return width, fov
