@@ -112,7 +112,7 @@ def _get_int_value(request, param_name, default, lower=None, upper=None):
             return value
     except (ValueError, MultiValueDictKeyError):
         pass
-    return default
+    return int(default)
 
 
 def _get_float_value(request, param_name, default, lower=None, upper=None):
@@ -123,4 +123,4 @@ def _get_float_value(request, param_name, default, lower=None, upper=None):
             return value
     except (ValueError, MultiValueDictKeyError):
         pass
-    return default
+    return float(default)
