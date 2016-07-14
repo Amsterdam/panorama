@@ -155,6 +155,12 @@ LOGIN_URL = '/login'
 INTERNAL_IPS = ['127.0.0.1']
 
 REST_FRAMEWORK = dict(
+    PAGE_SIZE=25,
+    MAX_PAGINATE_BY=100,
+
+    DEFAULT_PAGINATION_CLASS='drf_hal_json.pagination.HalPageNumberPagination',
+    DEFAULT_PARSER_CLASSES=('drf_hal_json.parsers.JsonHalParser',),
+
     DEFAULT_AUTHENTICATION_CLASSES=(
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -165,6 +171,7 @@ REST_FRAMEWORK = dict(
     ),
     COERCE_DECIMAL_TO_STRING=False,
 )
+
 
 CORS_ORIGIN_ALLOW_ALL = True # if True, the whitelist will not be used and all origins will be accepted
 

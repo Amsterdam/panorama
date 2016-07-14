@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 from geo_views import migrate
-from .temp import constants
+from .shared_sql import constants
 
 
 class Migration(migrations.Migration):
