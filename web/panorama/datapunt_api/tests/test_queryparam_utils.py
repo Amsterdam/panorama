@@ -1,12 +1,35 @@
 import unittest
 from django.utils.datastructures import MultiValueDict
-from datapunt_api.queryparam_utils import _get_int_value, _get_float_value
+from datapunt_api.queryparam_utils import _get_int_value, _get_float_value, _get_request_coord
 
 
 class Request:
 
     def __init__(self):
         self.query_params = MultiValueDict()
+
+
+class TestQueryParamUtilsCoords(unittest.TestCase):
+
+    def test_get_wsg84(self):
+        req = Request()
+        req.query_params['lat'] = "52.372606"
+        req.query_params['lon'] = "4.880097"
+
+        lon, lat = _get_request_coord(req.query_params)
+
+        self.assertAlmostEqual(52.372606, lat, places=6)
+        self.assertAlmostEqual(4.880097, lon, places=6)
+
+    def test_get_rd(self):
+        req = Request()
+        req.query_params['x'] = 120467
+        req.query_params['y'] = 487313
+
+        lon, lat = _get_request_coord(req.query_params)
+
+        self.assertAlmostEqual(52.373, lat, places=3)
+        self.assertAlmostEqual(4.880, lon, places=3)
 
 
 class TestQueryParamUtils(unittest.TestCase):
