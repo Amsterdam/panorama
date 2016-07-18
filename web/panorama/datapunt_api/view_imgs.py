@@ -1,17 +1,27 @@
 from math import pi, radians, atan2, degrees, log, tan
 
 # Packages
-from django.contrib.gis.geos import LineString
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, QueryDict, HttpResponseRedirect
+from rest_framework import renderers
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
+from django.shortcuts import get_object_or_404
 from scipy import misc
 
 from .queryparam_utils import _get_float_value, _get_int_value, _get_request_coord
 from datapunt_api.views import PanoramaViewSet
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.transform.transformer import PanoramaTransformer
+from datasets.panoramas.serializers import ThumbnailSerializer
 from . import datapunt_rest
+
+
+class ImgRenderer(renderers.BaseRenderer):
+    """
+    Doesn't need to do anything, is sitting pretty to make ThumbnailViewSet accept 'image/*'
+    """
+    media_type = 'image/*'
+    format = 'jpg'
 
 
 class ImageViewSet(datapunt_rest.AtlasViewSet):
@@ -58,6 +68,8 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         radius: (int) denoting search radius in meters (default = 20m)
 
+        when providing a Accept: image/* header, you will be redirected to the specific thumbnail
+
     Optional Parameters for the thumbnail:
 
         width: in pixels (max 1600) (default 750)
@@ -69,6 +81,7 @@ class ThumbnailViewSet(PanoramaViewSet):
     """
 
     lookup_field = 'pano_id'
+    renderer_classes = (renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
 
     def list(self, request):
         """
@@ -83,11 +96,28 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         try:
             pano = queryset[0]
-            heading = self._get_heading(pano.geolocation, coords)
-            return self.retrieve(request, pano_id=pano.pano_id, heading=heading)
         except IndexError:
             # No results were found
             return Response([])
+
+        path = reverse('thumbnail-detail', args=[pano.pano_id], request=request)
+
+        parameters = QueryDict('', mutable=True)
+        parameters.update({k: v for k, v in request.query_params.items()
+                           if k != 'radius' and k != 'lat' and k != 'lon'})
+        parameters['heading'] = round(self._get_heading(pano.geolocation, coords))
+
+        url = '%s?%s' % (path, parameters.urlencode())
+
+        if 'image/' in request.accepted_renderer.media_type:
+            return HttpResponseRedirect(url)
+        else:
+            resp = ThumbnailSerializer({'url': url,
+                                        'heading': parameters['heading'],
+                                        'pano_id': pano.pano_id},
+                                       context={'request': request})
+            return Response(resp.data)
+
 
     def _get_heading(self, from_coords, to_coords):
         # http://gis.stackexchange.com/questions/29239/calculate-bearing-between-two-decimal-gps-coordinates
