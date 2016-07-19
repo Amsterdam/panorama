@@ -11,11 +11,15 @@ dc() {
 
 trap 'dc kill ; dc rm -f' EXIT
 
+dc build
 dc scale render=1
-sleep 60
+sleep 45
 dc scale render=2
 sleep 60
 dc scale render=3
-sleep 60
+sleep 75
 dc scale render=4
-sleep 60
+sleep 90
+dc scale render=5
+sleep 90
+dc scale render=6
