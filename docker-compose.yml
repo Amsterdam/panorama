@@ -16,7 +16,21 @@ web:
     - database:database
   volumes:
     - $PWD/reports:/app/reports
+    - $PWD/web/panorama/panoramas_test:/app/panoramas_test
     - $PWD/panoramas_test/output:/app/panoramas_test/2016/output
+  environment:
+    SECRET_KEY: hoi
+    DB_NAME: panorama
+    DB_PASSWORD: insecure
+
+
+render:
+  build: ./web
+  dockerfile: Dockerfile-render
+  links:
+    - database:database
+  volumes:
+    - $PWD/web/panorama/panoramas_test:/app/panoramas_test
   environment:
     SECRET_KEY: hoi
     DB_NAME: panorama

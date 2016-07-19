@@ -1,7 +1,10 @@
+import os.path
 from math import atan2, degrees, cos, sin, radians
+
 from django.contrib.gis.db import models as geo
-from django.db import models
 from django.contrib.gis.geos import Point
+from django.db import models
+
 # Project
 from django.conf import settings
 
@@ -36,8 +39,11 @@ class Panorama(models.Model):
     def __str__(self):
         return '<Panorama %s/%s>' % (self.path, self.filename)
 
-    def get_full_path(self):
-        return '%s/%s/%s' % (settings.PANO_DIR, self.path, self.filename)
+    def get_full_raw_path(self):
+        return os.path.join(settings.PANO_DIR, self.path[1:], self.filename)
+
+    def get_full_rendered_path(self):
+        return os.path.join(settings.PANO_DIR, self.path[1:], self.filename[:-4]+'_normalized.jpg')
 
     @property
     def img_url(self):
