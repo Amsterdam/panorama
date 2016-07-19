@@ -11,9 +11,11 @@ dc() {
 
 trap 'dc kill ; dc rm -f' EXIT
 
-rm -rf ${DIR}/backups
-mkdir -p ${DIR}/backups
-
-dc build
-dc run --rm importer
-dc run --rm db-backup
+dc scale render=1
+sleep 60
+dc scale render=2
+sleep 60
+dc scale render=3
+sleep 60
+dc scale render=4
+sleep 60
