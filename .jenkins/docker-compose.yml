@@ -17,7 +17,6 @@ importer:
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
-#            && python manage.py run_import \
             && python manage.py create_renderbatch"
 
 db-backup:

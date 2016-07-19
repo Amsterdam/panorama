@@ -19,6 +19,7 @@ class RenderPanorama:
         try:
             while True:
                 pano_to_render = Panorama.objects.filter(pano_id=self._get_pano_id())[0]
+                log.info('RENDERING panorama: %s', pano_to_render.pano_id)
                 pt = PanoramaTransformer(pano_to_render)
                 rendered = pt.get_translated_image(target_width=8000)
                 misc.imsave(pano_to_render.get_full_rendered_path(), rendered)
