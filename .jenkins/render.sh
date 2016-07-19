@@ -21,5 +21,5 @@ sleep 75
 dc scale render=4
 sleep 90
 dc scale render=5
-sleep 90
+sleep 115
 dc scale render=6
