@@ -100,24 +100,28 @@ class ThumbnailViewSet(PanoramaViewSet):
             # No results were found
             return Response([])
 
-        path = reverse('thumbnail-detail', args=[pano.pano_id], request=request)
-
-        parameters = QueryDict('', mutable=True)
-        parameters.update({k: v for k, v in request.query_params.items()
-                           if k != 'radius' and k != 'lat' and k != 'lon'})
-        parameters['heading'] = round(self._get_heading(pano.geolocation, coords))
-
-        url = '%s?%s' % (path, parameters.urlencode())
+        heading = round(self._get_heading(pano.geolocation, coords))
+        url = self._get_thumb_url(pano.pano_id, heading, request)
 
         if 'image/' in request.accepted_renderer.media_type:
             return HttpResponseRedirect(url)
         else:
             resp = ThumbnailSerializer({'url': url,
-                                        'heading': parameters['heading'],
+                                        'heading': heading,
                                         'pano_id': pano.pano_id},
                                        context={'request': request})
             return Response(resp.data)
 
+    def _get_thumb_url(self, pano_id, heading, request):
+        path = reverse('thumbnail-detail', args=[pano_id], request=request)
+
+        parameters = QueryDict('', mutable=True)
+        parameters.update({k: v for k, v in request.query_params.items()
+                           if k != 'radius' and k != 'lat' and k != 'lon'})
+        parameters['heading'] = heading
+
+        url = '%s?%s' % (path, parameters.urlencode())
+        return url
 
     def _get_heading(self, from_coords, to_coords):
         # http://gis.stackexchange.com/questions/29239/calculate-bearing-between-two-decimal-gps-coordinates
