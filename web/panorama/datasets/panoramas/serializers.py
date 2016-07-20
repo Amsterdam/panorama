@@ -28,6 +28,16 @@ class ImageLinksSerializer(serializers.ModelSerializer):
         fields = ('raw', 'normalized', 'thumbnail')
 
 
+class ThumbnailSerializer(serializers.ModelSerializer):
+    heading = serializers.DecimalField(max_digits=20, decimal_places=2)
+    pano_id = serializers.ReadOnlyField()
+    url = serializers.ReadOnlyField()
+
+    class Meta:
+        model = models.Panorama
+        fields = ('url', 'heading', 'pano_id')
+
+
 class PanoSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField(source='get_images')
     geometrie = fields.GeometryField(source='geolocation')

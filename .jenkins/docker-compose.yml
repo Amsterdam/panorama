@@ -17,7 +17,8 @@ importer:
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
-            && python manage.py run_import"
+            && python manage.py run_import \
+            && python manage.py create_renderbatch"
 
 db-backup:
   image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
@@ -36,3 +37,15 @@ db-backup:
                         -U panorama \
                         -h db -p 5432 \
                         panorama > /tmp/backups/database.dump"
+
+render:
+  build: ../web
+  dockerfile: Dockerfile-render
+  links:
+    - database:database
+  volumes:
+    - /mnt/pano2016:/app/panoramas/2016
+  environment:
+    DB_NAME: panorama
+    DB_PASSWORD: insecure
+    PANORAMA_DATA_DIR: /app/panoramas
