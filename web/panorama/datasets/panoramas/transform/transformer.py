@@ -42,7 +42,7 @@ class PanoramaTransformer:
         x3, y3 = self._cartesian2cylindrical(x2, y2, z2)
 
         # return grid of output pixels from source image based on warped coordinates
-        return misc.imread(self.panorama.get_full_path())[y3[:, :], x3[:, :]]
+        return misc.imread(self.panorama.get_full_raw_path())[y3[:, :], x3[:, :]]
 
     def _create_sample_set(self, target_angle, target_aspect, target_heading, target_horizon, target_width):
         target_center = SOURCE_WIDTH / 2 - (self.panorama.heading - target_heading) * SOURCE_WIDTH / 360
