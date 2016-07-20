@@ -9,7 +9,9 @@ dc() {
 	docker-compose -f ${DIR}/docker-compose.yml $*
 }
 
-trap 'dc kill ; dc rm -f' EXIT
+trap 'dc kill db-backup importer; dc rm -f db-backup importer' EXIT
+
+dc kill database; dc rm -f database
 
 rm -rf ${DIR}/backups
 mkdir -p ${DIR}/backups

@@ -9,7 +9,7 @@ dc() {
 	docker-compose -f ${DIR}/docker-compose.yml $*
 }
 
-trap 'dc kill ; dc rm -f' EXIT
+trap 'dc kill render; dc rm -f render' EXIT
 
 dc build
 dc scale render=1
@@ -23,3 +23,8 @@ sleep 90
 dc scale render=5
 sleep 115
 dc scale render=6
+
+# keep the script alive while rendering
+while (docker ps | grep render > /dev/null); do
+	sleep 60
+done

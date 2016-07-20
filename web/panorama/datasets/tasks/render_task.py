@@ -16,15 +16,17 @@ log = logging.getLogger(__name__)
 class RenderPanorama:
 
     def process(self):
-        try:
-            while True:
-                pano_to_render = Panorama.objects.filter(pano_id=self._get_pano_id())[0]
-                log.info('RENDERING panorama: %s', pano_to_render.pano_id)
+        continue_processing = True
+        while continue_processing:
+            pano_id = self._get_pano_id()
+            if pano_id:
+                log.info('RENDERING panorama: %s', pano_id)
+                pano_to_render = Panorama.objects.filter(pano_id=pano_id)[0]
                 pt = PanoramaTransformer(pano_to_render)
                 rendered = pt.get_translated_image(target_width=8000)
                 misc.imsave(pano_to_render.get_full_rendered_path(), rendered)
-        except IndexError:
-            return None
+            else:
+                continue_processing = False
 
     @transaction.atomic
     def _get_pano_id(self):
