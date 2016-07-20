@@ -154,15 +154,19 @@ class PanoramaApiTest(APITestCase):
 
     def test_get_thumbnail_returns_jpg(self):
         response = self.client.get('/panorama/thumbnail/?lat=52.3779561&lon=4.8970701&radius=1000',
-                              follow=False, **{'HTTP_ACCEPT':'image/jpeg'})
+                                    follow=False,
+                                    HTTP_ACCEPT='image/jpeg')
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], 'http://testserver/panorama/thumbnail/PANO_1_2014/?heading=31')
 
     def test_get_thumbnail_returns_json_with_qparams(self):
         response = self.client.get('/panorama/thumbnail/?lat=52.3779561&lon=4.8970701&radius=1000&width=600',
-                                   follow=False, **{'HTTP_ACCEPT':'image/jpeg'})
+                                   follow=False,
+                                   HTTP_ACCEPT='image/jpeg')
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['Location'], 'http://testserver/panorama/thumbnail/PANO_1_2014/?heading=31&width=600')
+        self.assertIn('http://testserver/panorama/thumbnail/PANO_1_2014/?', response['Location'])
+        self.assertIn('heading=31', response['Location'])
+        self.assertIn('width=600', response['Location'])
 
     def test_cors(self):
         """
