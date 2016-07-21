@@ -21,8 +21,10 @@ sleep 75
 dc scale render=4
 sleep 90
 dc scale render=5
-sleep 115
+sleep 105
 dc scale render=6
+sleep 120
+dc scale render=7
 
 # keep the script alive while rendering
 while (docker ps | grep render > /dev/null); do
