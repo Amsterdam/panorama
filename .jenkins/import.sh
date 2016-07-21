@@ -11,7 +11,7 @@ dc() {
 
 trap 'dc kill db-backup importer; dc rm -f db-backup importer' EXIT
 
-dc kill database; dc rm -f database
+dc kill render database; dc rm -f render database
 
 rm -rf ${DIR}/backups
 mkdir -p ${DIR}/backups
