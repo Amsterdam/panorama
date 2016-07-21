@@ -12,6 +12,7 @@ dc() {
 trap 'dc kill render; dc rm -f render' EXIT
 
 dc build
+dc run database
 dc scale render=1
 sleep 45
 dc scale render=2
