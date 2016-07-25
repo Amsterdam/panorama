@@ -12,6 +12,7 @@ dc() {
 trap 'dc kill render; dc rm -f render' EXIT
 
 dc build
+dc run database
 dc scale render=1
 sleep 45
 dc scale render=2
@@ -21,10 +22,12 @@ sleep 75
 dc scale render=4
 sleep 90
 dc scale render=5
-sleep 115
+sleep 105
 dc scale render=6
 
-# keep the script alive while rendering
+# keep the script alive while rendering - rendernodes quit when done
 while (docker ps | grep render > /dev/null); do
 	sleep 60
 done
+
+dc stop database
