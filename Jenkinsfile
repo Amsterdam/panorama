@@ -30,7 +30,7 @@ node {
     }, {
         step([$class: "JUnitResultArchiver", testResults: "reports/junit.xml"])
 
-        sh "docker-compose -f .jenkins/docker-compose.yml down"
+        sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
     }
 
     stage "Build"
