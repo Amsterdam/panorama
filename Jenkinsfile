@@ -17,8 +17,8 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
 }
 
 
-String BRANCH = "${env.BRANCH_NAME}"
-String INVENTORY = (BRANCH == "master" ? "production" : "acceptance")
+    String BRANCH = "${env.BRANCH_NAME}"
+    String INVENTORY = (BRANCH == "master" ? "production" : "acceptance")
 
 node {
     stage "Checkout"
@@ -26,14 +26,12 @@ node {
 
     stage "Test"
     tryStep "Test",  {
-            sh "docker-compose build"
-            sh "docker-compose up -d"
-            sh "sleep 20"
-            sh "docker-compose up -d"
+        sh "docker-compose -p panorama -f .jenkins/docker-compose.yml run -u root --rm tests"
     }, {
-            sh "docker-compose stop"
-            sh "docker-compose rm -f"
-        }
+        step([$class: "JUnitResultArchiver", testResults: "reports/junit.xml"])
+
+        sh "docker-compose -f .jenkins/docker-compose.yml down"
+    }
 
     stage "Build"
     tryStep "build", {
