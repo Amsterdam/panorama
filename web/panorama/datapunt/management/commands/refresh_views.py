@@ -1,8 +1,6 @@
 from django.core.management import BaseCommand
 from django.db import connection
 
-GEO_VIEW_PREFIX = 'geo_'
-
 
 class Command(BaseCommand):
     views = ['panoramas_adjacencies']

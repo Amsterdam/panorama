@@ -54,6 +54,7 @@ INSTALLED_APPS = (
     'geo_views',
     'datapunt_api',
     'datasets.panoramas',
+    'datasets.tasks',
 
     'health',
 )
