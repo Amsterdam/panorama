@@ -4,6 +4,18 @@ database:
     POSTGRES_PASSWORD: insecure
     POSTGRES_USER: panorama
 
+tests:
+  build: ../web
+  links:
+    - database:database
+  volumes:
+    - ../reports:/app/reports
+  environment:
+    DATABASE_NAME: panorama
+    DATABASE_USER: panorama
+    DATABASE_PASSWORD: insecure
+  command: bash -c "/app/docker-wait.sh && python manage.py jenkins"
+
 importer:
   build: ../web
   links:
@@ -17,7 +29,8 @@ importer:
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
-            && python manage.py run_import"
+            && python manage.py run_import \
+            && python manage.py create_renderbatch"
 
 db-backup:
   image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
@@ -36,3 +49,15 @@ db-backup:
                         -U panorama \
                         -h db -p 5432 \
                         panorama > /tmp/backups/database.dump"
+
+render:
+  build: ../web
+  dockerfile: Dockerfile-render
+  links:
+    - database:database
+  volumes:
+    - /mnt/pano2016:/app/panoramas/2016
+  environment:
+    DB_NAME: panorama
+    DB_PASSWORD: insecure
+    PANORAMA_DATA_DIR: /app/panoramas
