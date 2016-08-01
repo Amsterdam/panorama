@@ -1,7 +1,7 @@
 database:
   image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
   ports:
-    - "5432"
+    - "5454:5432"
   environment:
     POSTGRES_PASSWORD: insecure
     POSTGRES_DB: panorama
@@ -11,7 +11,7 @@ database:
 web:
   build: ./web
   ports:
-    - "8000"
+    - "8087:8000"
   links:
     - database:database
   volumes:
