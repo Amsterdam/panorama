@@ -18,7 +18,7 @@ class TestTransformImg(unittest.TestCase):
     This is more like an integration test than a unit test
     Because it expects a mounted /app/panoramas folder, run these in the Docker container
 
-        docker exec -it panorama_web_1 ./manage.py test
+        docker exec -it panorama_web_1 ./manage.py test datasets.panoramas.transform.tests
 
     look into the .gitignore-ed directory PROJECT/panoramas_test/output for a visual check on the transformations
     """
@@ -32,7 +32,7 @@ class TestTransformImg(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0004_000087.jpg',
-            path='/2016/06/09/TMX7315120208-000073',
+            path='2016/06/09/TMX7315120208-000073/',
             geolocation=Point(4.89593266865189,
                               52.3717022854865,
                               47.3290048856288),
@@ -45,7 +45,7 @@ class TestTransformImg(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0004_000183.jpg',
-            path='/2016/06/09/TMX7315120208-000073',
+            path='2016/06/09/TMX7315120208-000073/',
             geolocation=Point(4.90015282534372,
                               52.3752177982126,
                               45.951653891243),
@@ -58,7 +58,7 @@ class TestTransformImg(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0005_001111.jpg',
-            path='/2016/06/09/TMX7315120208-000073',
+            path='2016/06/09/TMX7315120208-000073/',
             geolocation=Point(4.88584822835825,
                               52.3856824065041,
                               47.984863370657),
@@ -71,7 +71,7 @@ class TestTransformImg(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0007_000072.jpg',
-            path='/2016/06/08/TMX7315120208-000072',
+            path='2016/06/08/TMX7315120208-000072/',
             geolocation=Point(4.91250404103872,
                               52.3745885115937,
                               46.1886808034033),
@@ -84,7 +84,7 @@ class TestTransformImg(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0000_000853.jpg',
-            path='/2016/04/18/TMX7315120208-000030',
+            path='2016/04/18/TMX7315120208-000030/',
             geolocation=Point(4.93665401561895,
                               52.3551484757251,
                               37.6860034232959),
@@ -97,7 +97,7 @@ class TestTransformImg(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0002_000466.jpg',
-            path='/2016/05/09/TMX7315120208-000038',
+            path='2016/05/09/TMX7315120208-000038/',
             geolocation=Point(5.02513104599607,
                               52.4096209630701,
                               43.5107887201011),
@@ -110,7 +110,7 @@ class TestTransformImg(unittest.TestCase):
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename='pano_0011_000463.jpg',
-            path='/2016/06/06/TMX7315120208-000067',
+            path='2016/06/06/TMX7315120208-000067/',
             geolocation=Point(4.96113893249052,
                               52.3632599072419,
                               46.0049178628251),

@@ -18,36 +18,10 @@ from . import datapunt_rest
 
 class ImgRenderer(renderers.BaseRenderer):
     """
-    Doesn't need to do anything, is sitting pretty to make ThumbnailViewSet accept 'image/*'
+    Doesn't need to do anything, but makes ThumbnailViewSet accept 'image/*'
     """
     media_type = 'image/*'
     format = 'jpg'
-
-
-class ImageViewSet(datapunt_rest.AtlasViewSet):
-
-    """
-    View to retrieve normalized images
-
-    Parameters:
-
-        pano_id of Panorama
-
-    """
-    lookup_field = 'pano_id'
-    queryset = Panorama.objects.all()
-
-    def list(self, request):
-        return Response({'error': 'pano_id'})
-
-    def retrieve(self, request, pano_id=None):
-        pano = get_object_or_404(Panorama, pano_id=pano_id)
-        pt = PanoramaTransformer(pano)
-        normalized_pano = pt.get_translated_image(target_width=4000)
-
-        response = HttpResponse(content_type="image/jpeg")
-        misc.toimage(normalized_pano).save(response, "JPEG")
-        return response
 
 
 class ThumbnailViewSet(PanoramaViewSet):

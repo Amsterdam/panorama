@@ -1,15 +1,23 @@
-import os.path
+import io
 from math import atan2, degrees, cos, sin, radians
 
 from django.contrib.gis.db import models as geo
 from django.contrib.gis.geos import Point
 from django.db import models
+from model_utils.models import StatusModel
+from model_utils import Choices
+from PIL import Image
 
 # Project
 from django.conf import settings
+from datasets.shared.object_store import ObjectStore
+
+objs = ObjectStore()
 
 
-class Panorama(models.Model):
+class Panorama(StatusModel):
+    STATUS = Choices('to_be_rendered', 'rendering', 'rendered')
+
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True)
     timestamp = models.DateTimeField()
@@ -37,17 +45,16 @@ class Panorama(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return '<Panorama %s/%s>' % (self.path, self.filename)
+        return '<Panorama %s%s>' % (self.path, self.filename)
 
-    def get_full_raw_path(self):
-        return os.path.join(settings.PANO_DIR, self.path[1:], self.filename)
-
-    def get_full_rendered_path(self):
-        return os.path.join(settings.PANO_DIR, self.path[1:], self.filename[:-4]+'_normalized.jpg')
+    def get_raw_image_binary(self):
+        container = self.path.split('/')[0]
+        name = (self.path+self.filename).replace(container+'/', '')
+        return Image.open(io.BytesIO(objs.get_panorama_store_object({'container':container, 'name':name})))
 
     @property
     def img_url(self):
-        return '%s/%s/%s' % (settings.PANO_IMAGE_URL, self.path, self.filename)
+        return '%s/%s/%s' % (settings.PANO_IMAGE_URL, self.path, self.filename[:-4]+'_normalized.jpg')
 
 
 class Adjacency(models.Model):

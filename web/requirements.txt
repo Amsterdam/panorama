@@ -7,6 +7,7 @@ django-debug-toolbar==1.4
 django-extensions==1.6.1
 django-filter==0.13.0
 django-jenkins==0.18.1
+django-model-utils==2.5
 django-shotgun==0.2
 djangorestframework==3.3.3
 djangorestframework-gis==0.10.1
@@ -29,5 +30,7 @@ scipy==0.17.1
 six==1.10.0
 sphinx-me==0.3
 sqlparse==0.1.19
+python-keystoneclient==3.4.0
+python-swiftclient==3.0.0
 tqdm==4.4.3
 urllib3==1.15.1

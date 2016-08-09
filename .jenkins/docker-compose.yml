@@ -25,7 +25,6 @@ importer:
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
-    PANORAMA_DATA_DIR: /app/panoramas
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
@@ -60,4 +59,3 @@ render:
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
-    PANORAMA_DATA_DIR: /app/panoramas

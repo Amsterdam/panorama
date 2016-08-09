@@ -34,7 +34,7 @@ class TestRender(unittest.TestCase):
                 timestamp=factory.fuzzy.FuzzyDateTime(
                     datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
                 filename='pano_0004_000087.jpg',
-                path='/2016/06/09/TMX7315120208-000073',
+                path='2016/06/09/TMX7315120208-000073/',
                 geolocation=Point(4.89593266865189,
                                   52.3717022854865,
                                   47.3290048856288),
@@ -64,13 +64,12 @@ class TestRender(unittest.TestCase):
             pass
 
     def test_create_and_render_batch(self):
-        render_batch.CreateRenderBatch().process()
-        task = RenderTask.objects.all()[0]
-        self.assertEquals('TMX7315120208-000073_pano_0004_000087', task.pano_id)
+        to_render = Panorama.to_be_rendered.all()[0]
+        self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
-        pano = Panorama.objects.filter(pano_id=task.pano_id)[0]
+        pano = Panorama.objects.filter(pano_id=to_render.pano_id)[0]
         self.assertFalse(os.path.isfile(pano.get_full_rendered_path()))
 
         render_task.RenderPanorama().process()
-        self.assertEquals(0, len(RenderTask.objects.all()))
+        self.assertEquals(0, len(Panorama.to_be_rendered.all()))
         self.assertTrue(os.path.isfile(pano.get_full_rendered_path()))

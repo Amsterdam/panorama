@@ -1,4 +1,5 @@
 # Python
+import io
 import logging
 
 from django.db import transaction
@@ -6,30 +7,37 @@ from scipy import misc
 
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.transform.transformer import PanoramaTransformer
-from datasets.tasks.models import RenderTask
+from datasets.shared.object_store import ObjectStore
 
+objs = ObjectStore()
 log = logging.getLogger(__name__)
 
 
 class RenderPanorama:
     def process(self):
         while True:
-            pano_id = self._get_next_pano_id()
-            if not pano_id:
+            pano_to_render = self._get_next_pano_to_render()
+            if not pano_to_render:
                 break
 
-            log.info('RENDERING panorama: %s', pano_id)
-            pano_to_render = Panorama.objects.filter(pano_id=pano_id)[0]
-            pt = PanoramaTransformer(pano_to_render)
-            rendered = pt.get_translated_image(target_width=8000)
-            misc.imsave(pano_to_render.get_full_rendered_path(), rendered)
+            log.info('RENDERING panorama: %s', str(pano_to_render))
+            rendered_name = pano_to_render.path+pano_to_render.filename[:-4]+'_normalized.jpg'
+            rendered_arr = PanoramaTransformer(pano_to_render).get_translated_image(target_width=8000)
+            to_bytes = io.BytesIO()
+            misc.toimage(rendered_arr).save(to_bytes, format='jpeg')
+            objs.put_into_datapunt_store(rendered_name, to_bytes.getvalue(), 'image/jpeg')
+            self._set_renderstatus_to(pano_to_render, Panorama.STATUS.rendered)
 
     @transaction.atomic
-    def _get_next_pano_id(self):
+    def _get_next_pano_to_render(self):
         try:
-            task = RenderTask.objects.all()[0]
-            pano_id = task.pano_id
-            task.delete()
-            return pano_id
+            pano_to_render = Panorama.to_be_rendered.all()[0]
+            self._set_renderstatus_to(pano_to_render, Panorama.STATUS.rendering)
+            return pano_to_render
         except IndexError:
             return None
+
+    @transaction.atomic
+    def _set_renderstatus_to(self, panorama, status):
+        panorama.status = status
+        panorama.save()
