@@ -19,13 +19,12 @@ class AdjacencySerializer(serializers.ModelSerializer):
 
 
 class ImageLinksSerializer(serializers.ModelSerializer):
-    raw = serializers.ReadOnlyField(source='img_url')
-    normalized = serializers.HyperlinkedIdentityField(view_name='normalized-detail', lookup_field='pano_id', format='html')
+    equirectangular = serializers.ReadOnlyField(source='img_url')
     thumbnail = serializers.HyperlinkedIdentityField(view_name='thumbnail-detail', lookup_field='pano_id', format='html')
 
     class Meta:
         model = models.Panorama
-        fields = ('raw', 'normalized', 'thumbnail')
+        fields = ('equirectangular', 'thumbnail')
 
 
 class ThumbnailSerializer(serializers.ModelSerializer):

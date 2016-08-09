@@ -1,7 +1,11 @@
 import sys
+import logging
+
 from django.core.management import BaseCommand, call_command
 
 import datasets.panoramas.batch
+
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -25,16 +29,16 @@ class Command(BaseCommand):
 
         for ds in dataset:
             if ds not in self.imports.keys():
-                self.stderr.write("Unkown dataset: {}".format(ds))
+                log.error("Unkown dataset: {}".format(ds))
                 sys.exit(1)
 
         sets = [ds for ds in self.ordered if ds in dataset]     # enforce order
 
-        self.stdout.write("Importing {}".format(", ".join(sets)))
+        log.info("Importing {}".format(", ".join(sets)))
 
         for ds in sets:
-
             for job_class in self.imports[ds]:
                 job_class().process()
 
         call_command('refresh_views')
+        call_command('clear_rendering')

@@ -1,5 +1,9 @@
+import logging
+
 from django.core.management import BaseCommand
 from django.db import connection
+
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -15,4 +19,4 @@ class Command(BaseCommand):
             self.stdout.write('refreshing materialized view {}'.format(view))
             cursor.execute("REFRESH MATERIALIZED VIEW {}".format(view))
 
-        self.stdout.write('refresh {} views'.format(len(self.views)))
+        log.info('refresh {} views'.format(len(self.views)))

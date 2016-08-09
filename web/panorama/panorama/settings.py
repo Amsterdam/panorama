@@ -14,11 +14,7 @@ def get_docker_host():
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PANO_DIR = os.getenv(
-    'PANORAMA_DATA_DIR', os.path.abspath(os.path.join(
-        BASE_DIR, 'panoramas_test')))
-PANO_IMAGE_URL = os.getenv(
-    'PANORAMA_IMAGE_URL', 'https://acc.atlas.amsterdam.nl/panorama')
+PANO_IMAGE_URL = os.getenv('PANORAMA_IMAGE_URL', 'https://acc.atlas.amsterdam.nl/panorama')
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default-secret")
 
@@ -186,8 +182,25 @@ CORS_ORIGIN_REGEX_WHITELIST = (
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
-# CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 X_FRAME_OPTIONS = 'DENY'
 
 HEALTH_MODEL = 'panoramas.Panorama'
+
+# OBJECT_STORE SETTINGS
+
+OBJECTSTORE_USER = os.getenv('OBJECTSTORE_USER', 'datapunt')
+OBJECTSTORE_PASSWORD = os.getenv('OBJECTSTORE_PASSWORD', 'insecure')
+
+AUTH_VERSION = '2.0'
+AUTHURL = 'https://identity.stack.cloudvps.com/v2.0'
+
+DATAPUNT_TENANT_NAME = 'BGE000081 Datapunt'
+DATAPUNT_TENANT_ID = 'ffb7a5a57dd34cc49436abc510cad162'
+PANORAMA_TENANT_NAME = 'BGE000081 Panorama'
+PANORAMA_TENANT_ID = '3206eec333a04cc980799f75a593505a'
+
+PANORAMA_CONTAINERS = ['2016']
+DATAPUNT_CONTAINER = 'panorama'
+
+REGION_NAME = 'NL'
