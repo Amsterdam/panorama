@@ -14,10 +14,6 @@ web:
     - "8087:8000"
   links:
     - database:database
-  volumes:
-    - $PWD/reports:/app/reports
-    - $PWD/web/panorama/panoramas_test:/app/panoramas_test
-    - $PWD/panoramas_test/output:/app/panoramas_test/2016/output
   environment:
     SECRET_KEY: hoi
     DB_NAME: panorama
@@ -29,8 +25,6 @@ render:
   dockerfile: Dockerfile-render
   links:
     - database:database
-  volumes:
-    - $PWD/web/panorama/panoramas_test:/app/panoramas_test
   environment:
     SECRET_KEY: hoi
     DB_NAME: panorama
