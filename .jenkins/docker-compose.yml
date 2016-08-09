@@ -14,6 +14,7 @@ tests:
     DATABASE_NAME: panorama
     DATABASE_USER: panorama
     DATABASE_PASSWORD: insecure
+    OBJECTSTORE_PASSWORD:
   command: bash -c "/app/docker-wait.sh && python manage.py jenkins"
 
 importer:
@@ -23,6 +24,7 @@ importer:
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
+    OBJECTSTORE_PASSWORD:
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
@@ -55,3 +57,4 @@ render:
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
+    OBJECTSTORE_PASSWORD:
