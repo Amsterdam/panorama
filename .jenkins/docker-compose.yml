@@ -20,8 +20,6 @@ importer:
   build: ../web
   links:
     - database:database
-  volumes:
-    - /mnt/pano2016:/app/panoramas/2016
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
@@ -54,8 +52,6 @@ render:
   dockerfile: Dockerfile-render
   links:
     - database:database
-  volumes:
-    - /mnt/pano2016:/app/panoramas/2016
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
