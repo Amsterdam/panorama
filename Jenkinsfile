@@ -26,9 +26,7 @@ node {
 
     stage "Test"
     tryStep "Test",  {
-        withCredenials([[$class: 'StringBinding', credentialsId: 'OBJECTSTORE_PASSWORD', variable: 'OBJECTSTORE_PASSWORD']]) {
-            sh "set + x"
-            sh "export OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD"
+        withCredentials([[$class: 'StringBinding', credentialsId: 'OBJECTSTORE_PASSWORD', variable: 'OBJECTSTORE_PASSWORD']]) {
             sh "docker-compose -p panorama -f .jenkins/docker-compose.yml run -u root --rm tests"
         }
     }, {
