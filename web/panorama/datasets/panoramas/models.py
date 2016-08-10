@@ -12,7 +12,6 @@ from PIL import Image
 from django.conf import settings
 from datasets.shared.object_store import ObjectStore
 
-objs = ObjectStore()
 
 
 class Panorama(StatusModel):
@@ -31,6 +30,7 @@ class Panorama(StatusModel):
     adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
 
     objects = geo.GeoManager()
+    object_store = ObjectStore()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,7 +50,7 @@ class Panorama(StatusModel):
     def get_raw_image_binary(self):
         container = self.path.split('/')[0]
         name = (self.path+self.filename).replace(container+'/', '')
-        return Image.open(io.BytesIO(objs.get_panorama_store_object({'container':container, 'name':name})))
+        return Image.open(io.BytesIO(self.object_store.get_panorama_store_object({'container':container, 'name':name})))
 
     @property
     def img_url(self):
