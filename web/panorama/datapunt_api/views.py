@@ -34,8 +34,8 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             if 'vanaf' and 'tot' are given, tot >= vanaf
     """
     queryset = Panorama.objects.all()
-    serializer_detail_class = serializers.PanoSerializer
-    serializer_class = serializers.PanoSerializer
+    serializer_detail_class = serializers.FilteredPanoSerializer
+    serializer_class = serializers.FilteredPanoSerializer
 
     def list(self, request):
         """
