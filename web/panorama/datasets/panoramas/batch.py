@@ -17,7 +17,6 @@ from datasets.shared.object_store import ObjectStore
 
 BATCH_SIZE = 50000
 log = logging.getLogger(__name__)
-objs = ObjectStore()
 
 # Conversion between GPS and UTC time
 # Initial difference plus the 36 leap seconds recorded to date
@@ -35,6 +34,7 @@ class ImportPanoramaJob(object):
     """
     files_in_panodir = []
     files_in_renderdir = []
+    object_store = ObjectStore()
 
     def process(self):
         """
@@ -45,18 +45,21 @@ class ImportPanoramaJob(object):
         then all the trajectory
         files.
         """
-        for csv_file in objs.get_csvs('panorama'):
+        csvs = self.object_store.get_csvs('panorama')
+        for csv_file in csvs:
             log.info('READING panorama: %s', csv_file['name'])
             container = csv_file['container']
             path = csv_file['name'].replace(csv_file['name'].split('/')[-1], '')
-            self.files_in_panodir = [file['name'] for file in objs.get_panorama_store_objects(container, path)]
-            self.files_in_renderdir = [file['name'] for file in objs.get_datapunt_store_objects(container + '/' + path)]
+            self.files_in_panodir = [file['name'] for file in
+                                     self.object_store.get_panorama_store_objects(container, path)]
+            self.files_in_renderdir = [file['name'] for file in
+                                       self.object_store.get_datapunt_store_objects(container + '/' + path)]
             Panorama.objects.bulk_create(
                 self.process_csv(csv_file, self.process_panorama_row),
                 batch_size=BATCH_SIZE
             )
 
-        for csv_file in objs.get_csvs('trajectory'):
+        for csv_file in self.object_store.get_csvs('trajectory'):
             log.info('READING trajectory: %s', csv_file['name'])
             Traject.objects.bulk_create(
                 self.process_csv(csv_file, self.process_traject_row),
@@ -69,7 +72,7 @@ class ImportPanoramaJob(object):
         """
         models = []
 
-        csv_file_iterator = iter(objs.get_panorama_store_object(csv_file).decode("utf-8").split('\n'))
+        csv_file_iterator = iter(self.object_store.get_panorama_store_object(csv_file).decode("utf-8").split('\n'))
         rows = csv.reader(csv_file_iterator,
                           delimiter='\t',
                           quotechar=None,
