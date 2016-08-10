@@ -10,6 +10,8 @@ tests:
     - database:database
   volumes:
     - ../reports:/app/reports
+    - ../web/panorama/panoramas_test:/app/panoramas_test
+    - ../panoramas_test/output:/app/panoramas_test/2016/output
   environment:
     DATABASE_NAME: panorama
     DATABASE_USER: panorama
