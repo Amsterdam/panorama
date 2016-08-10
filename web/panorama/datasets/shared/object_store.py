@@ -5,6 +5,8 @@ from django.conf import settings
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("swiftclient").setLevel(logging.WARNING)
+
 log = logging.getLogger(__name__)
 
 
