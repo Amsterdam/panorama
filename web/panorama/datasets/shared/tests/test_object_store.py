@@ -1,7 +1,10 @@
 # Python
 import unittest
+import logging
 # Project
 from .. import object_store
+
+log = logging.getLogger(__name__)
 
 
 class TestObjectStore(unittest.TestCase):
@@ -51,6 +54,10 @@ class TestObjectStore(unittest.TestCase):
                           quotechar=None,
                           quoting=csv.QUOTE_NONE)
         headers = next(rows)
-        print(headers)
-        for row in rows:
-            print(row)
+        log.info('header +  firstrow: %s' % str(dict(zip(headers, next(rows)))))
+
+    def test_get_objects_pages(self):
+        big_dir = '07/07/TMX7315120208-000104/'
+        self.object_store.RESP_LIMIT = 1000
+        self.assertGreater(len(self.object_store.get_datapunt_store_objects('2016'+'/'+big_dir)), 2000)
+        self.assertGreater(len(self.object_store.get_panorama_store_objects('2016', big_dir)), 2000)
