@@ -1,5 +1,5 @@
 # Python
-import datetime, os
+import datetime, os, logging
 from unittest import TestCase, mock, skipIf
 # Packages
 from django.contrib.gis.geos import Point
@@ -7,15 +7,24 @@ from django.utils.timezone import utc as UTC_TZ
 import factory
 import factory.fuzzy
 from scipy import misc
+from PIL import Image
 # Project
 from datasets.panoramas.tests import factories
 from datasets.panoramas.transform.transformer import PanoramaTransformer
 from datasets.panoramas.models import Panorama
 
-def mock_get_raw_pano(pano):
+log = logging.getLogger(__name__)
+
+
+def set_pano(pano):
+    global panorama
+    panorama = pano
+
+
+def mock_get_raw_pano():
+    pano = panorama.get_raw_image_objectstore_id()
     path = '/app/panoramas_test/'+pano['container']+'/'+pano['name']
-    with open(path, mode='rb') as file:
-        return file.read()
+    return Image.open(path)
 
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
@@ -61,7 +70,7 @@ class TestTransformImg(TestCase):
             heading=295.567147056641,
         )
 
-    @mock.patch('datasets.panoramas.models.Panorama.object_store.get_panorama_store_object',
+    @mock.patch('datasets.panoramas.transform.transformer.PanoramaTransformer._get_raw_image_binary',
                 side_effect=mock_get_raw_pano)
     def test_transform_runs_without_errors(self, mock_1):
 
@@ -72,6 +81,7 @@ class TestTransformImg(TestCase):
 
         for img in images:
             image_tranformer = PanoramaTransformer(img)
+            set_pano(img)
             output_path = "/app/panoramas_test/2016/output/"+img.filename[:-4]
             for direction in [0, 90, 180, 270]:
                 img1 = image_tranformer.get_translated_image(target_width=900,
