@@ -13,7 +13,6 @@ from django.conf import settings
 from datasets.shared.object_store import ObjectStore
 
 
-
 class Panorama(StatusModel):
     STATUS = Choices('to_be_rendered', 'rendering', 'rendered')
 

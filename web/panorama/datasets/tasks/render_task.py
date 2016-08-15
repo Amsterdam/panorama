@@ -32,7 +32,7 @@ class RenderPanorama:
     @transaction.atomic
     def _get_next_pano_to_render(self):
         try:
-            pano_to_render = Panorama.to_be_rendered.all()[0]
+            pano_to_render = Panorama.to_be_rendered.select_for_update()[0]
             self._set_renderstatus_to(pano_to_render, Panorama.STATUS.rendering)
             return pano_to_render
         except IndexError:

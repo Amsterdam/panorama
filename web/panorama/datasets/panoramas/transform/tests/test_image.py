@@ -1,6 +1,6 @@
 # Python
-import datetime
-from unittest import TestCase, mock
+import datetime, os
+from unittest import TestCase, mock, skipIf
 # Packages
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
@@ -18,6 +18,8 @@ def mock_get_raw_pano(pano):
         return file.read()
 
 
+@skipIf(not os.path.exists('/app/panoramas_test'),
+        'Render test skipped: no mounted directory found, run in docker container')
 class TestTransformImg(TestCase):
     """
     This is more like an integration test than a unit test
