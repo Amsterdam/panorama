@@ -1,4 +1,3 @@
-import io
 from math import atan2, degrees, cos, sin, radians
 
 from django.contrib.gis.db import models as geo
@@ -6,11 +5,9 @@ from django.contrib.gis.geos import Point
 from django.db import models
 from model_utils.models import StatusModel
 from model_utils import Choices
-from PIL import Image
 
 # Project
 from django.conf import settings
-from datasets.shared.object_store import ObjectStore
 
 
 class Panorama(StatusModel):
@@ -29,7 +26,6 @@ class Panorama(StatusModel):
     adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
 
     objects = geo.GeoManager()
-    object_store = ObjectStore()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,10 +42,10 @@ class Panorama(StatusModel):
     def __str__(self):
         return '<Panorama %s%s>' % (self.path, self.filename)
 
-    def get_raw_image_binary(self):
+    def get_raw_image_objectstore_id(self):
         container = self.path.split('/')[0]
         name = (self.path+self.filename).replace(container+'/', '')
-        return Image.open(io.BytesIO(self.object_store.get_panorama_store_object({'container':container, 'name':name})))
+        return {'container':container, 'name':name}
 
     @property
     def img_url(self):
@@ -87,6 +83,7 @@ class Adjacency(models.Model):
             return 0.0
         else:
             return degrees(atan2(self.elevation, self.distance))
+
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()

@@ -1,21 +1,29 @@
 # Python
-import datetime, os
+import datetime, os, logging
 from unittest import TestCase, mock, skipIf
 # Packages
 import factory
 import factory.fuzzy
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
+from PIL import Image
 # Project
 from datasets.panoramas.tests import factories
 from datasets.panoramas.models import Panorama
 from .. import render_task
 
+log = logging.getLogger(__name__)
 
-def mock_get_raw_pano(pano):
+
+def set_pano(pano):
+    global panorama
+    panorama = pano
+
+
+def mock_get_raw_pano():
+    pano = panorama.get_raw_image_objectstore_id()
     path = '/app/panoramas_test/'+pano['container']+'/'+pano['name']
-    with open(path, mode='rb') as file:
-        return file.read()
+    return Image.open(path)
 
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
@@ -59,10 +67,11 @@ class TestRender(TestCase):
 
 
     @mock.patch('datasets.tasks.render_task.RenderPanorama.object_store.put_into_datapunt_store')
-    @mock.patch('datasets.panoramas.models.Panorama.object_store.get_panorama_store_object',
+    @mock.patch('datasets.panoramas.transform.transformer.PanoramaTransformer._get_raw_image_binary',
                 side_effect=mock_get_raw_pano)
     def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
         to_render = Panorama.to_be_rendered.all()[0]
+        set_pano(to_render)
         self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
         render_task.RenderPanorama().process()
