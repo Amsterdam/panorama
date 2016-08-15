@@ -29,12 +29,12 @@ class Command(BaseCommand):
 
         for ds in dataset:
             if ds not in self.imports.keys():
-                log.error("Unkown dataset: {}".format(ds))
+                self.stderr.write("Unkown dataset: {}".format(ds))
                 sys.exit(1)
 
         sets = [ds for ds in self.ordered if ds in dataset]     # enforce order
 
-        log.info("Importing {}".format(", ".join(sets)))
+        self.stdout.write("Importing {}".format(", ".join(sets)))
 
         for ds in sets:
             for job_class in self.imports[ds]:

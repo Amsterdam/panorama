@@ -19,4 +19,4 @@ class Command(BaseCommand):
             self.stdout.write('refreshing materialized view {}'.format(view))
             cursor.execute("REFRESH MATERIALIZED VIEW {}".format(view))
 
-        log.info('refresh {} views'.format(len(self.views)))
+        self.stdout.write('refresh {} views'.format(len(self.views)))
