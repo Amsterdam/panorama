@@ -4,7 +4,7 @@ from rest_framework.fields import empty
 from rest_framework_gis import fields
 # Project
 from datasets.panoramas import models
-from datapunt_api.datapunt_rest import HALSerializer
+from datapunt_api.datapunt_rest import LinksField, HALSerializer
 
 
 class AdjacencySerializer(serializers.ModelSerializer):
@@ -38,7 +38,12 @@ class ThumbnailSerializer(serializers.ModelSerializer):
         fields = ('url', 'heading', 'pano_id')
 
 
+class PanoLinksField(LinksField):
+    lookup_field = 'pano_id'
+
+
 class PanoSerializer(HALSerializer):
+    serializer_url_field = PanoLinksField
     images = serializers.SerializerMethodField(source='get_images')
     geometrie = fields.GeometryField(source='geolocation')
     roll = serializers.DecimalField(max_digits=20, decimal_places=2)
