@@ -27,6 +27,9 @@ class Panorama(StatusModel):
 
     objects = geo.GeoManager()
 
+    class Meta:
+        ordering = ('id',)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self._geolocation_2d:
@@ -61,6 +64,7 @@ class Adjacency(models.Model):
     elevation = models.FloatField()
 
     class Meta:
+        index_together = [['from_pano', 'distance']]
         managed = False
         db_table = "panoramas_adjacencies"
 

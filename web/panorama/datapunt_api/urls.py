@@ -23,7 +23,7 @@ class PanoramaRouter(routers.DefaultRouter):
 
 
 panorama = routers.DefaultRouter()
-panorama.register(r'opnamelocatie', PanoramaViewSet, base_name='opnamelocatie')
+panorama.register(r'opnamelocatie', PanoramaViewSet, base_name='panorama')
 panorama.register(r'thumbnail', ThumbnailViewSet, base_name='thumbnail')
 
 urlpatterns = [
