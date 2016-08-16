@@ -32,8 +32,12 @@ class DataSetSerializerMixin(object):
 
 class LinksField(serializers.HyperlinkedIdentityField):
     def to_representation(self, value):
-        request = self.context.get('request')
+        view = self.context.get('view')
+        if view.lookup_field != 'pk':
+            self.lookup_url_kwarg = view.lookup_field
+            self.lookup_field = view.lookup_field
 
+        request = self.context.get('request')
         result = OrderedDict([
             ('self', dict(
                 href=self.get_url(value, self.view_name, request, None))
