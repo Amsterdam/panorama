@@ -18,7 +18,7 @@ PANO_IMAGE_URL = os.getenv('PANORAMA_IMAGE_URL', 'https://acc.atlas.amsterdam.nl
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default-secret")
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
