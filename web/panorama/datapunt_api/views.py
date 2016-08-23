@@ -1,9 +1,6 @@
 # Packages
-from django.shortcuts import get_object_or_404
-
 from rest_framework.response import Response
 
-# from rest_framework import viewsets
 # Project
 
 from .queryparam_utils import _get_request_coord, _convert_to_date, _get_int_value
