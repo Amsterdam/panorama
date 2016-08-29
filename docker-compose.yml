@@ -21,4 +21,15 @@ web:
     SECRET_KEY: hoi
     DB_NAME: panorama
     DB_PASSWORD: insecure
+    PANORAMA_IMAGE_URL: http://localhost:8088/panorama
     OBJECTSTORE_PASSWORD:
+
+
+demo:
+  build: ./demo
+  ports:
+    - "8088:80"
+  volumes:
+    - "./demo/html:/var/www/html/demo"
+    - "./web/panorama/panoramas_test/2016:/var/www/html/2016"
+
