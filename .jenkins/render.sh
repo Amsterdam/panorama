@@ -9,7 +9,7 @@ dc() {
 	docker-compose -f ${DIR}/docker-compose.yml $*
 }
 
-trap 'dc kill render; dc rm -f render' EXIT
+trap 'dc kill render' EXIT
 
 dc build
 dc up -d database
