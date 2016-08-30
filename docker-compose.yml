@@ -15,23 +15,21 @@ web:
   links:
     - database:database
   volumes:
-    - $PWD/reports:/app/reports
     - $PWD/web/panorama/panoramas_test:/app/panoramas_test
     - $PWD/panoramas_test/output:/app/panoramas_test/2016/output
   environment:
     SECRET_KEY: hoi
     DB_NAME: panorama
     DB_PASSWORD: insecure
+    PANORAMA_IMAGE_URL: http://localhost:8088/panorama
+    OBJECTSTORE_PASSWORD:
 
 
-render:
-  build: ./web
-  dockerfile: Dockerfile-render
-  links:
-    - database:database
+demo:
+  build: ./demo
+  ports:
+    - "8088:80"
   volumes:
-    - $PWD/web/panorama/panoramas_test:/app/panoramas_test
-  environment:
-    SECRET_KEY: hoi
-    DB_NAME: panorama
-    DB_PASSWORD: insecure
+    - "./demo/html:/var/www/html/demo"
+    - "./web/panorama/panoramas_test/2016:/var/www/html/2016"
+

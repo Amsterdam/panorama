@@ -1,7 +1,11 @@
 import sys
+import logging
+
 from django.core.management import BaseCommand, call_command
 
 import datasets.panoramas.batch
+
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -33,8 +37,8 @@ class Command(BaseCommand):
         self.stdout.write("Importing {}".format(", ".join(sets)))
 
         for ds in sets:
-
             for job_class in self.imports[ds]:
                 job_class().process()
 
         call_command('refresh_views')
+        call_command('clear_rendering')
