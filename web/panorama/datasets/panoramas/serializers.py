@@ -4,6 +4,7 @@ from rest_framework.fields import empty
 from rest_framework_gis import fields
 # Project
 from datasets.panoramas import models
+from datapunt_api.datapunt_rest import LinksField, HALSerializer
 
 
 class AdjacencySerializer(serializers.ModelSerializer):
@@ -19,13 +20,12 @@ class AdjacencySerializer(serializers.ModelSerializer):
 
 
 class ImageLinksSerializer(serializers.ModelSerializer):
-    raw = serializers.ReadOnlyField(source='img_url')
-    normalized = serializers.HyperlinkedIdentityField(view_name='normalized-detail', lookup_field='pano_id', format='html')
+    equirectangular = serializers.ReadOnlyField(source='img_url')
     thumbnail = serializers.HyperlinkedIdentityField(view_name='thumbnail-detail', lookup_field='pano_id', format='html')
 
     class Meta:
         model = models.Panorama
-        fields = ('raw', 'normalized', 'thumbnail')
+        fields = ('equirectangular', 'thumbnail')
 
 
 class ThumbnailSerializer(serializers.ModelSerializer):
@@ -38,17 +38,21 @@ class ThumbnailSerializer(serializers.ModelSerializer):
         fields = ('url', 'heading', 'pano_id')
 
 
-class PanoSerializer(serializers.ModelSerializer):
+class PanoLinksField(LinksField):
+    lookup_field = 'pano_id'
+
+
+class PanoSerializer(HALSerializer):
+    serializer_url_field = PanoLinksField
     images = serializers.SerializerMethodField(source='get_images')
     geometrie = fields.GeometryField(source='geolocation')
-    adjacent = AdjacencySerializer(source='to_adjacency', many=True)
     roll = serializers.DecimalField(max_digits=20, decimal_places=2)
     pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
     heading = serializers.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
         model = models.Panorama
-        exclude = ('path','geolocation','adjacent_panos','_geolocation_2d')
+        exclude = ('path','geolocation','adjacent_panos','_geolocation_2d', 'status', 'status_changed')
 
     def to_representation(self, instance):
         return super().to_representation(instance)

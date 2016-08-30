@@ -1,19 +1,34 @@
 # Python
-import datetime
-import unittest
-import os.path
+import datetime, os, logging
+from unittest import TestCase, mock, skipIf
 # Packages
-from django.contrib.gis.geos import Point
-from django.utils.timezone import utc as UTC_TZ
 import factory
 import factory.fuzzy
+from django.contrib.gis.geos import Point
+from django.utils.timezone import utc as UTC_TZ
+from PIL import Image
 # Project
 from datasets.panoramas.tests import factories
-from datasets.tasks.models import RenderTask
 from datasets.panoramas.models import Panorama
-from .. import render_batch, render_task
+from .. import render_task
 
-class TestRender(unittest.TestCase):
+log = logging.getLogger(__name__)
+
+
+def set_pano(pano):
+    global panorama
+    panorama = pano
+
+
+def mock_get_raw_pano():
+    pano = panorama.get_raw_image_objectstore_id()
+    path = '/app/panoramas_test/'+pano['container']+'/'+pano['name']
+    return Image.open(path)
+
+
+@skipIf(not os.path.exists('/app/panoramas_test'),
+        'Render test skipped: no mounted directory found, run in docker container')
+class TestRender(TestCase):
     """
     This is more like an integration test than a unit test
     Because it expects a mounted /app/panoramas folder, run these in the Docker container
@@ -26,15 +41,22 @@ class TestRender(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
+        for pano in Panorama.objects.all():
+            pano.status = Panorama.STATUS.rendered
+            pano.save()
+
         try:
-            Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
+            pano = Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
+            pano.status = Panorama.STATUS.to_be_rendered
+            pano.save()
         except IndexError:
             factories.PanoramaFactory.create(
                 pano_id='TMX7315120208-000073_pano_0004_000087',
                 timestamp=factory.fuzzy.FuzzyDateTime(
                     datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
                 filename='pano_0004_000087.jpg',
-                path='/2016/06/09/TMX7315120208-000073',
+                path='2016/06/09/TMX7315120208-000073/',
                 geolocation=Point(4.89593266865189,
                                   52.3717022854865,
                                   47.3290048856288),
@@ -43,34 +65,16 @@ class TestRender(unittest.TestCase):
                 heading=219.760795827427,
             )
 
-    def setUp(self):
-        self.created_pano = Panorama.objects.filter(
-            pano_id='TMX7315120208-000073_pano_0004_000087')[0]
-        try:
-            os.rename(self.created_pano.get_full_rendered_path(),
-                      self.created_pano.get_full_rendered_path()+'_hidden')
-        except OSError:
-            pass
 
-    def tearDown(self):
-        try:
-            os.remove(self.created_pano.get_full_rendered_path())
-        except OSError:
-            pass
-        try:
-            os.rename(self.created_pano.get_full_rendered_path()+'_hidden',
-                      self.created_pano.get_full_rendered_path())
-        except OSError:
-            pass
-
-    def test_create_and_render_batch(self):
-        render_batch.CreateRenderBatch().process()
-        task = RenderTask.objects.all()[0]
-        self.assertEquals('TMX7315120208-000073_pano_0004_000087', task.pano_id)
-
-        pano = Panorama.objects.filter(pano_id=task.pano_id)[0]
-        self.assertFalse(os.path.isfile(pano.get_full_rendered_path()))
+    @mock.patch('datasets.tasks.render_task.RenderPanorama.object_store.put_into_datapunt_store')
+    @mock.patch('datasets.panoramas.transform.transformer.PanoramaTransformer._get_raw_image_binary',
+                side_effect=mock_get_raw_pano)
+    def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
+        to_render = Panorama.to_be_rendered.all()[0]
+        set_pano(to_render)
+        self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
         render_task.RenderPanorama().process()
-        self.assertEquals(0, len(RenderTask.objects.all()))
-        self.assertTrue(os.path.isfile(pano.get_full_rendered_path()))
+        self.assertEquals(0, len(Panorama.to_be_rendered.all()))
+        self.assertTrue(mock_read_raw.called)
+        self.assertTrue(mock_write_transformed.called)

@@ -1,9 +1,6 @@
 # Packages
-from django.shortcuts import get_object_or_404
-
 from rest_framework.response import Response
 
-# from rest_framework import viewsets
 # Project
 
 from .queryparam_utils import _get_request_coord, _convert_to_date, _get_int_value
@@ -33,8 +30,9 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             - (string) Eu date formate dd-mm-yyyy.
             if 'vanaf' and 'tot' are given, tot >= vanaf
     """
+    lookup_field = 'pano_id'
     queryset = Panorama.objects.all()
-    serializer_detail_class = serializers.PanoSerializer
+    serializer_detail_class = serializers.FilteredPanoSerializer
     serializer_class = serializers.PanoSerializer
 
     def list(self, request):
@@ -82,8 +80,3 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             queryset = queryset.filter(timestamp__lt=end_date)
         queryset = queryset.extra(order_by=['distance'])
         return adjacent_filter, queryset
-
-    def retrieve(self, request, pk=None):
-        pano = get_object_or_404(Panorama, pano_id=pk)
-        resp = serializers.FilteredPanoSerializer(pano, context={'request': request})
-        return Response(resp.data)

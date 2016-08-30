@@ -1,15 +1,18 @@
-import os.path
 from math import atan2, degrees, cos, sin, radians
 
 from django.contrib.gis.db import models as geo
 from django.contrib.gis.geos import Point
 from django.db import models
+from model_utils.models import StatusModel
+from model_utils import Choices
 
 # Project
 from django.conf import settings
 
 
-class Panorama(models.Model):
+class Panorama(StatusModel):
+    STATUS = Choices('to_be_rendered', 'rendering', 'rendered')
+
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True)
     timestamp = models.DateTimeField()
@@ -24,6 +27,9 @@ class Panorama(models.Model):
 
     objects = geo.GeoManager()
 
+    class Meta:
+        ordering = ('id',)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self._geolocation_2d:
@@ -37,17 +43,16 @@ class Panorama(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return '<Panorama %s/%s>' % (self.path, self.filename)
+        return '<Panorama %s%s>' % (self.path, self.filename)
 
-    def get_full_raw_path(self):
-        return os.path.join(settings.PANO_DIR, self.path[1:], self.filename)
-
-    def get_full_rendered_path(self):
-        return os.path.join(settings.PANO_DIR, self.path[1:], self.filename[:-4]+'_normalized.jpg')
+    def get_raw_image_objectstore_id(self):
+        container = self.path.split('/')[0]
+        name = (self.path+self.filename).replace(container+'/', '')
+        return {'container':container, 'name':name}
 
     @property
     def img_url(self):
-        return '%s/%s/%s' % (settings.PANO_IMAGE_URL, self.path, self.filename)
+        return '%s/%s/%s' % (settings.PANO_IMAGE_URL, self.path, self.filename[:-4]+'_normalized.jpg')
 
 
 class Adjacency(models.Model):
@@ -59,6 +64,7 @@ class Adjacency(models.Model):
     elevation = models.FloatField()
 
     class Meta:
+        index_together = [['from_pano', 'distance']]
         managed = False
         db_table = "panoramas_adjacencies"
 
@@ -81,6 +87,7 @@ class Adjacency(models.Model):
             return 0.0
         else:
             return degrees(atan2(self.elevation, self.distance))
+
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()
