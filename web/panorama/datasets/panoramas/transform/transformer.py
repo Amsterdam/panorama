@@ -1,6 +1,10 @@
+import io
+
 from numpy import array, radians, float64, pi, arctan2, arccos, cos, sin, arange, meshgrid, mod, rint
 from scipy import misc
+from PIL import Image
 
+from datasets.shared.object_store import ObjectStore
 
 # specific property of our pano set source images
 SOURCE_WIDTH = 8000     # pixels
@@ -14,6 +18,7 @@ PANO_HEIGHT = SOURCE_WIDTH / PANO_ASPECT
 
 
 class PanoramaTransformer:
+    object_store = ObjectStore()
 
     def __init__(self, panorama):
         self.panorama = panorama
@@ -42,7 +47,7 @@ class PanoramaTransformer:
         x3, y3 = self._cartesian2cylindrical(x2, y2, z2)
 
         # return grid of output pixels from source image based on warped coordinates
-        return misc.imread(self.panorama.get_full_raw_path())[y3[:, :], x3[:, :]]
+        return misc.fromimage(self._get_raw_image_binary())[y3[:, :], x3[:, :]]
 
     def _create_sample_set(self, target_angle, target_aspect, target_heading, target_horizon, target_width):
         target_center = SOURCE_WIDTH / 2 - (self.panorama.heading - target_heading) * SOURCE_WIDTH / 360
@@ -102,4 +107,11 @@ class PanoramaTransformer:
         y1 = mod(rint(PANO_HEIGHT * theta / pi), PANO_HEIGHT).astype(int)
 
         return x1, y1
+
+    def _get_raw_image_binary(self):
+        raw_image_location = self.panorama.get_raw_image_objectstore_id()
+        raw_image = self.object_store.get_panorama_store_object(raw_image_location)
+        return Image.open(io.BytesIO(raw_image))
+
+
 

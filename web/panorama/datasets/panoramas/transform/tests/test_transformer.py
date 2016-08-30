@@ -99,8 +99,6 @@ class TestTransformer(unittest.TestCase):
         result =  t._get_rotation_matrix(45, 45)
         self.assertTrue(allclose(result, [[sqrt(1/2),0.5,0.5],[0,sqrt(1/2),-sqrt(1/2)],[-sqrt(1/2),0.5,0.5]]))
 
-        print(result)
-
     def assertArrayAlmostEquals(self, expected, actual):
         self.assertEqual(len(expected), len(actual), 'not same length')
         for i in range(len(actual)):

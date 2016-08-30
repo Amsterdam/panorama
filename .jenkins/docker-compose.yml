@@ -8,29 +8,30 @@ tests:
   build: ../web
   links:
     - database:database
+  mem_limit: 4G
   volumes:
     - ../reports:/app/reports
+    - ../web/panorama/panoramas_test:/app/panoramas_test
+    - ../panoramas_test/output:/app/panoramas_test/2016/output
   environment:
     DATABASE_NAME: panorama
     DATABASE_USER: panorama
     DATABASE_PASSWORD: insecure
+    OBJECTSTORE_PASSWORD:
   command: bash -c "/app/docker-wait.sh && python manage.py jenkins"
 
 importer:
   build: ../web
   links:
     - database:database
-  volumes:
-    - /mnt/pano2016:/app/panoramas/2016
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
-    PANORAMA_DATA_DIR: /app/panoramas
+    OBJECTSTORE_PASSWORD:
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
-            && python manage.py run_import \
-            && python manage.py create_renderbatch"
+            && python manage.py run_import"
 
 db-backup:
   image: admin.datapunt.amsterdam.nl:5000/atlas/postgres
@@ -55,9 +56,7 @@ render:
   dockerfile: Dockerfile-render
   links:
     - database:database
-  volumes:
-    - /mnt/pano2016:/app/panoramas/2016
   environment:
     DB_NAME: panorama
     DB_PASSWORD: insecure
-    PANORAMA_DATA_DIR: /app/panoramas
+    OBJECTSTORE_PASSWORD:
