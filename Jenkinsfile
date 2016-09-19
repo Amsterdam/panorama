@@ -23,31 +23,29 @@ node {
         checkout scm
     }
 
---    stage('Test') {
---    tryStep "Test", {
---        sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
---
---        withCredentials([[$class: 'StringBinding', credentialsId: 'OBJECTSTORE_PASSWORD', variable: 'OBJECTSTORE_PASSWORD']]) {
---            sh "docker-compose -p panorama -f .jenkins/docker-compose.yml build && " +
---                    "docker-compose -p panorama -f .jenkins/docker-compose.yml run -u root --rm tests"
---        }
---    }, {
---        step([$class: "JUnitResultArchiver", testResults: "reports/junit.xml"])
---
---        sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
---     }
---}
+    stage('Test') {
+    tryStep "Test", {
+        sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
+
+        withCredentials([[$class: 'StringBinding', credentialsId: 'OBJECTSTORE_PASSWORD', variable: 'OBJECTSTORE_PASSWORD']]) {
+            sh "docker-compose -p panorama -f .jenkins/docker-compose.yml build && " +
+                    "docker-compose -p panorama -f .jenkins/docker-compose.yml run -u root --rm tests"
+        }
+    }, {
+        step([$class: "JUnitResultArchiver", testResults: "reports/junit.xml"])
+
+        sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
+     }
+}
 
     stage("Build develop image") {
         tryStep "build", {
             def image = docker.build("admin.datapunt.amsterdam.nl:5000/datapunt/panorama:${env.BUILD_NUMBER}", "web")
             image.push()
             image.push("develop")
-            image.push("acceptance")
-            image.push("production")
         }
     }
-
+}
 
 node {
     stage("Deploy to ACC") {
@@ -56,6 +54,7 @@ node {
                     parameters: [
                             [$class: 'StringParameterValue', name: 'INVENTORY', value: 'acceptance'],
                             [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-panorama.yml'],
+                            [$class: 'StringParameterValue', name: 'BRANCH', value: 'master'],
                     ]
         }
     }
@@ -75,7 +74,7 @@ node {
             def image = docker.image("admin.datapunt.amsterdam.nl:5000/datapunt/panorama:${env.BUILD_NUMBER}")
             image.pull()
 
-            image.push("production")
+            image.push("master")
             image.push("latest")
         }
     }
@@ -88,6 +87,7 @@ node {
                     parameters: [
                             [$class: 'StringParameterValue', name: 'INVENTORY', value: 'production'],
                             [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-panorama.yml'],
+                            [$class: 'StringParameterValue', name: 'BRANCH', value: 'master'],
                     ]
         }
     }
