@@ -44,7 +44,6 @@ node {
             image.push()
             image.push("develop")
             image.push("acceptance")
-            image.push("production")
         }
     }
 }
