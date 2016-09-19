@@ -47,7 +47,7 @@ node {
             image.push("production")
         }
     }
-}
+
 
 node {
     stage("Deploy to ACC") {
