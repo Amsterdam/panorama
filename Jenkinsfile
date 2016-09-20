@@ -42,9 +42,7 @@ node {
         tryStep "build", {
             def image = docker.build("admin.datapunt.amsterdam.nl:5000/datapunt/panorama:${env.BUILD_NUMBER}", "web")
             image.push()
-            image.push("develop")
             image.push("acceptance")
-            image.push("production")
         }
     }
 }
