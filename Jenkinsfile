@@ -43,6 +43,8 @@ node {
             def image = docker.build("admin.datapunt.amsterdam.nl:5000/datapunt/panorama:${env.BUILD_NUMBER}", "web")
             image.push()
             image.push("develop")
+            image.push("acceptance")
+            image.push("production")
         }
     }
 }
@@ -54,7 +56,6 @@ node {
                     parameters: [
                             [$class: 'StringParameterValue', name: 'INVENTORY', value: 'acceptance'],
                             [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-panorama.yml'],
-                            [$class: 'StringParameterValue', name: 'BRANCH', value: 'master'],
                     ]
         }
     }
@@ -74,7 +75,7 @@ node {
             def image = docker.image("admin.datapunt.amsterdam.nl:5000/datapunt/panorama:${env.BUILD_NUMBER}")
             image.pull()
 
-            image.push("master")
+            image.push("production")
             image.push("latest")
         }
     }
@@ -87,7 +88,6 @@ node {
                     parameters: [
                             [$class: 'StringParameterValue', name: 'INVENTORY', value: 'production'],
                             [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-panorama.yml'],
-                            [$class: 'StringParameterValue', name: 'BRANCH', value: 'master'],
                     ]
         }
     }
