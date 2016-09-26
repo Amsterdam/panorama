@@ -47,7 +47,7 @@ class PanoramaTransformer:
         x3, y3 = self._cartesian2cylindrical(x2, y2, z2)
 
         # return grid of output pixels from source image based on warped coordinates
-        return misc.fromimage(self._get_raw_image_binary())[y3[:, :], x3[:, :]]
+        return misc.fromimage(self._get_raw_image_binary())[x3[:, :], y3[:, :]]
 
     def _create_sample_set(self, target_angle, target_aspect, target_heading, target_horizon, target_width):
         target_center = SOURCE_WIDTH / 2 - (self.panorama.heading - target_heading) * SOURCE_WIDTH / 360
@@ -103,8 +103,8 @@ class PanoramaTransformer:
         theta = arccos(z)
         phi = arctan2(y, x)
 
-        x1 = mod(rint(PANO_HEIGHT + PANO_HEIGHT * phi / pi), SOURCE_WIDTH).astype(int)
-        y1 = mod(rint(PANO_HEIGHT * theta / pi), PANO_HEIGHT).astype(int)
+        x1 = mod(rint(PANO_HEIGHT * theta / pi), PANO_HEIGHT).astype(int)
+        y1 = mod(rint(PANO_HEIGHT + PANO_HEIGHT * phi / pi), SOURCE_WIDTH).astype(int)
 
         return x1, y1
 
