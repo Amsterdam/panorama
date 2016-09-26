@@ -49,40 +49,40 @@ class TestTransformer(unittest.TestCase):
         t = PanoramaTransformer(None)
 
         result = t._cartesian2cylindrical(1, 0, 0)
-        self.assertArrayAlmostEquals([4000, 2000], result)
+        self.assertArrayAlmostEquals([2000, 4000], result)
 
         result = t._cartesian2cylindrical(0, -1, 0)
         self.assertArrayAlmostEquals([2000, 2000], result)
 
         result = t._cartesian2cylindrical(-1, 0, 0)
-        self.assertArrayAlmostEquals([0, 2000], result)
+        self.assertArrayAlmostEquals([2000, 0], result)
 
         result = t._cartesian2cylindrical(0, 1, 0)
-        self.assertArrayAlmostEquals([6000, 2000], result)
+        self.assertArrayAlmostEquals([2000, 6000], result)
 
         result = t._cartesian2cylindrical(sqrt(1 / 2), 0, sqrt(1 / 2))
-        self.assertArrayAlmostEquals([4000, 1000], result)
+        self.assertArrayAlmostEquals([1000, 4000], result)
 
         result = t._cartesian2cylindrical(sqrt(1 / 2), 0, -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([4000, 3000], result)
+        self.assertArrayAlmostEquals([3000, 4000], result)
 
         result = t._cartesian2cylindrical(0, -sqrt(1 / 2), sqrt(1 / 2))
-        self.assertArrayAlmostEquals([2000, 1000], result)
+        self.assertArrayAlmostEquals([1000, 2000], result)
 
         result = t._cartesian2cylindrical(0, -sqrt(1 / 2), -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([2000, 3000], result)
+        self.assertArrayAlmostEquals([3000, 2000], result)
 
         result = t._cartesian2cylindrical(-sqrt(1 / 2), 0, sqrt(1 / 2))
-        self.assertArrayAlmostEquals([0, 1000], result)
+        self.assertArrayAlmostEquals([1000, 0], result)
 
         result = t._cartesian2cylindrical(-sqrt(1 / 2), 0, -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([0, 3000], result)
+        self.assertArrayAlmostEquals([3000, 0], result)
 
         result = t._cartesian2cylindrical(0, sqrt(1 / 2), sqrt(1 / 2))
-        self.assertArrayAlmostEquals([6000, 1000], result)
+        self.assertArrayAlmostEquals([1000, 6000], result)
 
         result = t._cartesian2cylindrical(0, sqrt(1 / 2), -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([6000, 3000], result)
+        self.assertArrayAlmostEquals([3000, 6000], result)
 
     def test_get_rotation_matrix(self):
         t = PanoramaTransformer(None)

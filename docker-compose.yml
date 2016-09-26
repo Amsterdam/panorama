@@ -16,7 +16,7 @@ web:
     - database:database
   volumes:
     - $PWD/web/panorama/panoramas_test:/app/panoramas_test
-    - $PWD/panoramas_test/output:/app/panoramas_test/2016/output
+    - $PWD/panoramas_test/test_output:/app/panoramas_test/2016/test_output
   environment:
     SECRET_KEY: hoi
     DB_NAME: panorama
