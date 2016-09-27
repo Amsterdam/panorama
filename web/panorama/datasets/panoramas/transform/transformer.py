@@ -1,7 +1,8 @@
 import io
 
-from numpy import array, radians, float64, pi, arctan2, arccos, cos, sin, arange, meshgrid, mod, rint
+from numpy import array, dsplit, squeeze, dstack, radians, float64, pi, arctan2, arccos, cos, sin, arange, meshgrid, mod
 from scipy import misc
+from scipy.ndimage import map_coordinates
 from PIL import Image
 
 from datasets.shared.object_store import ObjectStore
@@ -46,8 +47,19 @@ class PanoramaTransformer:
         # transform cartesion vectors back to image coordinates in a equirectangular projection
         x3, y3 = self._cartesian2cylindrical(x2, y2, z2)
 
-        # return grid of output pixels from source image based on warped coordinates
-        return misc.fromimage(self._get_raw_image_binary())[x3[:, :], y3[:, :]]
+        # read image as numpy array
+        panorama_image = misc.fromimage(self._get_raw_image_binary())
+
+        # split image in 3 channels
+        rgb_in = squeeze(dsplit(panorama_image, 3))
+
+        # resample_each_channel
+        r = map_coordinates(rgb_in[0], [x3, y3], order=1)
+        g = map_coordinates(rgb_in[1], [x3, y3], order=1)
+        b = map_coordinates(rgb_in[2], [x3, y3], order=1)
+
+        # merge channels
+        return dstack((r, g, b))
 
     def _create_sample_set(self, target_angle, target_aspect, target_heading, target_horizon, target_width):
         target_center = SOURCE_WIDTH / 2 - (self.panorama.heading - target_heading) * SOURCE_WIDTH / 360
@@ -103,8 +115,8 @@ class PanoramaTransformer:
         theta = arccos(z)
         phi = arctan2(y, x)
 
-        x1 = mod(rint(PANO_HEIGHT * theta / pi), PANO_HEIGHT).astype(int)
-        y1 = mod(rint(PANO_HEIGHT + PANO_HEIGHT * phi / pi), SOURCE_WIDTH).astype(int)
+        x1 = PANO_HEIGHT * theta / pi
+        y1 = mod(PANO_HEIGHT + PANO_HEIGHT * phi / pi, SOURCE_WIDTH-1)
 
         return x1, y1
 
