@@ -55,7 +55,7 @@ class TestTransformer(unittest.TestCase):
         self.assertArrayAlmostEquals([2000, 2000], result)
 
         result = t._cartesian2cylindrical(-1, 0, 0)
-        self.assertArrayAlmostEquals([2000, 0], result)
+        self.assertArrayAlmostEquals([2000, 1], result)
 
         result = t._cartesian2cylindrical(0, 1, 0)
         self.assertArrayAlmostEquals([2000, 6000], result)
@@ -73,10 +73,10 @@ class TestTransformer(unittest.TestCase):
         self.assertArrayAlmostEquals([3000, 2000], result)
 
         result = t._cartesian2cylindrical(-sqrt(1 / 2), 0, sqrt(1 / 2))
-        self.assertArrayAlmostEquals([1000, 0], result)
+        self.assertArrayAlmostEquals([1000, 1], result)
 
         result = t._cartesian2cylindrical(-sqrt(1 / 2), 0, -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([3000, 0], result)
+        self.assertArrayAlmostEquals([3000, 1], result)
 
         result = t._cartesian2cylindrical(0, sqrt(1 / 2), sqrt(1 / 2))
         self.assertArrayAlmostEquals([1000, 6000], result)
