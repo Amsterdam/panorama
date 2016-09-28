@@ -32,8 +32,6 @@ node {
                     "docker-compose -p panorama -f .jenkins/docker-compose.yml run -u root --rm tests"
         }
     }, {
-        step([$class: "JUnitResultArchiver", testResults: "reports/junit.xml"])
-
         sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
      }
 }
