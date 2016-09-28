@@ -10,7 +10,6 @@ tests:
     - database:database
   mem_limit: 4G
   volumes:
-    - ../reports:/app/reports
     - ../web/panorama/panoramas_test:/app/panoramas_test
     - ../panoramas_test/test_output:/app/panoramas_test/2016/test_output
   environment:
