@@ -6,6 +6,8 @@ from rest_framework_gis import fields
 from datasets.panoramas import models
 from datapunt_api.datapunt_rest import LinksField, HALSerializer
 
+MAX_ADJACENCY = 21
+
 
 class AdjacencySerializer(serializers.ModelSerializer):
     pano_id = serializers.ReadOnlyField(source='to_pano.pano_id')
@@ -70,7 +72,7 @@ class FilteredPanoSerializer(PanoSerializer):
         super().__init__(instance, data, **kwargs)
 
     def get_adjacent(self, instance):
-        qs = models.Adjacency.objects.filter(from_pano=instance, distance__lt=11)
+        qs = models.Adjacency.objects.filter(from_pano=instance, distance__lt=MAX_ADJACENCY)
         if 'vanaf' in self.filter:
             qs = qs.exclude(to_pano__timestamp__lt=self.filter['vanaf'])
         if 'tot' in self.filter:
