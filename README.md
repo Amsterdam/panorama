@@ -18,13 +18,15 @@ Requirements
 Developing
 ----------
 
-Use `docker-compose` to start a local database.
+Use `docker-compose` to start a local set of dockers.
 
 	(sudo) docker-compose start
 
 or
 
 	docker-compose up
+	
+You can also start the web project locally on port 8000 for live development, it will connect to the containerized database. 
 
 Unit tests run locally
 ----------------------
@@ -36,4 +38,4 @@ name the django app explicitly.
 Running panorama demo
 ---------------------
 
-Use http:/<server>:8088/demo in url
+Use http://localhost:8088/demo in a browser to see a demo of normalized panoramas in Marzipano viewer.
