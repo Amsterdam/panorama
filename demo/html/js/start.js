@@ -60,10 +60,10 @@ var demo_pano = demo_panos[Math.floor(Math.random() * demo_panos.length)];
 var source = Marzipano.ImageUrlSource.fromString(demo_pano);
 
 // Create geometry.
-var geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
+var geometry = new Marzipano.EquirectGeometry([{ width: 8000 }]);
 
 // Create view.
-var limiter = Marzipano.RectilinearView.limit.traditional(1024, 100*Math.PI/180);
+var limiter = Marzipano.RectilinearView.limit.traditional(2000, 100*Math.PI/180);
 var view = new Marzipano.RectilinearView({ yaw: 0 }, limiter);
 
 // Create scene.
