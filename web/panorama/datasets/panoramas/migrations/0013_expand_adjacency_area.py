@@ -23,7 +23,7 @@ SELECT row_number() OVER (ORDER BY pp.id, pp1.id) AS id,
   st_z(pp1.geolocation) - st_z(pp.geolocation) AS elevation
 FROM panoramas_panorama pp,
     panoramas_panorama pp1
-WHERE st_dwithin(pp.geopoint, pp1.geopoint, 0.00036000036::double precision) AND pp1.id <> pp.id
+WHERE st_dwithin(pp._geolocation_2d, pp1._geolocation_2d, 0.00036000036::double precision) AND pp1.id <> pp.id
 ORDER BY pp.id, pp1.id"""
         ),
     ]
