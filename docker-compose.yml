@@ -21,7 +21,7 @@ web:
     SECRET_KEY: hoi
     DB_NAME: panorama
     DB_PASSWORD: insecure
-    PANORAMA_IMAGE_URL: http://localhost:8088/panorama
+    PANORAMA_IMAGE_URL: https://acc.atlas.amsterdam.nl/panorama
     OBJECTSTORE_PASSWORD:
 
 
