@@ -8,4 +8,4 @@ web/static/*
 .env
 .jenkins/backups
 /panoramas_test
-**/test_output
+test_output

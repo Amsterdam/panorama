@@ -125,5 +125,3 @@ class PanoramaTransformer:
         raw_image = self.object_store.get_panorama_store_object(raw_image_location)
         return Image.open(io.BytesIO(raw_image))
 
-
-

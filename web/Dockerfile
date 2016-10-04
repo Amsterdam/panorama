@@ -10,7 +10,7 @@ RUN apt-get update \
 		gdal-bin \
 		libgeos-dev \
 		netcat \
-	&& apt-get clean \
+ 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
 	&& adduser --system datapunt \
 	&& mkdir -p /static \
