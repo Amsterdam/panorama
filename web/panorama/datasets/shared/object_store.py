@@ -37,6 +37,9 @@ class ObjectStore():
     def get_datapunt_store_objects(self, path):
         return self._get_full_container_list(self.datapunt_conn, settings.DATAPUNT_CONTAINER, [], prefix=path)
 
+    def get_datapunt_store_object(self, path):
+        return self.datapunt_conn.get_object(settings.DATAPUNT_CONTAINER, path)[1]
+
     def _get_full_container_list(self, conn, container, seed, **kwargs):
         kwargs['limit'] = self.RESP_LIMIT
         if len(seed):

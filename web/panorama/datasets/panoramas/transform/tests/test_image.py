@@ -34,7 +34,7 @@ class TestTransformImg(TestCase):
     This is more like an integration test than a unit test
     Because it expects a mounted /app/panoramas_test folder, run these in the Docker container
 
-        docker exec -it panorama_web_1 ./manage.py test datasets.panoramas.transform.tests
+        docker exec -it panorama_web_1 ./manage.py test datasets.panoramas.transform.tests.test_image
 
     look into the .gitignore-ed directory PROJECT/panoramas_test/output for a visual check on the transformations
     """
@@ -82,7 +82,7 @@ class TestTransformImg(TestCase):
         for img in images:
             image_tranformer = PanoramaTransformer(img)
             set_pano(img)
-            output_path = "/app/panoramas_test/2016/test_output/"+img.filename[:-4]
+            output_path = "/app/test_output/"+img.filename[:-4]
             for direction in [0, 90, 180, 270]:
                 img1 = image_tranformer.get_translated_image(target_width=900,
                                                              target_fov=80,
