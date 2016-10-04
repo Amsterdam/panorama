@@ -17,7 +17,10 @@ tests:
     DATABASE_USER: panorama
     DATABASE_PASSWORD: insecure
     OBJECTSTORE_PASSWORD:
-  command: bash -c "/app/docker-wait.sh && python manage.py jenkins"
+  command: >
+    bash -c "/app/docker-wait.sh \
+            && python manage.py migrate \
+            && python manage.py jenkins"
 
 importer:
   build: ../web
