@@ -32,4 +32,3 @@ demo:
   volumes:
     - "./demo/html:/var/www/html/demo"
     - "./web/panorama/panoramas_test/2016:/var/www/html/2016"
-
