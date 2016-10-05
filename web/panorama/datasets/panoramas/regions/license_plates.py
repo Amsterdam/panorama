@@ -72,6 +72,6 @@ class LicensePlateDetector:
                     for coordinates in result['coordinates']:
                         x, y = cliche.original(coordinates['x'], coordinates['y'])
                         licenseplate_region.append((x,y))
-                        licenseplate_regions.append(licenseplate_region)
+                    licenseplate_regions.append(licenseplate_region)
 
         return licenseplate_regions

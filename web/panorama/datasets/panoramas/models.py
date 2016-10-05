@@ -89,6 +89,32 @@ class Adjacency(models.Model):
             return degrees(atan2(self.elevation, self.distance))
 
 
+class Region(models.Model):
+    REGION_TYPES = (
+        ('N', 'Nummerbord'),
+        ('G', 'Gezicht')
+    )
+    id = models.AutoField(primary_key=True)
+    panorama = models.ForeignKey(Panorama)
+    region_type = models.CharField(max_length=1, choices=REGION_TYPES)
+
+    # coordinates from left top, clockwise
+    left_top_x = models.IntegerField()
+    left_top_y = models.IntegerField()
+    right_top_x = models.IntegerField()
+    right_top_y = models.IntegerField()
+    right_bottom_x = models.IntegerField()
+    right_bottom_y = models.IntegerField()
+    left_bottom_x = models.IntegerField()
+    left_bottom_y = models.IntegerField()
+
+    class Meta:
+        ordering = ('id',)
+
+    def __str__(self):
+        return '<Region {} of Panorama {}>'.format(self.id, self.panorama.pano_id)
+
+
 class Traject(models.Model):
     timestamp = models.DateTimeField()
     geolocation = geo.PointField(dim=3, spatial_index=True)
