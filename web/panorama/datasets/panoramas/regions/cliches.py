@@ -42,7 +42,10 @@ class Cliche:
         return mod(y, PANORAMA_WIDTH-1)
 
     def original(self, x, y):
-        return int(self.x[y, x]), int(self.y[y, x])
+        x = min(x, len(self.x)-1)
+        y = min(y, len(self.y[0])-1)
+
+        return int(self.x[x, y]), int(self.y[x, y])
 
 
 class Cliches:

@@ -7,6 +7,7 @@ from PIL import Image
 
 from datasets.shared.object_store import ObjectStore
 from .cliches import Cliches
+from .openalpr import OpenAlpr
 
 
 class LicensePlateSampler:
@@ -25,7 +26,7 @@ class LicensePlateSampler:
         for cliche in self.cliches.all:
             sample = {}
             sample['image'] = self.sample_image(panorama_image, cliche.x, cliche.y)
-            sample['original'] = cliche.original
+            sample['cliche'] = cliche
             samples.append(sample)
 
         return samples
@@ -46,3 +47,31 @@ class LicensePlateSampler:
         raw_image_location = self.panorama.get_raw_image_objectstore_id()
         raw_image = self.object_store.get_panorama_store_object(raw_image_location)
         return Image.open(io.BytesIO(raw_image))
+
+
+class LicensePlateDetector:
+    def __init__(self, panorama):
+        self.panorama = panorama
+
+    def get_licenseplate_regions(self):
+        licenseplate_regions = []
+
+        with OpenAlpr() as alpr:
+            panorama_samples = LicensePlateSampler(self.panorama).get_image_samples()
+
+            for sample in panorama_samples:
+                img = sample['image']
+                cliche = sample['cliche']
+
+                imgByteArr = io.BytesIO()
+                Image.fromarray(img, 'RGB').save(imgByteArr, format='JPEG')
+
+                result = alpr.recognize_array(imgByteArr.getvalue())
+                for result in result['results']:
+                    licenseplate_region = []
+                    for coordinates in result['coordinates']:
+                        x, y = cliche.original(coordinates['x'], coordinates['y'])
+                        licenseplate_region.append((x,y))
+                        licenseplate_regions.append(licenseplate_region)
+
+        return licenseplate_regions
