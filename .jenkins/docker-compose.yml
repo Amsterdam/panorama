@@ -8,7 +8,7 @@ tests:
   build: ../web
   links:
     - database:database
-  mem_limit: 4G
+  mem_limit: 6G
   volumes:
     - ../web/panorama/panoramas_test:/app/panoramas_test
     - ../panoramas_test/test_output:/app/panoramas_test/2016/test_output
