@@ -4,11 +4,14 @@ import logging
 import os
 from random import randrange
 from unittest import TestCase, mock, skipIf
+import datetime
 
 from PIL import Image
 from scipy import misc
+from django.contrib.gis.geos import Point
 
 from datasets.panoramas.regions.license_plates import LicensePlateSampler, LicensePlateDetector
+from datasets.panoramas.models import Panorama, Region
 from datasets.shared.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
@@ -86,10 +89,39 @@ class TestLicensePlateDetector(TestCase):
     @mock.patch('datasets.panoramas.regions.license_plates.LicensePlateSampler._get_raw_image_binary',
                 side_effect=mock_get_raw_pano)
     def test_detection_licenseplates_runs_without_errors(self, mock):
-        for panorama in get_subset():
-            log.warning("detecting license plates in panorama: {}, please hold".format(panorama))
+        for pano_idx, panorama_url in enumerate(get_subset()):
+            log.warning("detecting license plates in panorama: {}, please hold".format(panorama_url))
 
-            set_pano(panorama)
-            for region in LicensePlateDetector(None).get_licenseplate_regions():
-                for coordinates in region:
-                    log.warning("x, y = {}, {}".format(coordinates[0], coordinates[1]))
+            panorama = Panorama(pano_id=pano_idx, filename=panorama_url, geolocation=Point(54,5,15),
+                            roll=0, pitch=0, heading=0,
+                            timestamp=datetime.datetime.now(), status=Panorama.STATUS.to_be_rendered)
+            panorama.save()
+
+            set_pano(panorama_url)
+            for regioncoordinates in LicensePlateDetector(None).get_licenseplate_regions():
+
+                region = Region()
+                region.panorama = panorama
+                region.region_type = 'N'
+
+                region.left_top_x, region.left_top_y = regioncoordinates[0]
+                region.right_top_x, region.right_top_y = regioncoordinates[1]
+                region.right_bottom_x, region.right_bottom_y = regioncoordinates[2]
+                region.left_bottom_x, region.left_bottom_y = regioncoordinates[3]
+
+                region.save()
+
+        regions = Region.objects.all()
+        for region in regions:
+            log.warning("{}, {}, ({},{}) -> ({},{}) -> ({},{}) -> ({},{})".format(
+                str(region),
+                region.region_type,
+                region.left_top_x,
+                region.left_top_y,
+                region.right_top_x,
+                region.right_top_y,
+                region.right_bottom_x,
+                region.right_bottom_y,
+                region.left_bottom_x,
+                region.left_bottom_y,
+            ))
