@@ -29,7 +29,7 @@ class TestCliches(TestCase):
             expect_y = test_y / cl.SAMPLE_MAGNIFICATION + cliche.y[0][0]
             expect_x = cl.SAMPLE_X + (test_x / cl.SAMPLE_MAGNIFICATION) * (1 - cliche.shift_factor * (expect_y - cliche.y_mid) )
 
-            actual_x, actual_y = cliche.original(test_x, test_y)
+            actual_x, actual_y = cliche.original(test_y, test_x)
 
             msg = "testing cliche[{}](x, y) = ({}, {}) to map back to ({}, {}), but resulting in ({}, {})".format(
                 c_idx, test_x, test_y, expect_x, expect_y, actual_x, actual_y
