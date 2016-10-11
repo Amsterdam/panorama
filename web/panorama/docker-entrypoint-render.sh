@@ -7,9 +7,6 @@ cd /app
 
 source docker-wait.sh
 
-# collect static files
-python manage.py collectstatic --noinput
-
 # migrate database tables
 yes yes | python manage.py migrate --noinput
 
