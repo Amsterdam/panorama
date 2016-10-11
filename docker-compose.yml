@@ -31,4 +31,4 @@ demo:
     - "8088:80"
   volumes:
     - "./demo/html:/var/www/html/demo"
-    - "./web/panorama/panoramas_test/2016:/var/www/html/2016"
+    - "./test_output:/var/www/html/img"

@@ -1,6 +1,7 @@
 # Python
 import datetime, os, logging
 from unittest import TestCase, mock, skipIf
+from math import log as logarithm
 # Packages
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
@@ -15,14 +16,17 @@ from datasets.panoramas.models import Panorama
 
 log = logging.getLogger(__name__)
 
+MAX_WIDTH=2048
+TILE_SIZE=512
+PREVIEW_WIDTH=256
+
 
 def set_pano(pano):
     global panorama
     panorama = pano
 
 
-def mock_get_raw_pano():
-    pano = panorama.get_raw_image_objectstore_id()
+def mock_get_raw_pano(pano):
     path = '/app/panoramas_test/'+pano['container']+'/'+pano['name']
     return Image.open(path)
 
@@ -80,8 +84,8 @@ class TestTransformImg(TestCase):
         ]
 
         for img in images:
-            image_tranformer = PanoramaTransformer(img)
             set_pano(img)
+            image_tranformer = PanoramaTransformer(img.get_raw_image_objectstore_id(), img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
             for direction in [0, 90, 180, 270]:
                 img1 = image_tranformer.get_translated_image(target_width=900,
@@ -97,7 +101,46 @@ class TestTransformImg(TestCase):
                                                              target_aspect=4/3)
                 misc.imsave(output_path+"_small_{}.jpg".format(direction), img1)
 
-            img1 = image_tranformer.get_translated_image()
-            misc.imsave(output_path+"_trans.jpg", img1)
+            img1 = image_tranformer.get_translated_image(target_width=8000)
+            transformed = Image.fromarray(img1)
+            transformed.save(output_path+"_8000.jpg", optimize=True, progressive=True)
+            half_size = transformed.resize((4000, 2000), Image.ANTIALIAS)
+            half_size.save(output_path+"_4000.jpg", optimize=True, progressive=True)
+            smallest = transformed.resize((2000, 1000), Image.ANTIALIAS)
+            smallest.save(output_path+"_2000.jpg", optimize=True, progressive=True)
+
+    @mock.patch('datasets.panoramas.transform.transformer.PanoramaTransformer._get_raw_image_binary',
+                side_effect=mock_get_raw_pano)
+    def test_transform_cubic_runs_without_errors(self, mock_1):
+
+        images = [
+            Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0],
+            Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0],
+        ]
+
+        for img in images:
+            set_pano(img)
+            image_tranformer = PanoramaTransformer(img.get_raw_image_objectstore_id(), img.heading, img.pitch, img.roll)
+            output_path = "/app/test_output/"+img.filename[:-4]
+            img_set = image_tranformer.get_cubic_projections(target_width=MAX_WIDTH)
+            previews = {}
+            for side, img in img_set.items():
+                cube_face = Image.fromarray(img)
+                preview = cube_face.resize((PREVIEW_WIDTH, PREVIEW_WIDTH), Image.ANTIALIAS)
+                previews[side] = preview
+                for zoomlevel in range(0, 1+int(logarithm(MAX_WIDTH/TILE_SIZE, 2))):
+                    zoom_size = 2 ** zoomlevel * TILE_SIZE
+                    zoomed_img = cube_face.resize((zoom_size, zoom_size), Image.ANTIALIAS)
+                    for h_idx, h_start in enumerate(range(0, zoom_size, TILE_SIZE)):
+                        for v_idx, v_start in enumerate(range(0, zoom_size, TILE_SIZE)):
+                            tile = zoomed_img.crop((h_start, v_start, h_start+TILE_SIZE, v_start+TILE_SIZE))
+                            tile_path = "/{}/{}/{}".format(zoomlevel+1, side, v_idx)
+                            os.makedirs(output_path+tile_path, exist_ok=True)
+                            tile.save("{}{}/{}.jpg".format(output_path, tile_path, h_idx),  optimize=True, progressive=True)
+
+            preview_image = Image.new('RGB', (PREVIEW_WIDTH, 6 * PREVIEW_WIDTH))
+            for idx, side in enumerate(['b', 'd', 'f', 'l', 'r', 'u']):
+                preview_image.paste(previews[side], (0,PREVIEW_WIDTH*idx))
+            preview_image.save(output_path+"/preview.jpg", "JPEG", optimize=True, progressive=True)
 
 
