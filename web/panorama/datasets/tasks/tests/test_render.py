@@ -20,8 +20,7 @@ def set_pano(pano):
     panorama = pano
 
 
-def mock_get_raw_pano():
-    pano = panorama.get_raw_image_objectstore_id()
+def mock_get_raw_pano(pano):
     path = '/app/panoramas_test/'+pano['container']+'/'+pano['name']
     return Image.open(path)
 

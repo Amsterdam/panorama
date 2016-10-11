@@ -23,7 +23,11 @@ class RenderPanorama:
 
             log.info('RENDERING panorama: %s', str(pano_to_render))
             rendered_name = pano_to_render.path+pano_to_render.filename[:-4]+'_normalized.jpg'
-            rendered_num_array = PanoramaTransformer(pano_to_render).get_translated_image(target_width=8000)
+            rendered_num_array = PanoramaTransformer(pano_to_render.get_raw_image_objectstore_id(),
+                                                     pano_to_render.heading,
+                                                     pano_to_render.pitch,
+                                                     pano_to_render.roll
+                                                     ).get_translated_image(target_width=8000)
             to_bytes = io.BytesIO()
             misc.toimage(rendered_num_array).save(to_bytes, format='jpeg')
             self.object_store.put_into_datapunt_store(rendered_name, to_bytes.getvalue(), 'image/jpeg')
