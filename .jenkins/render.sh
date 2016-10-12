@@ -26,9 +26,6 @@ dc scale render=5
 sleep 105
 dc scale render=6
 
-# keep the script alive while rendering - rendernodes quit when done
-while (docker ps | grep render > /dev/null); do
-	sleep 60
-done
+docker wait panorama_render_1 panorama_render_2 panorama_render_3 panorama_render_4 panorama_render_5 panorama_render_6
 
 dc stop database
