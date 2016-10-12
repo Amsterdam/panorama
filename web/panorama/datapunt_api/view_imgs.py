@@ -11,7 +11,7 @@ from scipy import misc
 from .queryparam_utils import _get_float_value, _get_int_value, _get_request_coord
 from datapunt_api.views import PanoramaViewSet
 from datasets.panoramas.models import Panorama
-from datasets.panoramas.transform.transformer import PanoramaTransformer
+from datasets.panoramas.transform.equirectangular import EquirectangularTransformer
 from datasets.panoramas.serializers import ThumbnailSerializer
 from . import datapunt_rest
 
@@ -120,12 +120,12 @@ class ThumbnailViewSet(PanoramaViewSet):
         target_aspect = _get_float_value(request, 'aspect', default=1.5, lower=1.0)
 
         pano = get_object_or_404(Panorama, pano_id=pano_id)
-        pt = PanoramaTransformer(pano.get_raw_image_objectstore_id(), pano.heading, pano.pitch, pano.roll)
-        normalized_pano = pt.get_translated_image(target_width=target_width,
-                                                  target_fov=target_fov,
-                                                  target_horizon=target_horizon,
-                                                  target_heading=target_heading,
-                                                  target_aspect=target_aspect)
+        pt = EquirectangularTransformer(pano.get_raw_image_objectstore_id(), pano.heading, pano.pitch, pano.roll)
+        normalized_pano = pt.get_projection(target_width=target_width,
+                                            target_fov=target_fov,
+                                            target_horizon=target_horizon,
+                                            target_heading=target_heading,
+                                            target_aspect=target_aspect)
 
         response = HttpResponse(content_type="image/jpeg")
         misc.toimage(normalized_pano).save(response, "JPEG")

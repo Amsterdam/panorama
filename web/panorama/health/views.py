@@ -25,7 +25,6 @@ def health(request):
             "Too few Panoramas in the database",
             content_type="text/plain", status=500)
 
-
     return HttpResponse(
         "Connectivity OK", content_type='text/plain', status=200)
 
