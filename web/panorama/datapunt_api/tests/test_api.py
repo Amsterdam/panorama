@@ -137,9 +137,12 @@ class PanoramaApiTest(APITestCase):
         self.assertEqual(response.data['pano_id'], 'PANO_1_2014')
 
     def test_get_status_health(self):
+        """
+            Tests both the pass of database-cursor as well as the missing of db-content
+        """
         response=self.client.get('/status/health')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Connectivity OK', str(response.content))
+        self.assertEqual(response.status_code, 500)
+        self.assertIn('Too few Panoramas', str(response.content))
 
     def test_get_thumbnail_returns_json(self):
         response = self.client.get(

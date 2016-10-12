@@ -1,106 +1,58 @@
-from unittest import TestCase, mock
-from math import sqrt
-from datasets.panoramas.transform.transformer import PanoramaTransformer
-from numpy import array_equal, allclose
+# Python
+import datetime
+from unittest import TestCase
+# Packages
+from django.contrib.gis.geos import Point
+from django.utils.timezone import utc as UTC_TZ
+import factory
+import factory.fuzzy
+# Project
+from datasets.panoramas.tests import factories
+from datasets.panoramas.models import Panorama
 
 
-@mock.patch('datasets.panoramas.transform.transformer.PanoramaTransformer._get_panorama_rgb_array')
 class TestTransformer(TestCase):
 
-    def test_cylindrical2cartesion(self, mock):
-        t = PanoramaTransformer("", 0, 0, 0)
+    @classmethod
+    def setUpClass(self):
+        super().setUpClass()
 
-        result = t._cylindrical2cartesian(4000, 2000)
-        self.assertArrayAlmostEquals([1,0,0], result)
+        try:
+            pano = Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
+        except IndexError:
+            factories.PanoramaFactory.create(
+                pano_id='TMX7315120208-000073_pano_0004_000087',
+                timestamp=factory.fuzzy.FuzzyDateTime(
+                    datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
+                filename='pano_0004_000087.jpg',
+                path='2016/06/09/TMX7315120208-000073/',
+                geolocation=Point(4.89593266865189,
+                                  52.3717022854865,
+                                  47.3290048856288),
+                roll=-5.48553832377717,
+                pitch=-6.76660799409535,
+                heading=219.760795827427,
+            )
 
-        result = t._cylindrical2cartesian(2000, 2000)
-        self.assertArrayAlmostEquals([0,-1,0], result)
+        try:
+            pano = Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0]
+        except IndexError:
+            factories.PanoramaFactory.create(
+                pano_id='TMX7315120208-000067_pano_0011_000463',
+                timestamp=factory.fuzzy.FuzzyDateTime(
+                    datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
+                filename='pano_0011_000463.jpg',
+                path='2016/06/06/TMX7315120208-000067/',
+                geolocation=Point(4.96113893249052,
+                                  52.3632599072419,
+                                  46.0049178628251),
+                roll=-7.25543305609142,
+                pitch=0.281594736873711,
+                heading=295.567147056641,
+            )
 
-        result = t._cylindrical2cartesian(0, 2000)
-        self.assertArrayAlmostEquals([-1,0,0], result)
+        self.images = [
+            Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0],
+            Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0],
+        ]
 
-        result = t._cylindrical2cartesian(6000, 2000)
-        self.assertArrayAlmostEquals([0,1,0], result)
-
-        result = t._cylindrical2cartesian(4000, 1000)
-        self.assertArrayAlmostEquals([sqrt(1/2),0,sqrt(1/2)], result)
-
-        result = t._cylindrical2cartesian(4000, 3000)
-        self.assertArrayAlmostEquals([sqrt(1/2),0,-sqrt(1/2)], result)
-
-        result = t._cylindrical2cartesian(2000, 1000)
-        self.assertArrayAlmostEquals([0,-sqrt(1/2),sqrt(1/2)], result)
-
-        result = t._cylindrical2cartesian(2000, 3000)
-        self.assertArrayAlmostEquals([0,-sqrt(1/2),-sqrt(1/2)], result)
-
-        result = t._cylindrical2cartesian(0, 1000)
-        self.assertArrayAlmostEquals([-sqrt(1/2),0,sqrt(1/2)], result)
-
-        result = t._cylindrical2cartesian(0, 3000)
-        self.assertArrayAlmostEquals([-sqrt(1/2),0,-sqrt(1/2)], result)
-
-        result = t._cylindrical2cartesian(6000, 1000)
-        self.assertArrayAlmostEquals([0,sqrt(1/2),sqrt(1/2)], result)
-
-        result = t._cylindrical2cartesian(6000, 3000)
-        self.assertArrayAlmostEquals([0,sqrt(1/2),-sqrt(1/2)], result)
-
-    def test_cartesian2cylindrical(self, mock):
-        t = PanoramaTransformer("", 0, 0, 0)
-
-        result = t._cartesian2cylindrical(1, 0, 0)
-        self.assertArrayAlmostEquals([4000, 2000], result)
-
-        result = t._cartesian2cylindrical(0, -1, 0)
-        self.assertArrayAlmostEquals([2000, 2000], result)
-
-        result = t._cartesian2cylindrical(-1, 0, 0)
-        self.assertArrayAlmostEquals([1, 2000], result)
-
-        result = t._cartesian2cylindrical(0, 1, 0)
-        self.assertArrayAlmostEquals([6000, 2000], result)
-
-        result = t._cartesian2cylindrical(sqrt(1 / 2), 0, sqrt(1 / 2))
-        self.assertArrayAlmostEquals([4000, 1000], result)
-
-        result = t._cartesian2cylindrical(sqrt(1 / 2), 0, -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([4000, 3000], result)
-
-        result = t._cartesian2cylindrical(0, -sqrt(1 / 2), sqrt(1 / 2))
-        self.assertArrayAlmostEquals([2000, 1000], result)
-
-        result = t._cartesian2cylindrical(0, -sqrt(1 / 2), -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([2000, 3000], result)
-
-        result = t._cartesian2cylindrical(-sqrt(1 / 2), 0, sqrt(1 / 2))
-        self.assertArrayAlmostEquals([1, 1000], result)
-
-        result = t._cartesian2cylindrical(-sqrt(1 / 2), 0, -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([1, 3000], result)
-
-        result = t._cartesian2cylindrical(0, sqrt(1 / 2), sqrt(1 / 2))
-        self.assertArrayAlmostEquals([6000, 1000], result)
-
-        result = t._cartesian2cylindrical(0, sqrt(1 / 2), -sqrt(1 / 2))
-        self.assertArrayAlmostEquals([6000, 3000], result)
-
-    def test_get_rotation_matrix(self, mock):
-        t = PanoramaTransformer("", 0, 0, 0)
-
-        result = t._get_rotation_matrix(0, 0, 0)
-        self.assertTrue(array_equal(result, [[1,0,0],[0,1,0],[0,0,1]]))
-
-        result = t._get_rotation_matrix(90, 0, 0)
-        self.assertTrue(allclose(result, [[0,-1,0],[1,0,0],[0,0,1]]))
-
-        result = t._get_rotation_matrix(0, 90, 0)
-        self.assertTrue(allclose(result, [[0,0,1],[0,1,0],[-1,0,0]]))
-
-        result = t._get_rotation_matrix(0, 45, 45)
-        self.assertTrue(allclose(result, [[sqrt(1/2),0,sqrt(1/2)],[1/2,sqrt(1/2),-1/2],[-1/2,sqrt(1/2),1/2]]))
-
-    def assertArrayAlmostEquals(self, expected, actual):
-        self.assertEqual(len(expected), len(actual), 'not same length')
-        for i in range(len(actual)):
-            self.assertAlmostEquals(expected[i], actual[i], 6, 'index {} in expected {} and actual {}'.format(i, expected, actual))
