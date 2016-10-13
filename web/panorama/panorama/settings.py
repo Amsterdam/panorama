@@ -2,6 +2,8 @@
 import os
 import re
 
+from panorama import objectstore_settings
+
 
 def get_docker_host():
     d_host = os.getenv('DOCKER_HOST', None)
@@ -189,18 +191,20 @@ HEALTH_MODEL = 'panoramas.Panorama'
 
 # OBJECT_STORE SETTINGS
 
-OBJECTSTORE_USER = os.getenv('OBJECTSTORE_USER', 'datapunt')
-OBJECTSTORE_PASSWORD = os.getenv('OBJECTSTORE_PASSWORD', 'insecure')
+import panorama.objectstore_settings
 
-AUTH_VERSION = '2.0'
-AUTHURL = 'https://identity.stack.cloudvps.com/v2.0'
+OBJECTSTORE_USER = objectstore_settings.OBJECTSTORE_USER
+OBJECTSTORE_PASSWORD = objectstore_settings.OBJECTSTORE_PASSWORD
 
-DATAPUNT_TENANT_NAME = 'BGE000081 Datapunt'
-DATAPUNT_TENANT_ID = 'ffb7a5a57dd34cc49436abc510cad162'
-PANORAMA_TENANT_NAME = 'BGE000081 Panorama'
-PANORAMA_TENANT_ID = '3206eec333a04cc980799f75a593505a'
+AUTH_VERSION = objectstore_settings.AUTH_VERSION
+AUTHURL = objectstore_settings.AUTHURL
 
-PANORAMA_CONTAINERS = ['2016']
-DATAPUNT_CONTAINER = 'panorama'
+DATAPUNT_TENANT_NAME = objectstore_settings.DATAPUNT_TENANT_NAME
+DATAPUNT_TENANT_ID = objectstore_settings.DATAPUNT_TENANT_ID
+PANORAMA_TENANT_NAME = objectstore_settings.PANORAMA_TENANT_NAME
+PANORAMA_TENANT_ID = objectstore_settings.PANORAMA_TENANT_ID
 
-REGION_NAME = 'NL'
+PANORAMA_CONTAINERS = objectstore_settings.PANORAMA_CONTAINERS
+DATAPUNT_CONTAINER = objectstore_settings.DATAPUNT_CONTAINER
+
+REGION_NAME = objectstore_settings.REGION_NAME

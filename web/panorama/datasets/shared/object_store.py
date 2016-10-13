@@ -1,7 +1,7 @@
 import logging
 
 from swiftclient.client import Connection
-from django.conf import settings
+import panorama.objectstore_settings as settings
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
