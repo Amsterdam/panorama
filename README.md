@@ -9,41 +9,49 @@ De API-laag bestaat uit twee componenten:
 * Een REST-API die aanvullende functionaliteiten biedt.
 
 
-Requirements
-------------
+Vereisten
+---------
 
-* Docker-Compose (required)
+* docker en docker-compose (required)
 
 
-Developing
-----------
+Ontwikkelen
+-----------
 
-Use `docker-compose` to start a local set of dockers.
+Gebruik `docker-compose` om een lokale versie op te starten
 
 	(sudo) docker-compose start
 
-or
+of
 
 	docker-compose up
 	
-You can also start the web project locally on port 8000 for live development, it will connect to the containerized database. 
+Je kunt ook het project lokaal op poort 8000 draaien, maar dat vereist op zijn minst de database-container:
 
-Unit tests run locally
-----------------------
+	docker-compose up database
+	
+Unit tests lokaal draaien
+-------------------------
 
-name the django app explicitly.
+Roep de django app expliciet aan, en zorg dat OBJECTSTORE_PASSWORD als omgevingsvariabele is gezet:
 
+	export OBJECTSTORE_PASSWORD=XXXXXX
     web/panorama/manage.py test datapunt_api
 
-Running panorama demo
----------------------
+Panorama demo lokaal
+--------------------
 
-Use http://localhost:8088/demo in a browser to see a demo of normalized panoramas in Marzipano viewer.
+Op [http://localhost:8088/demo](http://localhost:8088/demo) draaien de equidistante panorama's in Marzipano viewer.
+Op [http://localhost:8088/demo/cubic.html](http://localhost:8088/demo/cubic.html) draaien de kubische projecties van de panorama's in Marzipano viewer.
 
-Running job docker from root of the project:
------------------------------
 
-make sure you have the OBJECTSTORE_PASSWORD in an environment file (for instance ~/.docker/env/objectstore.env)
+Docker Job voor gedistribueerd rekenwerk
+----------------------------------------
 
-	docker build . -f JobDockerfile -t job
-	docker run --env-file ~/.docker/env/objectstore.env job 2016/03/17/TMX7315120208-000020/pano_0000_000000.jpg 359.75457352539 -0.467467454247501 -0.446629825528845
+Zorg dat je een docker swarm tot je beschikking hebt :-) en dat het OBJECTSTORE_PASSWORD in een environment file staat (bijvoorbeeld ~/.docker/env/object_store.env)
+
+	docker build ./web -f web/JobDockerfile -t job
+	docker run --env-file ~/.docker/env/object_store.env job 2016/03/17/TMX7315120208-000020/pano_0000_000000.jpg 359.75457352539 -0.467467454247501 -0.446629825528845
+	
+Vervolgens kun je een shell-script maken met alle entries om gedistribueerd uit te laten rekenen.
+Een to-do voor ons is om dit te automatiseren en te integreren met Jenkins.
