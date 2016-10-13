@@ -14,9 +14,16 @@ PANO_HEIGHT = SOURCE_WIDTH / PANO_ASPECT
 
 class PanoramaTransformer:
 
-    def __init__(self, objectstore_id, heading=0, pitch=0, roll=0):
-        self.rotation_matrix = Math.get_rotation_matrix(heading, pitch, roll)
-        self.pano_rgb = Img.get_panorama_rgb_array(objectstore_id)
+    def __init__(self, objectstore_id=None, heading=0, pitch=0, roll=0, rotation_matrix=None, pano_rgb=None):
+        if rotation_matrix is not None:
+            self.rotation_matrix = rotation_matrix
+        else:
+            self.rotation_matrix = Math.get_rotation_matrix(heading, pitch, roll)
+
+        if pano_rgb is not None:
+            self.pano_rgb = pano_rgb
+        else:
+            self.pano_rgb = Img.get_panorama_rgb_array(objectstore_id)
 
     def get_projection(self):
         pass

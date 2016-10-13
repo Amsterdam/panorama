@@ -33,22 +33,24 @@ def render(panorama_url, heading_in, pitch_in, roll_in):
     print('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_url))
     equirectangular_dir = panorama_url[:-4]+'/equirectangular/'
 
-    render = EquirectangularTransformer(objectstore_id, yaw, pitch, roll)
+    equi_t = EquirectangularTransformer(objectstore_id, yaw, pitch, roll)
 
-    projection = render.get_projection(target_width=8000)
+    projection = equi_t.get_projection(target_width=8000)
     save_image(Image.fromarray(projection), equirectangular_dir+"panorama_8000.jpg")
 
-    projection = render.get_projection(target_width=4000)
+    projection = equi_t.get_projection(target_width=4000)
     save_image(Image.fromarray(projection), equirectangular_dir+"panorama_4000.jpg")
 
-    projection = render.get_projection(target_width=2000)
+    projection = equi_t.get_projection(target_width=2000)
     save_image(Image.fromarray(projection), equirectangular_dir+"panorama_2000.jpg")
 
     print('START RENDERING panorama: {} in cubic projection.'.format(panorama_url))
     cubic_dir = panorama_url[:-4]+'/cubic'
 
-    render = CubicTransformer(objectstore_id, yaw, pitch, roll)
-    projections = render.get_projection(target_width=MAX_WIDTH)
+    # for less overhead reuse rotation_matrix and pano_rgb
+    cubic_t = CubicTransformer(None, rotation_matrix=equi_t.rotation_matrix, pano_rgb=equi_t.pano_rgb)
+
+    projections = cubic_t.get_projection(target_width=MAX_WIDTH)
     previews = {}
     for side, img in projections.items():
         cube_face = Image.fromarray(img)
