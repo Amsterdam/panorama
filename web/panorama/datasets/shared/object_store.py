@@ -9,22 +9,6 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("swiftclient").setLevel(logging.WARNING)
 
 log = logging.getLogger(__name__)
-original_get_auth_method = client.get_auth
-
-
-def modified_get_auth_method(auth_url, user, key, **kwargs):
-    intermediate_url, token = original_get_auth_method(auth_url, user, key, **kwargs)
-
-    parsed = list(urlparse(intermediate_url))
-    netloc = parsed[1]
-    components = netloc.split('.')
-    components.insert(1, 'internal')
-    parsed[1] = '.'.join(components)
-    url = urlunparse(parsed)
-
-    return url, token
-
-client.get_auth = modified_get_auth_method
 
 
 class ObjectStore():
@@ -36,14 +20,16 @@ class ObjectStore():
                                       tenant_name=settings.DATAPUNT_TENANT_NAME,
                                       auth_version=settings.AUTH_VERSION,
                                       os_options={'tenant_id': settings.DATAPUNT_TENANT_ID,
-                                                  'region_name': settings.REGION_NAME})
+                                                  'region_name': settings.REGION_NAME,
+                                                  'endpoint_type' : 'internalURL'})
     panorama_conn = client.Connection(authurl=settings.AUTHURL,
                                       user=settings.OBJECTSTORE_USER,
                                       key=settings.OBJECTSTORE_PASSWORD,
                                       tenant_name=settings.PANORAMA_TENANT_NAME,
                                       auth_version=settings.AUTH_VERSION,
                                       os_options={'tenant_id': settings.PANORAMA_TENANT_ID,
-                                                  'region_name': settings.REGION_NAME})
+                                                  'region_name': settings.REGION_NAME,
+                                                  'endpoint_type' : 'internalURL'})
 
     def get_panorama_store_object(self, object_meta_data):
         return self.panorama_conn.get_object(object_meta_data['container'], object_meta_data['name'])[1]
