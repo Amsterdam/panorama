@@ -1,0 +1,24 @@
+FROM python:3.5
+MAINTAINER datapunt.ois@amsterdam.nl
+
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+	&& adduser --system datapunt
+
+WORKDIR /app
+
+COPY ./job/requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN mkdir -p /app/datasets/panoramas/transform
+COPY ./web/panorama/datasets/panoramas/transform /app/datasets/panoramas/transform/
+
+RUN mkdir -p /app/datasets/shared
+COPY ./web/panorama/datasets/shared /app/datasets/shared/
+
+RUN mkdir -p /app/panorama
+COPY ./web/panorama/panorama/objectstore_settings.py /app/panorama
+
+COPY ./job/src/job.py /app/
+
+USER datapunt
+ENTRYPOINT ["python3", "job.py"]

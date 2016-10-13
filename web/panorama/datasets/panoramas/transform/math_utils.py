@@ -1,10 +1,10 @@
 from numpy import array, sqrt, square, radians, float64, pi, arctan2, arccos, cos, sin, mod
 
 
-def get_rotation_matrix(head, pitch, roll):
+def get_rotation_matrix(yaw, pitch, roll):
     r_pitch = radians(pitch)
     r_roll = radians(roll)
-    r_yaw = radians(head)
+    r_yaw = radians(yaw)
 
     rx_roll = array(
         [

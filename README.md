@@ -39,3 +39,11 @@ Running panorama demo
 ---------------------
 
 Use http://localhost:8088/demo in a browser to see a demo of normalized panoramas in Marzipano viewer.
+
+Running job docker from root of the project:
+-----------------------------
+
+make sure you have the OBJECTSTORE_PASSWORD in an environment file (for instance ~/.docker/env/objectstore.env)
+
+	docker build . -f JobDockerfile -t job
+	docker run --env-file ~/.docker/env/objectstore.env job 2016/03/17/TMX7315120208-000020/pano_0000_000000.jpg 359.75457352539 -0.467467454247501 -0.446629825528845
