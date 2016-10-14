@@ -51,8 +51,18 @@ class Panorama(StatusModel):
         return {'container':container, 'name':name}
 
     @property
-    def img_url(self):
-        return '%s/%s/%s' % (settings.PANO_IMAGE_URL, self.path, self.filename[:-4]+'_normalized.jpg')
+    def cubic_img_urls(self):
+        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4]+'/cubic/')
+        return {'baseurl': baseurl,
+                'pattern': baseurl+'{z}/{f}/{y}/{x}.jpg',
+                'preview': baseurl+'preview.jpg'}
+
+    @property
+    def equirectangular_img_urls(self):
+        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4]+'/equirectangular/')
+        return {'full': baseurl+'panorama_8000.jpg',
+                'medium': baseurl+'panorama_4000.jpg',
+                'small': baseurl+'panorama_2000.jpg'}
 
 
 class Adjacency(models.Model):

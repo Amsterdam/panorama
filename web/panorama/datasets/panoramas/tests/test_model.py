@@ -9,11 +9,23 @@ class TestModel(TestCase):
 
     def test_img_url(self):
         cases = [
-            ('container/path', 'image.jpg', 'https://acc.atlas.amsterdam.nl/panorama/container/path/image_normalized.jpg'),
+            ('container/path/',
+             'image.jpg',
+             'https://acc.atlas.amsterdam.nl/panorama/container/path/image/equirectangular/panorama_8000.jpg',
+             'https://acc.atlas.amsterdam.nl/panorama/container/path/image/equirectangular/panorama_4000.jpg',
+             'https://acc.atlas.amsterdam.nl/panorama/container/path/image/equirectangular/panorama_2000.jpg',
+             'https://acc.atlas.amsterdam.nl/panorama/container/path/image/cubic/',
+             'https://acc.atlas.amsterdam.nl/panorama/container/path/image/cubic/{z}/{f}/{y}/{x}.jpg',
+             'https://acc.atlas.amsterdam.nl/panorama/container/path/image/cubic/preview.jpg'),
         ]
         for c in cases:
             p = models.Panorama(path=c[0], filename=c[1], geolocation=Point(1,1,1))
-            self.assertEqual(c[2], p.img_url)
+            self.assertEqual(c[2], p.equirectangular_img_urls['full'])
+            self.assertEqual(c[3], p.equirectangular_img_urls['medium'])
+            self.assertEqual(c[4], p.equirectangular_img_urls['small'])
+            self.assertEqual(c[5], p.cubic_img_urls['baseurl'])
+            self.assertEqual(c[6], p.cubic_img_urls['pattern'])
+            self.assertEqual(c[7], p.cubic_img_urls['preview'])
 
     def get_raw_image_objectstore_id(self):
         cases = [
