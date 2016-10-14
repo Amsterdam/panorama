@@ -85,6 +85,9 @@ class TestMath(TestCase):
         self.assertTrue(array_equal(result, [[1,0,0],[0,1,0],[0,0,1]]))
 
         result = Math.get_rotation_matrix(90, 0, 0)
+        self.assertTrue(allclose(result, [[0,1,0],[-1,0,0],[0,0,1]]))
+
+        result = Math.get_rotation_matrix(-90, 0, 0)
         self.assertTrue(allclose(result, [[0,-1,0],[1,0,0],[0,0,1]]))
 
         result = Math.get_rotation_matrix(0, 90, 0)
