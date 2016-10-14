@@ -4,7 +4,7 @@ from numpy import array, sqrt, square, radians, float64, pi, arctan2, arccos, co
 def get_rotation_matrix(yaw, pitch, roll):
     r_pitch = radians(pitch)
     r_roll = radians(roll)
-    r_yaw = radians(yaw)
+    r_yaw = -radians(yaw)
 
     rx_roll = array(
         [
@@ -24,8 +24,8 @@ def get_rotation_matrix(yaw, pitch, roll):
     )
     rz_yaw = array(
         [
-            [cos(r_yaw), -sin(r_yaw), 0],
-            [sin(r_yaw), cos(r_yaw), 0],
+            [cos(r_yaw), sin(r_yaw), 0],
+            [-sin(r_yaw), cos(r_yaw), 0],
             [0, 0, 1]
         ],
         dtype=float64
