@@ -22,12 +22,13 @@ class AdjacencySerializer(serializers.ModelSerializer):
 
 
 class ImageLinksSerializer(serializers.ModelSerializer):
-    equirectangular = serializers.ReadOnlyField(source='img_url')
+    equirectangular = serializers.ReadOnlyField(source='equirectangular_img_urls')
+    cubic = serializers.ReadOnlyField(source='cubic_img_urls')
     thumbnail = serializers.HyperlinkedIdentityField(view_name='thumbnail-detail', lookup_field='pano_id', format='html')
 
     class Meta:
         model = models.Panorama
-        fields = ('equirectangular', 'thumbnail')
+        fields = ('equirectangular', 'thumbnail', 'cubic')
 
 
 class ThumbnailSerializer(serializers.ModelSerializer):
@@ -46,7 +47,7 @@ class PanoLinksField(LinksField):
 
 class PanoSerializer(HALSerializer):
     serializer_url_field = PanoLinksField
-    images = serializers.SerializerMethodField(source='get_images')
+    image_sets = serializers.SerializerMethodField(source='get_image_sets')
     geometrie = fields.GeometryField(source='geolocation')
     roll = serializers.DecimalField(max_digits=20, decimal_places=2)
     pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
@@ -59,7 +60,7 @@ class PanoSerializer(HALSerializer):
     def to_representation(self, instance):
         return super().to_representation(instance)
 
-    def get_images(self, instance):
+    def get_image_sets(self, instance):
         serializer = ImageLinksSerializer(instance=instance, context={'request': self.context['request']})
         return serializer.data
 
