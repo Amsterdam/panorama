@@ -24,11 +24,11 @@ Gebruik `docker-compose` om een lokale versie op te starten
 
 of
 
-	docker-compose up
+	docker-compose up -d
 	
 Je kunt ook het project lokaal op poort 8000 draaien, maar dat vereist op zijn minst de database-container:
 
-	docker-compose up database
+	docker-compose up -d database
 	
 Unit tests lokaal draaien
 -------------------------
