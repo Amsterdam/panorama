@@ -20,5 +20,8 @@ COPY panorama/panorama/objectstore_settings.py /app/panorama
 
 COPY panorama/job.py /app/
 
+ARG OBJECTSTORE_PASSWORD
+ENV OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD
+
 USER datapunt
 ENTRYPOINT ["python3", "job.py"]
