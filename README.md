@@ -48,7 +48,7 @@ Op [http://localhost:8088/demo/cubic.html](http://localhost:8088/demo/cubic.html
 Docker Job voor gedistribueerd rekenwerk
 ----------------------------------------
 
-Zorg dat je een docker swarm tot je beschikking hebt :-), bijvorbbeld eentje met een registry op de swarm master
+Zorg dat je een docker swarm tot je beschikking hebt :-), bijvoorbeeld eentje met een registry op de swarm master
 
 	docker build --build-arg OBJECTSTORE_PASSWORD=<PASSWORD> ./web -f web/JobDockerfile -t master.swarm.datapunt.amsterdam.nl:5000/panojob
 	docker push master.swarm.datapunt.amsterdam.nl:5000/panojob
