@@ -62,6 +62,6 @@ class TestObjectStore(unittest.TestCase):
 
     def test_get_objects_pages(self):
         big_dir = '07/07/TMX7315120208-000104/'
+        self.assertGreater(len(self.object_store.get_datapunt_store_objects('2016'+'/'+big_dir)), 10000)
         self.object_store.RESP_LIMIT = 1000
-        self.assertGreater(len(self.object_store.get_datapunt_store_objects('2016'+'/'+big_dir)), 2000)
-        self.assertGreater(len(self.object_store.get_panorama_store_objects('2016', big_dir)), 2000)
+        self.assertGreater(len(self.object_store.get_panorama_store_objects('2016', big_dir)), 1000)
