@@ -30,5 +30,5 @@ class OpenAlpr:
         return self.alpr
 
     def __exit__(self, type, value, traceback):
-        # Keep alive in this project, self.alpr.unload() also ends python process
+        # Keep alive in this project, self.alpr.unload() also ends python process, we don't want that
         pass
