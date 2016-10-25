@@ -1,22 +1,19 @@
 from numpy import arange, meshgrid
 
-from . import img_file_utils as Img
-from . import math_utils as Math
+from . import utils_img_file as Img
+from . import utils_math_array as Math
+from . import utils_math_cubic as Cube
 from . transformer import SOURCE_WIDTH, PANO_HEIGHT, PanoramaTransformer
-
-# general properties of cubic projections
-CUBE_SIDES = ['f', 'b', 'l', 'r', 'u', 'd']
-MAX_CUBIC_WIDTH = 2048  # width of cubic edges
 
 
 class CubicTransformer(PanoramaTransformer):
 
-    def get_projection(self, target_width=MAX_CUBIC_WIDTH):
+    def get_projection(self, target_width=Cube.MAX_CUBIC_WIDTH):
         cube_projections = {}
 
         # project to sides
-        for direction in CUBE_SIDES:
-            # get target pixel set of cube side (cartesian, where r =/= 1, but depends on cube size)
+        for direction in Cube.CUBE_SIDES:
+            # get target pixel set of cube side (cartesian, where r =/= 1, but depends on cube form)
             x, y, z = self._get_cube_side(direction, target_width)
 
             # rotate vectors according to rotation-matrix for pitch and roll
@@ -33,6 +30,16 @@ class CubicTransformer(PanoramaTransformer):
 
         return cube_projections
 
+    def get_normalized_projection(self, target_width=Cube.MAX_CUBIC_WIDTH):
+        cube_projections = {}
+        for direction in Cube.CUBE_SIDES:
+            x2, y2 = Math.cartesian2cylindrical(self._get_cube_side(direction, target_width),
+                                                source_width=SOURCE_WIDTH,
+                                                source_height=PANO_HEIGHT,
+                                                r_is_1=False)
+            cube_projections[direction] = Img.sample_image((x2, y2), self.pano_rgb)
+        return cube_projections
+
     def _get_cube_side(self, side, width):
         # create the target pixel sets expressed as coordinates of a cubic projection of given cube-size
         # u, d, f, b, l, r = up, down, front, back, left, right
@@ -40,29 +47,29 @@ class CubicTransformer(PanoramaTransformer):
         x, y, z = (0, 0, 0)
         half_width = width / 2
 
-        if side == 'f':
+        if side == Cube.CUBE_FRONT:
             x = half_width
             y, z = meshgrid(arange(-half_width, half_width, 1),
                             arange(half_width, -half_width, -1))
-        elif side == 'b':
+        elif side == Cube.CUBE_BACK:
             x = -half_width
             y, z = meshgrid(arange(half_width, -half_width, -1),
                             arange(half_width, -half_width, -1))
-        elif side == 'l':
+        elif side == Cube.CUBE_LEFT:
             y = -half_width
             x, z = meshgrid(arange(-half_width, half_width, 1),
                             arange(half_width, -half_width, -1))
-        elif side == 'r':
+        elif side == Cube.CUBE_RIGHT:
             y = half_width
             x, z = meshgrid(arange(half_width, -half_width, -1),
                             arange(half_width, -half_width, -1))
-        elif side == 'u':
+        elif side == Cube.CUBE_UP:
             z = half_width
             y, x = meshgrid(arange(-half_width, half_width, 1),
                             arange(-half_width, half_width, 1))
-        elif side == 'd':
+        elif side == Cube.CUBE_DOWN:
             z = -half_width
             y, x = meshgrid(arange(-half_width, half_width, 1),
                             arange(half_width, -half_width, -1))
 
-        return x, y, z
+        return (x, y, z)

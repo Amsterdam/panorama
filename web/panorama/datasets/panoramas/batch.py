@@ -12,7 +12,7 @@ from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
 
 # Project
-from .models import Panorama, Traject
+from .models import Panorama, Traject, EQUIRECTANGULAR_SUBPATH, FULL_IMAGE_NAME
 from datasets.shared.object_store import ObjectStore
 
 BATCH_SIZE = 50000
@@ -102,13 +102,13 @@ class ImportPanoramaJob(object):
             return None
 
         # check if rendered pano file exists
-        rendered_image = base_filename + '_normalized.jpg'
+        rendered_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
         is_pano_rendered = container+'/'+path+rendered_image in self.files_in_renderdir
 
         # Creating unique id from mission id and pano id
         pano_id = '%s_%s' % (path.split('/')[-2], base_filename)
 
-        return Panorama(
+        panorama = Panorama(
             pano_id=pano_id,
             status=Panorama.STATUS.rendered if is_pano_rendered else Panorama.STATUS.to_be_rendered,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),

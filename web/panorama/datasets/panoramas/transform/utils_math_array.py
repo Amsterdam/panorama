@@ -2,36 +2,36 @@ from numpy import array, sqrt, square, radians, float64, pi, arctan2, arccos, co
 
 
 def get_rotation_matrix(yaw, pitch, roll):
-    r_pitch = radians(pitch)
-    r_roll = radians(roll)
-    r_yaw = radians(-yaw)
+    rad_pitch = radians(pitch)
+    rad_roll = radians(roll)
+    rad_yaw = radians(-yaw)
 
-    rx_roll = array(
+    rot_x_roll = array(
         [
             [1, 0, 0],
-            [0, cos(r_roll), -sin(r_roll)],
-            [0, sin(r_roll), cos(r_roll)]
+            [0, cos(rad_roll), -sin(rad_roll)],
+            [0, sin(rad_roll), cos(rad_roll)]
         ],
         dtype=float64
     )
-    ry_pitch = array(
+    rot_y_pitch = array(
         [
-            [cos(r_pitch), 0, sin(r_pitch)],
+            [cos(rad_pitch), 0, sin(rad_pitch)],
             [0, 1, 0],
-            [-sin(r_pitch), 0, cos(r_pitch)]
+            [-sin(rad_pitch), 0, cos(rad_pitch)]
         ],
         dtype=float64
     )
-    rz_yaw = array(
+    rot_z_yaw = array(
         [
-            [cos(r_yaw), -sin(r_yaw), 0],
-            [sin(r_yaw), cos(r_yaw), 0],
+            [cos(rad_yaw), -sin(rad_yaw), 0],
+            [sin(rad_yaw), cos(rad_yaw), 0],
             [0, 0, 1]
         ],
         dtype=float64
     )
 
-    return rx_roll.dot(ry_pitch).dot(rz_yaw)
+    return rot_x_roll.dot(rot_y_pitch).dot(rot_z_yaw)
 
 
 def cylindrical2cartesian(coordinates, source_width, source_height):

@@ -1,6 +1,6 @@
 from unittest import TestCase
 from math import sqrt
-import datasets.panoramas.transform.math_utils as Math
+import datasets.panoramas.transform.utils_math_array as Math
 from numpy import array_equal, allclose
 
 

@@ -22,8 +22,8 @@ def set_pano(pano):
     panorama = pano
 
 
-def mock_get_pano_rgb_array(pano):
-    path = '/app/panoramas_test/'+pano['container']+'/'+pano['name']
+def mock_get_pano_rgb_array(pano_url):
+    path = '/app/panoramas_test/' + pano_url
     panorama_image = misc.fromimage(Image.open(path))
     return squeeze(dsplit(panorama_image, 3))
 
@@ -69,7 +69,7 @@ class TestRender(TestCase):
 
 
     @mock.patch('datasets.tasks.render_task.RenderPanorama.object_store.put_into_datapunt_store')
-    @mock.patch('datasets.panoramas.transform.img_file_utils.get_panorama_rgb_array',
+    @mock.patch('datasets.panoramas.transform.utils_img_file.get_panorama_rgb_array',
                 side_effect=mock_get_pano_rgb_array)
     def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
         to_render = Panorama.to_be_rendered.all()[0]

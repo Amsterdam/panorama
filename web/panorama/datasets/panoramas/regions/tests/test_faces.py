@@ -2,12 +2,15 @@
 import io
 import logging
 import os
-from unittest import TestCase, mock, skipIf
+from random import randrange
+from unittest import TestCase, skipIf
+
+# Packages
 import cv2
-
 from PIL import Image
-from numpy import array
+from numpy import array, int32
 
+# Project
 from datasets.panoramas.regions.faces import FaceDetector
 from datasets.shared.object_store import ObjectStore
 
@@ -35,14 +38,11 @@ test_set = [
 ]
 
 
-def set_pano(pano):
-    global panorama_url
-    panorama_url = pano
+def get_subset():
+    test_1 = randrange(0, len(test_set))
+    test_2 = randrange(0, len(test_set))
 
-
-def mock_get_raw_pano(ignore):
-    raw_image = object_store.get_datapunt_store_object(panorama_url)
-    return Image.open(io.BytesIO(raw_image))
+    return [test_set[test_1], test_set[test_2]]
 
 
 @skipIf(not os.path.exists('/app/test_output'),
@@ -55,19 +55,22 @@ class TestFaceDetection(TestCase):
 
         docker exec -it panorama_web_1 ./manage.py test datasets.panoramas.regions.tests.test_faces
 
+    Because it's slow not all images are tested all the time.
+    look into the .gitignore-ed directory PROJECT/test_output for a visual check of the result
     """
-    @mock.patch('datasets.panoramas.regions.faces.get_normalized_image',
-                side_effect=mock_get_raw_pano)
-    def test_detection_faces_runs_without_errors(self, mock):
-        for pano_idx, panorama_url in enumerate(test_set):
+    def test_detection_faces_runs_without_errors(self):
+        for pano_idx, panorama_url in enumerate(get_subset()):
             log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_url))
-            set_pano(panorama_url)
-            image = cv2.cvtColor(array(mock_get_raw_pano(None)), cv2.COLOR_RGB2BGR)
-
-            fd = FaceDetector(None)
+            fd = FaceDetector(panorama_url)
             found_faces = fd.get_face_regions()
-            for (x, y, w, h) in found_faces:
-                log.warning("face at: {}, {}, {}, {}".format(x, y, w, h))
-                cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+            full_image = Image.open(io.BytesIO(object_store.get_datapunt_store_object(panorama_url)))
+            image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
+
+            for (lt, rt, rb, lb) in found_faces:
+                log.warning("face at: {}, {}, {}, {}".format(lt, rt, rb, lb))
+
+                pts = array([lt, rt, rb, lb], int32)
+                cv2.polylines(image, [pts], True, (0, 255, 0), 2)
 
             cv2.imwrite("/app/test_output/face_detection_{}.jpg".format(pano_idx), image)

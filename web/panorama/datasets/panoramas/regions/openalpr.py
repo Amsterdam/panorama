@@ -1,6 +1,9 @@
 import logging
+
+# This dependency is available in the docker container, which also has the binaries installed
 from openalpr.openalpr import Alpr
 
+# paths after installation of OpenALPR in the docker
 OPENALPR_DATA = "/usr/share/openalpr/runtime_data"
 OPENALPR_CONF = "/etc/openalpr/openalpr.conf"
 LICENSEPLATE_REGION = "eu"

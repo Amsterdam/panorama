@@ -30,7 +30,7 @@ Je kunt ook het project lokaal op poort 8000 draaien, maar dat vereist op zijn m
 
 	docker-compose up -d database
 	
-To import the latest database from acceptance:
+Importeer de meest recente database van acceptatie:
 
 	docker-compose exec database update-db.sh panorama
 	
@@ -47,7 +47,6 @@ Panorama demo lokaal
 
 Op [http://localhost:8088/demo](http://localhost:8088/demo) draaien de equidistante panorama's in Marzipano viewer.
 Op [http://localhost:8088/demo/cubic.html](http://localhost:8088/demo/cubic.html) draaien de kubische projecties van de panorama's in Marzipano viewer.
-
 
 Docker Job voor gedistribueerd rekenwerk
 ----------------------------------------

@@ -1,7 +1,7 @@
 from numpy import arange, meshgrid
 
-from . import img_file_utils as Img
-from . import math_utils as Math
+from . import utils_img_file as Img
+from . import utils_math_array as Math
 from . transformer import SOURCE_WIDTH, PANO_FOV, PANO_HORIZON, NORTH_0_DEGREES, PANO_HEIGHT, PANO_ASPECT, \
     PanoramaTransformer
 
