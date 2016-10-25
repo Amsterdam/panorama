@@ -1,4 +1,5 @@
 # Packages
+from django.conf import settings
 from django.conf.urls import url, include
 from rest_framework import routers
 # Project
@@ -30,3 +31,9 @@ urlpatterns = [
     url(r'^panorama/', include(panorama.urls)),
     url(r'^status/', include('health.urls')),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]

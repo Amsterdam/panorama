@@ -2,6 +2,7 @@ Babel==2.3.4
 debtcollector==1.8.0
 Django==1.9.9
 django-cors-headers==1.1.0
+django-debug-toolbar==1.6
 django-extensions==1.7.4
 django-filter==0.14.0
 django-jenkins==0.18.1
@@ -40,5 +41,6 @@ requests==2.11.1
 rfc3986==0.4.1
 scipy==0.18.0
 six==1.10.0
+sqlparse==0.2.2
 stevedore==1.17.1
 wrapt==1.10.8
