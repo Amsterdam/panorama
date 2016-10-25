@@ -9,9 +9,19 @@ from model_utils import Choices
 # Project
 from django.conf import settings
 
+CUBIC_SUBPATH = '/cubic/'
+EQUIRECTANGULAR_SUBPATH = '/equirectangular/'
+
+SMALL_IMAGE_NAME = 'panorama_2000.jpg'
+MEDIUM_IMAGE_NAME = 'panorama_4000.jpg'
+FULL_IMAGE_NAME = 'panorama_8000.jpg'
+
+MARZIPANO_URL_PATTERN = '{z}/{f}/{y}/{x}.jpg'
+PREVIEW_IMAGE = 'preview.jpg'
+
 
 class Panorama(StatusModel):
-    STATUS = Choices('to_be_rendered', 'rendering', 'rendered')
+    STATUS = Choices('to_be_rendered', 'rendering', 'rendered', 'blurring', 'blurred')
 
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True)
@@ -52,17 +62,17 @@ class Panorama(StatusModel):
 
     @property
     def cubic_img_urls(self):
-        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4]+'/cubic/')
+        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4] + CUBIC_SUBPATH)
         return {'baseurl': baseurl,
-                'pattern': baseurl+'{z}/{f}/{y}/{x}.jpg',
-                'preview': baseurl+'preview.jpg'}
+                'pattern': baseurl + MARZIPANO_URL_PATTERN,
+                'preview': baseurl + PREVIEW_IMAGE}
 
     @property
     def equirectangular_img_urls(self):
-        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4]+'/equirectangular/')
-        return {'full': baseurl+'panorama_8000.jpg',
-                'medium': baseurl+'panorama_4000.jpg',
-                'small': baseurl+'panorama_2000.jpg'}
+        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4] + EQUIRECTANGULAR_SUBPATH)
+        return {'full': baseurl + FULL_IMAGE_NAME,
+                'medium': baseurl + MEDIUM_IMAGE_NAME,
+                'small': baseurl + SMALL_IMAGE_NAME}
 
 
 class Adjacency(models.Model):

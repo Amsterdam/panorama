@@ -21,8 +21,8 @@ def set_pano(pano):
     panorama = pano
 
 
-def mock_get_raw_pano(pano):
-    path = '/app/panoramas_test/'+pano['container']+'/'+pano['name']
+def mock_get_raw_pano(pano_url):
+    path = '/app/panoramas_test/' + pano_url
     panorama_image = misc.fromimage(Image.open(path))
     return squeeze(dsplit(panorama_image, 3))
 
@@ -38,13 +38,13 @@ class TestTransformImgEquirectangular(TestTransformer):
 
     look into the .gitignore-ed directory PROJECT/panoramas_test/output for a visual check on the transformations
     """
-    @mock.patch('datasets.panoramas.transform.img_file_utils.get_panorama_rgb_array',
+    @mock.patch('datasets.panoramas.transform.utils_img_file.get_panorama_rgb_array',
                 side_effect=mock_get_raw_pano)
     def test_transform_runs_without_errors(self, mock):
 
         for img in self.images:
             set_pano(img)
-            image_tranformer = EquirectangularTransformer(img.get_raw_image_objectstore_id(),
+            image_tranformer = EquirectangularTransformer(img.path+img.filename,
                                                           img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
             for direction in [0, 90, 180, 270]:

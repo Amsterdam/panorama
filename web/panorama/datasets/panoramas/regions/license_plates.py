@@ -1,77 +1,107 @@
 import io
+from math import tan, radians
 
-from numpy import dsplit, squeeze, dstack
-from scipy import misc
-from scipy.ndimage import map_coordinates
 from PIL import Image
 
 from datasets.shared.object_store import ObjectStore
-from .cliches import Cliches
+from datasets.panoramas.transform import utils_img_file as Img
+
 from .openalpr import OpenAlpr
 
+object_store = ObjectStore()
 
-class LicensePlateSampler:
+PANORAMA_WIDTH = 8000
+PANORAMA_HEIGHT = 4000
+JUST_BELOW_HORIZON = 2050
+PLATES_NEAR_BY = 2350
+
+SAMPLE_DISTANCE = 455
+SAMPLE_WIDTH = 600
+SAMPLE_HEIGHT = 450
+ZOOM_RANGE = [1.12, 1.26, 1.41]
+ANGLE_RANGE = range(6, 31, 6)
+
+
+def calculate_shear_data(shear_angle):
     """
-    Creates a set of image-samples from a panorama that can be tested for license plates
+        See: https://en.wikipedia.org/wiki/Affine_transformation#/media/File:2D_affine_transformation_matrix.svg
+        and: http://stackoverflow.com/questions/14177744/how-does-perspective-transformation-work-in-pil
+
+        We use a vertical shear and stretch the image horizontally to emulate a perspective correction
+        Because from these calculating the original coordinates back is simpler and easier to do
     """
-    object_store = ObjectStore()
-    cliches = Cliches()
+    shear_factor = tan(radians(shear_angle))
+    # we increase the height of the picture to keep every pixel in view
+    new_height = int(SAMPLE_HEIGHT + abs(shear_factor) * SAMPLE_WIDTH)
+    size = (SAMPLE_WIDTH, new_height)
+    # we might also need to shift the image down to keep it in view
+    y_offset = SAMPLE_HEIGHT - new_height if shear_angle > 0 else 0
+    #   The two first rows of the affine-matrix concatenated
+    #       A combination of shear in the y direction and a translation along y to keep it in view
+    affine_matrix = (1, 0, 0, shear_factor, 1, y_offset)
+    # the more we shear, the more we are looking for a view on the license plate that is likely compressed
+    # we widen the image to compensate for that
+    widen = 1+abs(shear_factor)
+    return widen, size, affine_matrix
 
-    def __init__(self, panorama):
-        self.panorama = panorama
 
-    def get_image_samples(self):
-        samples = []
-        panorama_image = misc.fromimage(self._get_raw_image_binary())
-        for cliche in self.cliches.all:
-            sample = {}
-            sample['image'] = self.sample_image(panorama_image, cliche.x, cliche.y)
-            sample['cliche'] = cliche
-            samples.append(sample)
+def derive(coordinates, x, y, zoom, shear_angle, widen):
+    derived = []
+    for coordinate_set in coordinates:
+        x1 = int(coordinate_set['x']/widen/zoom)
+        y1 = int(coordinate_set['y']/zoom)
+        if shear_angle >= 0:
+            y2 = y1 - (SAMPLE_WIDTH - x1) * tan(radians(shear_angle))
+        else:
+            y2 = y1 + x1 * tan(radians(shear_angle))
+        derived.append((int(x1+x), int(y2+y)))
+    return derived
 
-        return samples
 
-    def sample_image(self, image, x, y):
-        # split in 3 channels
-        rgb_in = squeeze(dsplit(image, 3))
-
-        # sample_each_channel  //  .T for changing over columns and rows.
-        r = map_coordinates(rgb_in[0], [x, y], order=1).T
-        g = map_coordinates(rgb_in[1], [x, y], order=1).T
-        b = map_coordinates(rgb_in[2], [x, y], order=1).T
-
-        # merge channels
-        return dstack((r, g, b))
-
-    def _get_raw_image_binary(self):
-        raw_image_location = self.panorama.get_raw_image_objectstore_id()
-        raw_image = self.object_store.get_panorama_store_object(raw_image_location)
-        return Image.open(io.BytesIO(raw_image))
+def parse(results, x, y, zoom, shear_angle, widen):
+    parsed = []
+    for result in results:
+        # exclude the most frequent false positive, when encountering rasters (gates, in walls, etc.)
+        if "III" not in result['plate']:
+            parsed.append(derive(result['coordinates'], x, y, zoom, shear_angle, widen))
+    return parsed
 
 
 class LicensePlateDetector:
-    def __init__(self, panorama):
-        self.panorama = panorama
+    def __init__(self, panorama_path: str):
+        """
+        :param panorama_path: path of type
+                              "2016/08/18/TMX7316010203-000079/pano_0006_000054/equirectangular/panorama_8000.jpg"
+        """
+        self.panorama_path = panorama_path
 
     def get_licenseplate_regions(self):
+        panorama_img = Image.open(io.BytesIO(object_store.get_datapunt_store_object(self.panorama_path)))
         licenseplate_regions = []
-
         with OpenAlpr() as alpr:
-            panorama_samples = LicensePlateSampler(self.panorama).get_image_samples()
+            for x in range(0, PANORAMA_WIDTH, SAMPLE_DISTANCE):
+                for y in (JUST_BELOW_HORIZON, PLATES_NEAR_BY):
+                    if PANORAMA_WIDTH < x + SAMPLE_WIDTH:
+                        intermediate = Img.roll_left(panorama_img, SAMPLE_WIDTH, PANORAMA_WIDTH, PANORAMA_HEIGHT)
+                        snippet = intermediate.crop((x-SAMPLE_WIDTH, y, x, y+SAMPLE_HEIGHT))
+                    else:
+                        snippet = panorama_img.crop((x, y, x+SAMPLE_WIDTH, y+SAMPLE_HEIGHT))
 
-            for sample in panorama_samples:
-                img = sample['image']
-                cliche = sample['cliche']
+                    for zoom in ZOOM_RANGE:
+                        zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom * SAMPLE_HEIGHT))
+                        zoomed_snippet = snippet.resize(zoomed_size, Image.BICUBIC)
+                        results = alpr.recognize_array(Img.image2byte_array(zoomed_snippet))['results']
+                        licenseplate_regions.extend(parse(results, x, y, zoom, 0, 1))
 
-                imgByteArr = io.BytesIO()
-                Image.fromarray(img, 'RGB').save(imgByteArr, format='JPEG')
-
-                result = alpr.recognize_array(imgByteArr.getvalue())
-                for result in result['results']:
-                    licenseplate_region = []
-                    for coordinates in result['coordinates']:
-                        x, y = cliche.original(coordinates['x'], coordinates['y'])
-                        licenseplate_region.append((x,y))
-                    licenseplate_regions.append(licenseplate_region)
+                    for angle in ANGLE_RANGE:
+                        for direction in [1, -1]:
+                            widen, size, affine_matrix = calculate_shear_data(angle*direction)
+                            sheared = snippet.transform(size, Image.AFFINE, affine_matrix, Image.BICUBIC)
+                            for zoom in ZOOM_RANGE:
+                                width = size[0] * zoom * widen
+                                height = size[1] * zoom
+                                resized = sheared.resize((int(width), int(height)), Image.BICUBIC)
+                                results = alpr.recognize_array(Img.image2byte_array(resized))['results']
+                                licenseplate_regions.extend(parse(results, x, y, zoom, angle*direction, widen))
 
         return licenseplate_regions

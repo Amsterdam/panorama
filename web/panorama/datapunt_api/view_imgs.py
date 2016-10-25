@@ -120,7 +120,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         target_aspect = _get_float_value(request, 'aspect', default=1.5, lower=1.0)
 
         pano = get_object_or_404(Panorama, pano_id=pano_id)
-        pt = EquirectangularTransformer(pano.get_raw_image_objectstore_id(), pano.heading, pano.pitch, pano.roll)
+        pt = EquirectangularTransformer(pano.path+pano.filename, pano.heading, pano.pitch, pano.roll)
         normalized_pano = pt.get_projection(target_width=target_width,
                                             target_fov=target_fov,
                                             target_horizon=target_horizon,

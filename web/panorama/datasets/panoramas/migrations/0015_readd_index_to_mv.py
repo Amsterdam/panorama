@@ -3,8 +3,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-import django.utils.timezone
-import model_utils.fields
 
 
 class Migration(migrations.Migration):
