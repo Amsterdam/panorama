@@ -32,7 +32,7 @@ Je kunt ook het project lokaal op poort 8000 draaien, maar dat vereist op zijn m
 	
 To import the latest database from acceptance:
 
-	docker-compose exec database update-panorama.sh
+	docker-compose exec database update-db.sh panorama
 	
 Unit tests lokaal draaien
 -------------------------
