@@ -108,7 +108,7 @@ class ImportPanoramaJob(object):
         # Creating unique id from mission id and pano id
         pano_id = '%s_%s' % (path.split('/')[-2], base_filename)
 
-        panorama = Panorama(
+        return Panorama(
             pano_id=pano_id,
             status=Panorama.STATUS.rendered if is_pano_rendered else Panorama.STATUS.to_be_rendered,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
