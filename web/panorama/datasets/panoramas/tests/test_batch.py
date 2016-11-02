@@ -15,11 +15,14 @@ def mock_get_csvs(csv_type):
         files = glob.glob('/app/panoramas_test/**/trajectory.csv', recursive=True)
     return [{'container': '1', 'name': f} for f in files]
 
+
 def mock_pano_objectstore(container, path):
     return [{'name': f} for f in glob.glob(path+'*.jpg')]
 
+
 def mock_dp_objectstore(path):
     return [{'name': f} for f in glob.glob(path[2:]+'*.jpg')]
+
 
 def mock_get_csv(csv):
     with open(csv['name'], mode='rb') as file:

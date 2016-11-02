@@ -18,24 +18,22 @@ def render(panorama_url, heading_in, pitch_in, roll_in):
 
     equi_t = EquirectangularTransformer(panorama_url, yaw, pitch, roll)
 
-    projection = equi_t.get_projection(target_width=8000)
-    Img.save_image(Image.fromarray(projection), equirectangular_dir+"panorama_8000.jpg")
-
-    normalized_rgb = Img.get_rgb_channels(projection)
+    projection = equi_t.get_projection(target_width=2000)
+    Img.save_image(Image.fromarray(projection), equirectangular_dir+"panorama_2000.jpg")
 
     projection = equi_t.get_projection(target_width=4000)
     Img.save_image(Image.fromarray(projection), equirectangular_dir+"panorama_4000.jpg")
 
-    projection = equi_t.get_projection(target_width=2000)
-    Img.save_image(Image.fromarray(projection), equirectangular_dir+"panorama_2000.jpg")
+    projection = equi_t.get_projection(target_width=8000)
+    Img.save_image(Image.fromarray(projection), equirectangular_dir+"panorama_8000.jpg")
 
     print('START RENDERING panorama: {} in cubic projection.'.format(panorama_url))
     cubic_dir = panorama_url[:-4]+'/cubic'
 
-    # for less overhead reuse rotation_matrix and normalized pano_rgb
-    cubic_t = CubicTransformer(None, rotation_matrix=equi_t.rotation_matrix, pano_rgb=normalized_rgb)
-
-    projections = cubic_t.get_projection(target_width=CubeImg.MAX_WIDTH)
+    # for less overhead base cubic projection on normalized equirectangular pano_rgb
+    cubic_t = CubicTransformer(None, rotation_matrix=equi_t.rotation_matrix,
+                               pano_rgb=Img.get_rgb_channels(projection))
+    projections = cubic_t.get_normalized_projection(target_width=CubeImg.MAX_WIDTH)
     CubeImg.save_as_file_set(cubic_dir, projections)
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-FROM build.datapunt.amsterdam.nl:5000/datapunt/python_opencv_openalpr
+FROM amsterdam/panorama_image_processing:latest
 MAINTAINER datapunt.ois@amsterdam.nl
 
 RUN apt-get update \
