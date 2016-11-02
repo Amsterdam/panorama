@@ -30,10 +30,10 @@ class EquirectangularTransformer(PanoramaTransformer):
         # sample source image with output meshgrid
         return Img.sample_image((x3, y3), self.pano_rgb)
 
-    def _create_sample_set(self, target_angle, target_aspect, target_heading, target_horizon, target_width):
+    def _create_sample_set(self, target_fov, target_aspect, target_heading, target_horizon, target_width):
         target_center = SOURCE_WIDTH / 2 + target_heading * SOURCE_WIDTH / 360
 
-        chunk_width = SOURCE_WIDTH * target_angle / PANO_FOV
+        chunk_width = SOURCE_WIDTH * target_fov / PANO_FOV
         chunk_height = chunk_width / target_aspect
         chunk_above_horizon = chunk_height * (1 - target_horizon)
 
