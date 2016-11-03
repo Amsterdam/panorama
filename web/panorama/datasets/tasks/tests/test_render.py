@@ -58,13 +58,10 @@ class TestRender(TestCase):
                 heading=219.760795827427,
             )
 
-    @mock.patch(
-        'datasets.tasks.render_task.RenderPanorama.object_store.put_into_datapunt_store')
-    @mock.patch(
-        'datasets.panoramas.transform.utils_img_file.get_raw_panorama_as_rgb_array',
-        side_effect=mock_get_raw_pano)
-    def test_create_and_render_batch(self, mock_read_raw,
-                                     mock_write_transformed):
+    @mock.patch('datasets.panoramas.transform.utils_img_file.object_store.put_into_datapunt_store')
+    @mock.patch('datasets.panoramas.transform.utils_img_file.get_raw_panorama_as_rgb_array',
+                side_effect=mock_get_raw_pano)
+    def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
         to_render = Panorama.to_be_rendered.all()[0]
         self.assertEquals('TMX7315120208-000073_pano_0004_000087',
                           to_render.pano_id)
