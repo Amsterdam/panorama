@@ -12,8 +12,8 @@ MAX_WIDTH=2048
 
 def save_as_file_set(cubic_dir, projections, max_width=MAX_WIDTH):
     previews = {}
-    for side, img in projections.items():
-        cube_face = Image.fromarray(img)
+    for side, img_array in projections.items():
+        cube_face = Image.fromarray(img_array)
         preview = cube_face.resize((PREVIEW_WIDTH, PREVIEW_WIDTH), Image.ANTIALIAS)
         previews[side] = preview
         for zoomlevel in range(0, 1+int(log(max_width/TILE_SIZE, 2))):

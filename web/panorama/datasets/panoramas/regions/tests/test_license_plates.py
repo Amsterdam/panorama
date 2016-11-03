@@ -7,12 +7,12 @@ from unittest import TestCase, skipIf
 
 # Packages
 import cv2
-from PIL import Image
 from numpy import array, int32
 
 # Project
 from datasets.panoramas.regions.license_plates import LicensePlateDetector
 from datasets.shared.object_store import ObjectStore
+from datasets.panoramas.transform import utils_img_file as Img
 
 log = logging.getLogger(__name__)
 object_store = ObjectStore()
@@ -60,7 +60,7 @@ class TestLicensePlateDetector(TestCase):
             lpd = LicensePlateDetector(panorama_url)
             found_licenseplates = lpd.get_licenseplate_regions()
 
-            full_image = Image.open(io.BytesIO(object_store.get_datapunt_store_object(panorama_url)))
+            full_image = Img.get_panorama_image(panorama_url)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
 
             for (lt, rt, rb, lb) in found_licenseplates:

@@ -6,26 +6,13 @@ import factory
 import factory.fuzzy
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
-from PIL import Image
-from numpy import squeeze, dsplit
-from scipy import misc
 # Project
 from datasets.panoramas.tests import factories
 from datasets.panoramas.models import Panorama
 from .. import render_task
+from datasets.panoramas.transform.tests.test_img_file import mock_get_raw_pano
 
 log = logging.getLogger(__name__)
-
-
-def set_pano(pano):
-    global panorama
-    panorama = pano
-
-
-def mock_get_pano_rgb_array(pano_url):
-    path = '/app/panoramas_test/' + pano_url
-    panorama_image = misc.fromimage(Image.open(path))
-    return squeeze(dsplit(panorama_image, 3))
 
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
@@ -69,11 +56,10 @@ class TestRender(TestCase):
 
 
     @mock.patch('datasets.tasks.render_task.RenderPanorama.object_store.put_into_datapunt_store')
-    @mock.patch('datasets.panoramas.transform.utils_img_file.get_panorama_rgb_array',
-                side_effect=mock_get_pano_rgb_array)
+    @mock.patch('datasets.panoramas.transform.utils_img_file.get_raw_panorama_as_rgb_array',
+                side_effect=mock_get_raw_pano)
     def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
         to_render = Panorama.to_be_rendered.all()[0]
-        set_pano(to_render)
         self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
         render_task.RenderPanorama().process()

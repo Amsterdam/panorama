@@ -3,11 +3,11 @@ import os, logging
 from unittest import mock, skipIf
 # Packages
 from PIL import Image
-from numpy import squeeze, dsplit
 from scipy import misc
 # Project
 from datasets.panoramas.transform.equirectangular import EquirectangularTransformer
 from . test_transformer import TestTransformer
+from . test_img_file import mock_get_raw_pano
 
 log = logging.getLogger(__name__)
 
@@ -21,12 +21,6 @@ def set_pano(pano):
     panorama = pano
 
 
-def mock_get_raw_pano(pano_url):
-    path = '/app/panoramas_test/' + pano_url
-    panorama_image = misc.fromimage(Image.open(path))
-    return squeeze(dsplit(panorama_image, 3))
-
-
 @skipIf(not os.path.exists('/app/panoramas_test'),
         'Render test skipped: no mounted directory found, run in docker container')
 class TestTransformImgEquirectangular(TestTransformer):
@@ -38,7 +32,7 @@ class TestTransformImgEquirectangular(TestTransformer):
 
     look into the .gitignore-ed directory PROJECT/panoramas_test/output for a visual check on the transformations
     """
-    @mock.patch('datasets.panoramas.transform.utils_img_file.get_panorama_rgb_array',
+    @mock.patch('datasets.panoramas.transform.utils_img_file.get_raw_panorama_as_rgb_array',
                 side_effect=mock_get_raw_pano)
     def test_transform_runs_without_errors(self, mock):
 
@@ -48,17 +42,9 @@ class TestTransformImgEquirectangular(TestTransformer):
                                                           img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
             for direction in [0, 90, 180, 270]:
-                img1 = image_tranformer.get_projection(target_width=900,
-                                                       target_fov=80,
-                                                       target_horizon=0.3,
-                                                       target_heading=direction,
-                                                       target_aspect=4/3)
+                img1 = image_tranformer.get_projection(target_width=900)
                 misc.imsave(output_path+"_{}.jpg".format(direction), img1)
-                img1 = image_tranformer.get_projection(target_width=450,
-                                                       target_fov=80,
-                                                       target_horizon=0.3,
-                                                       target_heading=direction,
-                                                       target_aspect=4/3)
+                img1 = image_tranformer.get_projection(target_width=450)
                 misc.imsave(output_path+"_small_{}.jpg".format(direction), img1)
 
             img1 = image_tranformer.get_projection(target_width=8000)
