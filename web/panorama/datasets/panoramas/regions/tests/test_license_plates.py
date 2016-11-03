@@ -55,12 +55,12 @@ class TestLicensePlateDetector(TestCase):
     look into the .gitignore-ed directory PROJECT/test_output for a visual check of the result
     """
     def test_detection_licenseplates_runs_without_errors(self):
-        for pano_idx, panorama_url in enumerate(get_subset()):
-            log.warning("detecting license plates in panorama {}: {}, please hold".format(pano_idx, panorama_url))
-            lpd = LicensePlateDetector(panorama_url)
+        for pano_idx, panorama_path in enumerate(get_subset()):
+            log.warning("detecting license plates in panorama {}: {}, please hold".format(pano_idx, panorama_path))
+            lpd = LicensePlateDetector(panorama_path)
             found_licenseplates = lpd.get_licenseplate_regions()
 
-            full_image = Img.get_panorama_image(panorama_url)
+            full_image = Img.get_panorama_image(panorama_path)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
 
             for (lt, rt, rb, lb) in found_licenseplates:

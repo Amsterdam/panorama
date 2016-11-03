@@ -20,17 +20,17 @@ def byte_array2image(byte_array):
     return Image.open(io.BytesIO(byte_array))
 
 
-def get_raw_panorama_image(panorama_url):
+def get_raw_panorama_image(panorama_path):
     # construct objectstore_id
-    container = panorama_url.split('/')[0]
-    name = panorama_url.replace(container+'/', '')
+    container = panorama_path.split('/')[0]
+    name = panorama_path.replace(container + '/', '')
     objectstore_id = {'container': container, 'name': name}
 
     return byte_array2image(object_store.get_panorama_store_object(objectstore_id))
 
 
-def get_panorama_image(panorama_url):
-    return byte_array2image(object_store.get_datapunt_store_object(panorama_url))
+def get_panorama_image(panorama_path):
+    return byte_array2image(object_store.get_datapunt_store_object(panorama_path))
 
 
 def get_rgb_channels_from_array_image(array):
@@ -38,9 +38,9 @@ def get_rgb_channels_from_array_image(array):
     return squeeze(dsplit(array, 3))
 
 
-def get_raw_panorama_as_rgb_array(panorama_url):
+def get_raw_panorama_as_rgb_array(panorama_path):
     # read image as numpy array
-    panorama_array_image = misc.fromimage(get_raw_panorama_image(panorama_url))
+    panorama_array_image = misc.fromimage(get_raw_panorama_image(panorama_path))
     return get_rgb_channels_from_array_image(panorama_array_image)
 
 

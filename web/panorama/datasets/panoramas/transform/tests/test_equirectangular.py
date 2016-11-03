@@ -16,11 +16,6 @@ TILE_SIZE=512
 PREVIEW_WIDTH=256
 
 
-def set_pano(pano):
-    global panorama
-    panorama = pano
-
-
 @skipIf(not os.path.exists('/app/panoramas_test'),
         'Render test skipped: no mounted directory found, run in docker container')
 class TestTransformImgEquirectangular(TestTransformer):
@@ -37,15 +32,9 @@ class TestTransformImgEquirectangular(TestTransformer):
     def test_transform_runs_without_errors(self, mock):
 
         for img in self.images:
-            set_pano(img)
             image_tranformer = EquirectangularTransformer(img.path+img.filename,
                                                           img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
-            for direction in [0, 90, 180, 270]:
-                img1 = image_tranformer.get_projection(target_width=900)
-                misc.imsave(output_path+"_{}.jpg".format(direction), img1)
-                img1 = image_tranformer.get_projection(target_width=450)
-                misc.imsave(output_path+"_small_{}.jpg".format(direction), img1)
 
             img1 = image_tranformer.get_projection(target_width=8000)
             transformed = Image.fromarray(img1)
