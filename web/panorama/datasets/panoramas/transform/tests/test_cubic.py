@@ -10,13 +10,6 @@ from . test_img_file import mock_get_raw_pano
 log = logging.getLogger(__name__)
 
 MAX_WIDTH=2048
-TILE_SIZE=512
-PREVIEW_WIDTH=256
-
-
-def set_pano(pano):
-    global panorama
-    panorama = pano
 
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
@@ -34,7 +27,6 @@ class TestTransformImgCubic(TestTransformer):
                 side_effect=mock_get_raw_pano)
     def test_transform_cubic_runs_without_errors(self, mock):
         for img in self.images:
-            set_pano(img)
             image_tranformer = CubicTransformer(img.path+img.filename, img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
             img_set = image_tranformer.get_projection(target_width=MAX_WIDTH)

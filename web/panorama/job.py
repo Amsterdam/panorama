@@ -6,15 +6,15 @@ from datasets.panoramas.transform.equirectangular import EquirectangularTransfor
 from datasets.panoramas.transform.cubic import CubicTransformer
 
 
-def render(panorama_url, heading_in, pitch_in, roll_in):
+def render(panorama_path, heading_in, pitch_in, roll_in):
     yaw = float(heading_in)
     pitch = float(pitch_in)
     roll = float(roll_in)
 
-    print('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_url))
-    equirectangular_dir = panorama_url[:-4]+'/equirectangular/'
+    print('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_path))
+    equirectangular_dir = panorama_path[:-4] + '/equirectangular/'
 
-    equi_t = EquirectangularTransformer(panorama_url, yaw, pitch, roll)
+    equi_t = EquirectangularTransformer(panorama_path, yaw, pitch, roll)
 
     projection = equi_t.get_projection(target_width=2000)
     Img.save_array_image(projection, equirectangular_dir+"panorama_2000.jpg")
@@ -25,8 +25,8 @@ def render(panorama_url, heading_in, pitch_in, roll_in):
     projection = equi_t.get_projection(target_width=8000)
     Img.save_array_image(projection, equirectangular_dir+"panorama_8000.jpg")
 
-    print('START RENDERING panorama: {} in cubic projection.'.format(panorama_url))
-    cubic_dir = panorama_url[:-4]+'/cubic'
+    print('START RENDERING panorama: {} in cubic projection.'.format(panorama_path))
+    cubic_dir = panorama_path[:-4] + '/cubic'
 
     # for less overhead base cubic projection on normalized equirectangular pano_rgb
     cubic_t = CubicTransformer(None, rotation_matrix=equi_t.rotation_matrix,
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     if not len(sys.argv) == 5:
         print("""
 4 arguments required, please provide the following of the source Panorama:
-    - panorama_url in objectstore,
+    - panorama_path in objectstore,
     - heading in degrees,
     - pitch in degrees,
     - roll in degrees
