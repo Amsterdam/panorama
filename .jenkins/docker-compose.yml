@@ -20,7 +20,7 @@ tests:
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
-            && python manage.py jenkins"
+            && python manage.py test"
 
 importer:
   build: ../web
