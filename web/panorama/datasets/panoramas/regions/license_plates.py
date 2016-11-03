@@ -1,7 +1,7 @@
 import io
 from math import tan, radians
 
-from PIL import Image
+from PIL.Image import AFFINE, BICUBIC
 
 from datasets.shared.object_store import ObjectStore
 from datasets.panoramas.transform import utils_img_file as Img
@@ -76,7 +76,7 @@ class LicensePlateDetector:
         self.panorama_path = panorama_path
 
     def get_licenseplate_regions(self):
-        panorama_img = Image.open(io.BytesIO(object_store.get_datapunt_store_object(self.panorama_path)))
+        panorama_img = Img.get_panorama_image(self.panorama_path)
         licenseplate_regions = []
         with OpenAlpr() as alpr:
             for x in range(0, PANORAMA_WIDTH, SAMPLE_DISTANCE):
@@ -89,18 +89,18 @@ class LicensePlateDetector:
 
                     for zoom in ZOOM_RANGE:
                         zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom * SAMPLE_HEIGHT))
-                        zoomed_snippet = snippet.resize(zoomed_size, Image.BICUBIC)
+                        zoomed_snippet = snippet.resize(zoomed_size, BICUBIC)
                         results = alpr.recognize_array(Img.image2byte_array(zoomed_snippet))['results']
                         licenseplate_regions.extend(parse(results, x, y, zoom, 0, 1))
 
                     for angle in ANGLE_RANGE:
                         for direction in [1, -1]:
                             widen, size, affine_matrix = calculate_shear_data(angle*direction)
-                            sheared = snippet.transform(size, Image.AFFINE, affine_matrix, Image.BICUBIC)
+                            sheared = snippet.transform(size, AFFINE, affine_matrix, BICUBIC)
                             for zoom in ZOOM_RANGE:
                                 width = size[0] * zoom * widen
                                 height = size[1] * zoom
-                                resized = sheared.resize((int(width), int(height)), Image.BICUBIC)
+                                resized = sheared.resize((int(width), int(height)), BICUBIC)
                                 results = alpr.recognize_array(Img.image2byte_array(resized))['results']
                                 licenseplate_regions.extend(parse(results, x, y, zoom, angle*direction, widen))
 

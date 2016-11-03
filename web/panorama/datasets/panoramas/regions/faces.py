@@ -5,7 +5,7 @@ import logging
 import cv2
 
 from numpy import array
-from PIL import Image
+from PIL.Image import BICUBIC
 
 from datasets.shared.object_store import ObjectStore
 from datasets.panoramas.transform import utils_img_file as Img
@@ -59,7 +59,7 @@ class FaceDetector:
         self.panorama_path = panorama_path
 
     def get_face_regions(self):
-        panorama_img = Image.open(io.BytesIO(object_store.get_datapunt_store_object(self.panorama_path)))
+        panorama_img = Img.get_panorama_image(self.panorama_path)
         face_regions = []
         for x in range(0, PANORAMA_WIDTH, SAMPLE_DISTANCE):
             for y in (JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE):
@@ -71,7 +71,7 @@ class FaceDetector:
 
                 for zoom in ZOOM_RANGE:
                     zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom * SAMPLE_HEIGHT))
-                    zoomed_snippet = snippet.resize(zoomed_size, Image.BICUBIC)
+                    zoomed_snippet = snippet.resize(zoomed_size, BICUBIC)
                     gray_image = cv2.cvtColor(array(zoomed_snippet), cv2.COLOR_RGB2GRAY)
                     for cascade_set in cascade_sets:
                         face_cascade = cv2.CascadeClassifier(cascade_set[0])

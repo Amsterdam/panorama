@@ -8,12 +8,11 @@ from rest_framework.reverse import reverse
 from django.shortcuts import get_object_or_404
 from scipy import misc
 
-from .queryparam_utils import _get_float_value, _get_int_value, _get_request_coord
+from .queryparam_utils import get_float_value, get_int_value, get_request_coord
 from datapunt_api.views import PanoramaViewSet
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.transform.thumbnail import Thumbnail
 from datasets.panoramas.serializers import ThumbnailSerializer
-from . import datapunt_rest
 
 
 class ImgRenderer(renderers.BaseRenderer):
@@ -62,7 +61,7 @@ class ThumbnailViewSet(PanoramaViewSet):
         Overloading the list view to enable in finding
         the thumb looking at the given point
         """
-        coords = _get_request_coord(request.query_params)
+        coords = get_request_coord(request.query_params)
         if not coords:
             return Response({'error': 'pano_id'})
 
@@ -110,14 +109,14 @@ class ThumbnailViewSet(PanoramaViewSet):
         return degrees(atan2(d_lon, d_phi)) % 360.0
 
     def retrieve(self, request, pano_id=None, heading=0):
-        target_heading = _get_int_value(request, 'heading', default=heading, lower=0, upper=360)
+        target_heading = get_int_value(request, 'heading', default=heading, upper=360, strategy='modulo')
 
-        target_width = _get_int_value(request, 'width', default=750, lower=1, upper=1600)
-        target_fov = _get_int_value(request, 'fov', default=80, lower=0, upper=80)
+        target_width = get_int_value(request, 'width', default=750, lower=1, upper=1600, strategy='cutoff')
+        target_fov = get_int_value(request, 'fov', default=80, upper=80, strategy='cutoff')
         target_width, target_fov = self._max_fov_per_width(target_width, target_fov)
 
-        target_horizon = _get_float_value(request, 'horizon', default=0.3, lower=0.0, upper=1.0)
-        target_aspect = _get_float_value(request, 'aspect', default=1.5, lower=1.0)
+        target_horizon = get_float_value(request, 'horizon', default=0.3, lower=0.0, upper=1.0)
+        target_aspect = get_float_value(request, 'aspect', default=1.5, lower=1.0)
 
         pano = get_object_or_404(Panorama, pano_id=pano_id)
         thumb = Thumbnail(pano)

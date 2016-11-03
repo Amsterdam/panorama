@@ -12,7 +12,7 @@ SRID_WSG84 = 4326
 SRID_RD = 28992
 
 
-def _get_request_coord(query_params):
+def get_request_coord(query_params):
     """
     Retrieves the coordinates to work with. It allows for either lat/lon coord,
     for wgs84 or 'x' and 'y' for RD. Just to be on the safe side a value check
@@ -53,7 +53,7 @@ def _convert_coords(lon, lat, orig_srid, dest_srid):
     return p.coords
 
 
-def _convert_to_date(request, param_name):
+def convert_to_date(request, param_name):
     """
     Converts input time to a date object.
     Allowed input is timestamp, or string denoting a date in ISO or EU format
@@ -100,18 +100,22 @@ def _convert_to_date(request, param_name):
     return date_obj
 
 
-def _get_int_value(request, param_name, default, lower=None, upper=None):
+def get_int_value(request, param_name, default, lower=0, upper=None, strategy='cutoff'):
     try:
         value = int(request.query_params[param_name])
-        if (lower is None or lower <= value) \
-                and (upper is None or value <= upper):
-            return value
+        if lower is None or lower <= value:
+            if upper is None or value <= upper:
+                return value
+            elif strategy is 'cutoff' and upper is not None:
+                return upper
+            elif strategy is 'modulo' and upper is not None:
+                return value % upper
     except (ValueError, MultiValueDictKeyError):
         pass
     return int(default)
 
 
-def _get_float_value(request, param_name, default, lower=None, upper=None):
+def get_float_value(request, param_name, default, lower=None, upper=None):
     try:
         value = float(request.query_params[param_name])
         if (lower is None or lower <= value) \

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 # Project
 
-from .queryparam_utils import _get_request_coord, _convert_to_date, _get_int_value
+from .queryparam_utils import get_request_coord, convert_to_date, get_int_value
 from datasets.panoramas.models import Panorama
 from datasets.panoramas import serializers
 
@@ -43,7 +43,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
         pano = []
         # Make sure a position is given, otherwise there is
         # nothing to work with
-        coords = _get_request_coord(request.query_params)
+        coords = get_request_coord(request.query_params)
         if not coords:
             return super().list(self, request)
 
@@ -64,17 +64,17 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             select={
                 'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
             select_params=[coords[0], coords[1]])
-        max_range = _get_int_value(request, 'radius', 20)
+        max_range = get_int_value(request, 'radius', 20)
         queryset = queryset.extra(
             where=[""" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'),
                    geography(geolocation), %s) """],
             params=[coords[0], coords[1], max_range])
         adjacent_filter = {}
-        start_date = _convert_to_date(request, 'vanaf')
+        start_date = convert_to_date(request, 'vanaf')
         if start_date is not None:
             adjacent_filter['vanaf'] = start_date
             queryset = queryset.filter(timestamp__gte=start_date)
-        end_date = _convert_to_date(request, 'tot')
+        end_date = convert_to_date(request, 'tot')
         if end_date is not None:
             adjacent_filter['tot'] = end_date
             queryset = queryset.filter(timestamp__lt=end_date)

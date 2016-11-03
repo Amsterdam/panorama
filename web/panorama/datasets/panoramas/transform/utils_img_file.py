@@ -10,25 +10,41 @@ from datasets.shared.object_store import ObjectStore
 object_store = ObjectStore()
 
 
-def get_panorama_rgb_array(panorama_url):
+def image2byte_array(image: Image):
+    img_byte_array = io.BytesIO()
+    image.save(img_byte_array, format='JPEG')
+    return img_byte_array.getvalue()
+
+
+def byte_array2image(byte_array):
+    return Image.open(io.BytesIO(byte_array))
+
+
+def get_raw_panorama_image(panorama_url):
     # construct objectstore_id
     container = panorama_url.split('/')[0]
     name = panorama_url.replace(container+'/', '')
-    objectstore_id = {'container':container, 'name':name}
+    objectstore_id = {'container': container, 'name': name}
 
-    # read image as numpy array
-    raw_image = object_store.get_panorama_store_object(objectstore_id)
-    panorama_image = misc.fromimage(Image.open(io.BytesIO(raw_image)))
-
-    return get_rgb_channels(panorama_image)
+    return byte_array2image(object_store.get_panorama_store_object(objectstore_id))
 
 
-def get_rgb_channels(image):
+def get_panorama_image(panorama_url):
+    return byte_array2image(object_store.get_datapunt_store_object(panorama_url))
+
+
+def get_rgb_channels_from_array_image(array):
     # split image in the 3 RGB channels
-    return squeeze(dsplit(image, 3))
+    return squeeze(dsplit(array, 3))
 
 
-def sample_image(coordinates, rgb_array):
+def get_raw_panorama_as_rgb_array(panorama_url):
+    # read image as numpy array
+    panorama_array_image = misc.fromimage(get_raw_panorama_image(panorama_url))
+    return get_rgb_channels_from_array_image(panorama_array_image)
+
+
+def sample_rgb_array_image_as_array(coordinates, rgb_array):
     x = coordinates[0]
     y = coordinates[1]
 
@@ -47,6 +63,10 @@ def save_image(image, name):
     object_store.put_into_datapunt_store(name, byte_array.getvalue(), 'image/jpeg')
 
 
+def save_array_image(array, name):
+    save_image(Image.fromarray(array), name)
+
+
 def roll_left(image, shift, width, height):
     part1 = image.crop((0, 0, shift, height))
     part2 = image.crop((shift, 0, width, height))
@@ -57,11 +77,5 @@ def roll_left(image, shift, width, height):
     output.paste(part1, (width-shift, 0, width, height))
 
     return output
-
-
-def image2byte_array(image: Image):
-    imgByteArr = io.BytesIO()
-    image.save(imgByteArr, format='JPEG')
-    return imgByteArr.getvalue()
 
 
