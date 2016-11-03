@@ -1,16 +1,18 @@
 # Python
-import datetime, os, logging
+import datetime
+import logging
+import os
 from unittest import TestCase, mock, skipIf
-# Packages
+
 import factory
 import factory.fuzzy
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
-# Project
-from datasets.panoramas.tests import factories
+
 from datasets.panoramas.models import Panorama
-from .. import render_task
+from datasets.panoramas.tests import factories
 from datasets.panoramas.transform.tests.test_img_file import mock_get_raw_pano
+from .. import render_task
 
 log = logging.getLogger(__name__)
 
@@ -36,14 +38,16 @@ class TestRender(TestCase):
             pano.save()
 
         try:
-            pano = Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
+            pano = Panorama.objects.filter(
+                pano_id='TMX7315120208-000073_pano_0004_000087')[0]
             pano.status = Panorama.STATUS.to_be_rendered
             pano.save()
         except IndexError:
             factories.PanoramaFactory.create(
                 pano_id='TMX7315120208-000073_pano_0004_000087',
                 timestamp=factory.fuzzy.FuzzyDateTime(
-                    datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
+                    datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ),
+                    force_year=2014),
                 filename='pano_0004_000087.jpg',
                 path='2016/06/09/TMX7315120208-000073/',
                 geolocation=Point(4.89593266865189,
@@ -54,15 +58,20 @@ class TestRender(TestCase):
                 heading=219.760795827427,
             )
 
-
-    @mock.patch('datasets.tasks.render_task.RenderPanorama.object_store.put_into_datapunt_store')
-    @mock.patch('datasets.panoramas.transform.utils_img_file.get_raw_panorama_as_rgb_array',
-                side_effect=mock_get_raw_pano)
-    def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
+    @mock.patch(
+        'datasets.tasks.render_task.RenderPanorama.object_store.put_into_datapunt_store')
+    @mock.patch(
+        'datasets.panoramas.transform.utils_img_file.get_raw_panorama_as_rgb_array',
+        side_effect=mock_get_raw_pano)
+    def test_create_and_render_batch(self, mock_read_raw,
+                                     mock_write_transformed):
         to_render = Panorama.to_be_rendered.all()[0]
-        self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
+        self.assertEquals('TMX7315120208-000073_pano_0004_000087',
+                          to_render.pano_id)
 
         render_task.RenderPanorama().process()
         self.assertEquals(0, len(Panorama.to_be_rendered.all()))
-        self.assertTrue(mock_read_raw.called)
-        self.assertTrue(mock_write_transformed.called)
+        self.assertTrue(mock_read_raw.called, msg='Read Raw was not called')
+        self.assertTrue(
+            mock_write_transformed.called,
+            msg='Write transformed was not called')
