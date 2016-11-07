@@ -39,8 +39,6 @@ panorama.register(r'thumbnail', ThumbnailViewSet, base_name='thumbnail')
     [SwaggerUIRenderer, OpenAPIRenderer, renderers.CoreJSONRenderer])
 def swagger_schema_view(request):
     generator = schemas.SchemaGenerator(title='Panoramas API')
-    # crash
-    # here we need to add custom schema!
     return response.Response(generator.get_schema(request=request))
 
 
