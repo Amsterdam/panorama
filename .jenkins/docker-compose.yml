@@ -16,7 +16,7 @@ tests:
     DATABASE_NAME: panorama
     DATABASE_USER: panorama
     DATABASE_PASSWORD: insecure
-    OBJECTSTORE_PASSWORD:
+    # OBJECTSTORE_PASSWORD:
   command: >
     bash -c "/app/docker-wait.sh \
             && python manage.py migrate \
