@@ -9,9 +9,9 @@ tests:
   links:
     - database:database
   mem_limit: 6G
-  volumes:
-    - ../web/panorama/panoramas_test:/app/panoramas_test
-    - ../test_output:/app/test_output
+  #volumes:
+  #  - ../web/panorama/panoramas_test:/app/panoramas_test
+  #  - ../test_output:/app/test_output
   environment:
     DATABASE_NAME: panorama
     DATABASE_USER: panorama
