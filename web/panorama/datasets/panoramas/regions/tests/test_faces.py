@@ -11,11 +11,11 @@ from numpy import array, int32
 
 # Project
 from datasets.panoramas.regions.faces import FaceDetector
-from datasets.shared.object_store import ObjectStore
+#from datasets.shared.object_store import ObjectStore
 from datasets.panoramas.transform import utils_img_file as Img
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
+#object_store = ObjectStore()
 
 test_set = [
     "2016/06/07/TMX7315120208-000070/pano_0006_000457/equirectangular/panorama_8000.jpg",

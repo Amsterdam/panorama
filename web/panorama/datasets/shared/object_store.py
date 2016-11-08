@@ -10,6 +10,8 @@ logging.getLogger("swiftclient").setLevel(logging.WARNING)
 
 log = logging.getLogger(__name__)
 
+DISABLE = settings.OBJECTSTORE_PASSWORD == 'insecure'
+
 
 class ObjectStore():
     RESP_LIMIT = 10000  # serverside limit of the response
@@ -41,6 +43,9 @@ class ObjectStore():
         return self._get_full_container_list(self.datapunt_conn, settings.DATAPUNT_CONTAINER, [], prefix=path)
 
     def get_datapunt_store_object(self, path):
+        if DISABLE:
+            return
+
         return self.datapunt_conn.get_object(settings.DATAPUNT_CONTAINER, path)[1]
 
     def _get_full_container_list(self, conn, container, seed, **kwargs):
@@ -81,6 +86,9 @@ class ObjectStore():
         return csvs
 
     def put_into_datapunt_store(self, object_name, object_content, content_type):
+        if DISABLE:
+            return
+
         self.datapunt_conn.put_object(settings.DATAPUNT_CONTAINER,
                                       object_name,
                                       contents=object_content,
