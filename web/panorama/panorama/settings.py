@@ -207,8 +207,3 @@ PANORAMA_CONTAINERS = objectstore_settings.PANORAMA_CONTAINERS
 DATAPUNT_CONTAINER = objectstore_settings.DATAPUNT_CONTAINER
 
 REGION_NAME = objectstore_settings.REGION_NAME
-info = OBJECTSTORE_PASSWORD
-if OBJECTSTORE_PASSWORD != 'insecure':
-    logging.error('OBJECTSTORE_insecure?')
-    logging.error(len(info))
-    logging.error(info)
