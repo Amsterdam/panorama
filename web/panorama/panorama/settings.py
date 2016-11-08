@@ -1,5 +1,6 @@
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import logging
 import re
 
 from panorama import objectstore_settings
@@ -206,3 +207,4 @@ PANORAMA_CONTAINERS = objectstore_settings.PANORAMA_CONTAINERS
 DATAPUNT_CONTAINER = objectstore_settings.DATAPUNT_CONTAINER
 
 REGION_NAME = objectstore_settings.REGION_NAME
+logging.error('OBJECTSTORE_PASSWORD %s', OBJECTSTORE_PASSWORD)
