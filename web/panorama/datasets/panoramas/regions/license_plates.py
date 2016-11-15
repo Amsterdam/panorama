@@ -45,7 +45,7 @@ def calculate_shear_data(shear_angle):
     return widen, size, affine_matrix
 
 
-def derive(coordinates, x, y, zoom, shear_angle, widen):
+def derive(coordinates, x, y, zoom, shear_angle, widen, detected_by):
     derived = []
     for coordinate_set in coordinates:
         x1 = int(coordinate_set['x']/widen/zoom)
@@ -55,15 +55,17 @@ def derive(coordinates, x, y, zoom, shear_angle, widen):
         else:
             y2 = y1 + x1 * tan(radians(shear_angle))
         derived.append((int(x1+x), int(y2+y)))
+    derived.append(detected_by)
     return derived
 
 
 def parse(results, x, y, zoom, shear_angle, widen):
     parsed = []
+    detected_by = "shear_angle={}, zoom={}".format(shear_angle, zoom)
     for result in results:
         # exclude the most frequent false positive, when encountering rasters (gates, in walls, etc.)
         if "III" not in result['plate']:
-            parsed.append(derive(result['coordinates'], x, y, zoom, shear_angle, widen))
+            parsed.append(derive(result['coordinates'], x, y, zoom, shear_angle, widen, detected_by))
     return parsed
 
 

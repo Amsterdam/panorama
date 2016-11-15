@@ -28,25 +28,34 @@ NORMAL = 1
 FLIPPED = -1
 
 cascade_sets = [
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml", 1.21, DEFAULT_MIN_NEIGHBOURS, NORMAL),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml", 1.24, DEFAULT_MIN_NEIGHBOURS-3, NORMAL),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml", 1.15, DEFAULT_MIN_NEIGHBOURS, NORMAL),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml", 1.067, DEFAULT_MIN_NEIGHBOURS, NORMAL),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml", 1.067, DEFAULT_MIN_NEIGHBOURS, FLIPPED),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml", 1.016, 1, NORMAL),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml", 1.018, 1, NORMAL),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml", 1.02, 1, NORMAL),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
+        1.21, DEFAULT_MIN_NEIGHBOURS, NORMAL, 'default'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
+        1.24, DEFAULT_MIN_NEIGHBOURS-3, NORMAL, 'alt'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
+        1.15, DEFAULT_MIN_NEIGHBOURS, NORMAL, 'alt2'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
+        1.067, DEFAULT_MIN_NEIGHBOURS, NORMAL, 'profile'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
+        1.067, DEFAULT_MIN_NEIGHBOURS, FLIPPED, 'profile_flip'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
+        1.016, 1, NORMAL, 'alt_tree'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
+        1.018, 1, NORMAL, 'alt_tree'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
+        1.02, 1, NORMAL, 'alt_tree'),
 ]
 
 
-def derive(faces, x, y, zoom):
+def derive(faces, x, y, zoom, filter, scaleFactor):
     derived = []
+    detected_by = "cascade={}, scaleFactor={}, zoom={}".format(filter, scaleFactor, zoom)
     for (x0, y0, width, height) in faces:
         x1 = int(x0/zoom) + x
         y1 = int(y0/zoom) + y
         w1 = int(width/zoom)
         h1 = int(height/zoom)
-        derived.append([(x1, y1), (x1+w1, y1), (x1+w1, y1+h1), (x1, y1+h1)])
+        derived.append([(x1, y1), (x1+w1, y1), (x1+w1, y1+h1), (x1, y1+h1), detected_by])
     return derived
 
 
@@ -88,7 +97,9 @@ class FaceDetector:
                             gray_image = cv2.flip(gray_image, 0)
 
                         if len(detected_faces) > 0:
-                            log.warning('Cascade {}-{} detected: {}.'.format(cascade_set[1], cascade_set[0], detected_faces))
-                            face_regions.extend(derive(detected_faces, x, y, zoom))
+                            log.warning('Cascade {}-{} detected: {}.'.format(
+                                cascade_set[1], cascade_set[0], detected_faces)
+                            )
+                            face_regions.extend(derive(detected_faces, x, y, zoom, cascade_set[-1], scaleFactor=cascade_set[1]))
 
         return face_regions

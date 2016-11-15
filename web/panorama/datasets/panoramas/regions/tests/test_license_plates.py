@@ -1,5 +1,4 @@
 # Python
-import io
 import logging
 import os
 from random import randrange
@@ -7,12 +6,13 @@ from unittest import TestCase, skipIf
 
 # Packages
 import cv2
-from numpy import array, int32
+from numpy import array
 
 # Project
 from datasets.panoramas.regions.license_plates import LicensePlateDetector
 from datasets.shared.object_store import ObjectStore
 from datasets.panoramas.transform import utils_img_file as Img
+from .test_faces import draw_lines
 
 log = logging.getLogger(__name__)
 object_store = ObjectStore()
@@ -63,10 +63,6 @@ class TestLicensePlateDetector(TestCase):
             full_image = Img.get_panorama_image(panorama_path)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
 
-            for (lt, rt, rb, lb) in found_licenseplates:
-                log.warning("licenseplate at: {}, {}, {}, {}".format(lt, rt, rb, lb))
-
-                pts = array([lt, rt, rb, lb], int32)
-                cv2.polylines(image, [pts], True, (0, 255, 0), 2)
+            image = draw_lines(image, found_licenseplates)
 
             cv2.imwrite("/app/test_output/licenseplate_detection_{}.jpg".format(pano_idx), image)
