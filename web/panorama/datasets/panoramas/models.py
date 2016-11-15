@@ -117,6 +117,7 @@ class Region(models.Model):
     id = models.AutoField(primary_key=True)
     panorama = models.ForeignKey(Panorama)
     region_type = models.CharField(max_length=1, choices=REGION_TYPES)
+    detected_by = models.CharField(max_length=255)
 
     # coordinates from left top, clockwise
     left_top_x = models.IntegerField()

@@ -3,7 +3,6 @@ import os, logging
 from unittest import mock, skipIf
 # Packages
 from PIL import Image
-from scipy import misc
 # Project
 from datasets.panoramas.transform.equirectangular import EquirectangularTransformer
 from . test_transformer import TestTransformer

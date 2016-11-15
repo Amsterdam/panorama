@@ -1,5 +1,4 @@
 # Python
-import io
 import logging
 import os
 from random import randrange
@@ -12,6 +11,7 @@ from numpy import array, int32
 # Project
 from datasets.panoramas.regions.faces import FaceDetector
 from datasets.shared.object_store import ObjectStore
+from datasets.panoramas.regions.util import wrap_around
 from datasets.panoramas.transform import utils_img_file as Img
 
 log = logging.getLogger(__name__)
@@ -36,6 +36,18 @@ test_set = [
     "2016/06/01/TMX7315120208-000064/pano_0002_000150/equirectangular/panorama_8000.jpg",
     "2016/03/24/TMX7315120208-000022/pano_0001_000270/equirectangular/panorama_8000.jpg"
 ]
+
+
+def draw_lines(image, regions):
+    for (lt, rt, rb, lb, detected_by) in regions:
+        log.warning("region at: {}, {}, {}, {}, detected by: {}".format(lt, rt, rb, lb, detected_by))
+
+    split_regions = wrap_around(regions)
+    for region in split_regions:
+        pts = array(region, int32)
+        cv2.polylines(image, [pts], True, (0, 255, 0), 2)
+
+    return image
 
 
 def get_subset():
@@ -67,10 +79,6 @@ class TestFaceDetection(TestCase):
             full_image = Img.get_panorama_image(panorama_path)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
 
-            for (lt, rt, rb, lb) in found_faces:
-                log.warning("face at: {}, {}, {}, {}".format(lt, rt, rb, lb))
-
-                pts = array([lt, rt, rb, lb], int32)
-                cv2.polylines(image, [pts], True, (0, 255, 0), 2)
+            image = draw_lines(image, found_faces)
 
             cv2.imwrite("/app/test_output/face_detection_{}.jpg".format(pano_idx), image)

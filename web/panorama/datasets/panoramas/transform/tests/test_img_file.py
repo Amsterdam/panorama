@@ -8,4 +8,3 @@ def mock_get_raw_pano(pano_url):
     panorama_image = misc.fromimage(Image.open(path))
     return squeeze(dsplit(panorama_image, 3))
 
-
