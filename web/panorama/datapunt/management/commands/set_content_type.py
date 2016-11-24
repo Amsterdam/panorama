@@ -7,9 +7,6 @@ object_store = ObjectStore()
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        self.set_content_type()
-
-    def set_content_type(self):
         self._set_content_type_on_imgs(object_store.panorama_conn, '2016', '/', '')
         self._set_content_type_on_imgs(object_store.datapunt_conn, 'panorama', '/', '')
 

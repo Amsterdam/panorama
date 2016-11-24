@@ -1,17 +1,16 @@
 Babel==2.3.4
-Django==1.10.3
-Pillow==3.4.2
-PyYAML==3.12
 coreapi==2.0.9
 debtcollector==1.9.0
+Django==1.10.3
 django-cors-headers==1.2.2
 django-debug-toolbar==1.6
 django-extensions==1.7.4
 django-filter==0.15.3
+django-jenkins==0.18.1
 django-model-utils==2.6
+django-rest-swagger==2.1.0
 djangorestframework==3.5.2
 djangorestframework-gis==0.10.1
-django-rest-swagger==2.1.0
 drf-extensions==0.3.1
 drf-hal-json==0.9.1
 drf-nested-fields==0.9.3
@@ -32,6 +31,8 @@ oslo.i18n==3.10.0
 oslo.serialization==2.14.0
 oslo.utils==3.17.0
 pbr==1.10.0
+pika==0.10.0
+Pillow==3.4.2
 positional==1.1.1
 psycopg2==2.6.2
 pyparsing==2.1.10
@@ -39,6 +40,7 @@ python-dateutil==2.5.3
 python-keystoneclient==3.6.0
 python-swiftclient==3.1.0
 pytz==2016.7
+PyYAML==3.12
 requests==2.11.1
 rfc3986==0.4.1
 scipy==0.18.1

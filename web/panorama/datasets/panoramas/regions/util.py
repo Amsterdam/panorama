@@ -1,6 +1,3 @@
-# Packages
-from numpy import array, int32
-
 WIDTH = 8000
 X, Y = 0, 1
 
