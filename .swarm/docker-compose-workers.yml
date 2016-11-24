@@ -1,0 +1,6 @@
+swarm-worker:
+  build: ../web
+  environment:
+    AMPQ_HOST: master.swarm.datapunt.amsterdam.nl
+  command: >
+    bash -c "python manage.py work"
