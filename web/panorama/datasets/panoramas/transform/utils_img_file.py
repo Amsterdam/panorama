@@ -1,11 +1,17 @@
 import io
 
-from numpy import squeeze, dsplit, dstack
+from numpy import squeeze, dsplit, dstack, array
 from scipy import misc
 from scipy.ndimage import map_coordinates
 from PIL import Image
+import cv2
 
 from datasets.shared.object_store import ObjectStore
+
+PANORAMA_WIDTH = 8000
+PANORAMA_HEIGHT = 4000
+SAMPLE_WIDTH = 600
+SAMPLE_HEIGHT = 450
 
 object_store = ObjectStore()
 
@@ -77,5 +83,24 @@ def roll_left(image, shift, width, height):
     output.paste(part1, (width-shift, 0, width, height))
 
     return output
+
+
+def sample_image(image, x, y):
+    if PANORAMA_WIDTH < x + SAMPLE_WIDTH:
+        intermediate = roll_left(image, SAMPLE_WIDTH, PANORAMA_WIDTH, PANORAMA_HEIGHT)
+        snippet = intermediate.crop((x - SAMPLE_WIDTH, y, x, y + SAMPLE_HEIGHT))
+    else:
+        snippet = image.crop((x, y, x + SAMPLE_WIDTH, y + SAMPLE_HEIGHT))
+    return snippet
+
+
+def prepare_img(snippet, zoom, for_cv=True):
+    zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom * SAMPLE_HEIGHT))
+    zoomed_snippet = snippet.resize(zoomed_size, Image.BICUBIC)
+    if not for_cv:
+        return zoomed_snippet
+    else:
+        gray_image = cv2.cvtColor(array(zoomed_snippet), cv2.COLOR_RGB2GRAY)
+        return cv2.equalizeHist(gray_image)
 
 
