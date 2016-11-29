@@ -22,20 +22,22 @@ scheduler:
     DATABASE_NAME: panorama
     DATABASE_USER: panorama
     DATABASE_PASSWORD: insecure
+    OBJECTSTORE_PASSWORD:
   command: >
     bash -c "/app/scheduler-wait.sh \
                         && python manage.py schedule"
 
-#worker:
-#  build: ../web
-#  links:
-#    - queue:queue
-#    - database:database
-#  environment:
-#    DATABASE_NAME: panorama
-#    DATABASE_USER: panorama
-#    DATABASE_PASSWORD: insecure
-#  command: >
-#    bash -c "/app/scheduler-wait.sh \
-#                        && python manage.py work"
-#
+worker:
+  build: ../web
+  links:
+    - queue:queue
+    - database:database
+  environment:
+    DATABASE_NAME: panorama
+    DATABASE_USER: panorama
+    DATABASE_PASSWORD: insecure
+    OBJECTSTORE_PASSWORD:
+  command: >
+    bash -c "/app/scheduler-wait.sh \
+                        && python manage.py work"
+
