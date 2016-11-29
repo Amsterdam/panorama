@@ -24,7 +24,7 @@ class DetectionScheduler(Scheduler, PanoramaTableAware):
 
                 log.warn("Scheduling {} panoramas for region detection".format(len(messages)))
                 self.schedule_messages('face_task', messages)
-#                self.schedule_messages('license_plate_task', messages)
+                self.schedule_messages('license_plate_task', messages)
 
                 time.sleep(60*factor)
 
@@ -32,7 +32,7 @@ class DetectionScheduler(Scheduler, PanoramaTableAware):
         messages = []
         max_id = Panorama.objects.all().order_by("-id")[0].id
         rand_int = randrange(max_id+1)
-        for panorama in Panorama.rendered.all()[rand_int:rand_int+1200]:
+        for panorama in Panorama.rendered.all()[rand_int:rand_int+500]:
             log.info("Sending detection tasks for: {}".format(panorama.pano_id))
             messages.append({'pano_id': panorama.pano_id,
                              'panorama_url': panorama.equirectangular_img_urls['full']
