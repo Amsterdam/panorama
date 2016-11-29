@@ -30,6 +30,6 @@ class DetectLicensePlates(Worker):
             .format(rand_shear, ZOOM_RANGE[rand_zoom], int(round((time.time() - start_time) * 1000)))
 
         return [{'pano_id': message_dict['pano_id'],
-                 'regtions': regions,
+                 'regions': regions,
                  'detected_by': detected_by}]
 
