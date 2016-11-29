@@ -13,7 +13,7 @@ JUST_BELOW_HORIZON = 2050
 PLATES_NEAR_BY = 2350
 SAMPLE_DISTANCE = 455
 ZOOM_RANGE = [1.12, 1.26, 1.41]
-ANGLE_RANGE = range(5, 46, 5)
+ANGLE_RANGE = range(5, 51, 5)
 
 
 def calculate_shear_data(shear_angle):
