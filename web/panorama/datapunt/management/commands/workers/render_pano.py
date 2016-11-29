@@ -1,6 +1,6 @@
-import json, time
-from random import randrange
+import json
 
+from job import render
 from datapunt.management.queue import Worker
 
 
@@ -10,6 +10,10 @@ class RenderPano(Worker):
 
     def do_work_with_results(self, messagebody):
         message_dict = json.loads(messagebody.decode('utf-8'))
-        time.sleep(randrange(10, 20))
+
+        render(message_dict['pano_path'],
+               message_dict['heading'],
+               message_dict['pitch'],
+               message_dict['roll'])
 
         return [{ 'pano_id': message_dict['pano_id']}]
