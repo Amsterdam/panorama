@@ -14,7 +14,7 @@ class LicensePlateDone(Listener):
     def on_message(self, messagebody):
         message_dict = json.loads(messagebody.decode('utf-8'))
 
-        panorama = Panorama.objects.get(message_dict['pano_id'])
+        panorama = Panorama.objects.get(pano_id=message_dict['pano_id'])
         for region in message_dict['regions']:
             rg = Region()
 
