@@ -26,9 +26,9 @@ def region_writer(panorama: Panorama, lp=False, detected_by=None):
                              region.left_bottom_y, region.detected_by])
 
     if lp:
-        csv_name = '{}{}/{}regions_f.csv'.format(panorama.path, panorama.filename[:-4], prefix)
-    else:
         csv_name = '{}{}/{}regions_lp.csv'.format(panorama.path, panorama.filename[:-4], prefix)
+    else:
+        csv_name = '{}{}/{}regions_f.csv'.format(panorama.path, panorama.filename[:-4], prefix)
     log.warn('saving {}'.format(csv_name))
 
     object_store.put_into_datapunt_store(csv_name, output.getvalue(), 'text/csv')
