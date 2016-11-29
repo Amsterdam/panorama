@@ -21,7 +21,13 @@ class RenderScheduler(Scheduler, PanoramaTableAware):
         messages = []
         for panorama in Panorama.to_be_rendered.all()[:5]:
             log.info("Sending render task: {}".format(panorama.pano_id))
-            messages.append({'pano_id': panorama.pano_id,  'panorama_url': panorama.equirectangular_img_urls['full']})
+
+            messages.append({'pano_id': panorama.pano_id,
+                             'pano_path': panorama.path+panorama.filename,
+                             'heading': panorama.heading,
+                             'pitch': panorama.pitch,
+                             'roll': panorama.roll})
+
             panorama.status = Panorama.STATUS.rendering
             panorama.save()
 

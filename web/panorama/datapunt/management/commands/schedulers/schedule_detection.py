@@ -1,5 +1,8 @@
 import time
 import logging
+from random import randrange
+
+from django.conf import settings
 
 from datasets.panoramas.models import Panorama
 from datapunt.management.mixins import PanoramaTableAware
@@ -16,20 +19,24 @@ class DetectionScheduler(Scheduler, PanoramaTableAware):
             factor = 1
             while True:
                 messages = self.get_messages()
-                if len(messages) < 90:
+                if len(messages) < 9:
                     factor = 10
 
                 log.warn("Scheduling {} panoramas for region detection".format(len(messages)))
                 self.schedule_messages('face_task', messages)
-                self.schedule_messages('license_plate_task', messages)
+#                self.schedule_messages('license_plate_task', messages)
 
                 time.sleep(60*factor)
 
     def get_messages(self):
         messages = []
-        for panorama in Panorama.rendered.all()[:100]:
+        max_id = Panorama.objects.all().order_by("-id")[0].id
+        rand_int = randrange(max_id+1)
+        for panorama in Panorama.rendered.all()[rand_int:rand_int+1200]:
             log.info("Sending detection tasks for: {}".format(panorama.pano_id))
-            messages.append({'pano_id': panorama.pano_id,  'panorama_url': panorama.equirectangular_img_urls['full']})
+            messages.append({'pano_id': panorama.pano_id,
+                             'panorama_url': panorama.equirectangular_img_urls['full']
+                                                .replace(settings.PANO_IMAGE_URL+'/', '')})
             panorama.status = Panorama.STATUS.blurring
             panorama.save()
 
