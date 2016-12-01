@@ -27,7 +27,7 @@ scheduler:
     bash -c "/app/scheduler-wait.sh \
                         && python manage.py schedule"
 
-worker:
+local_worker:
   build: ../web
   links:
     - queue:queue

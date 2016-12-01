@@ -38,9 +38,9 @@ CASCADE_SETS = [
 ]
 
 
-def derive(faces, x, y, zoom, cascade, scale_factor):
+def derive(faces, x, y, zoom, cascade, scale_factor, neighbours):
     derived = []
-    detected_by = "cascade={}, scaleFactor={}, zoom={}".format(cascade, scale_factor, zoom)
+    detected_by = "cascade={}, scaleFactor={}, neighbours={}, zoom={}".format(cascade, scale_factor, neighbours, zoom)
     for (x0, y0, width, height) in faces:
         x1 = int(x0/zoom) + x
         y1 = int(y0/zoom) + y
@@ -57,18 +57,19 @@ class FaceDetector:
                               "2016/08/18/TMX7316010203-000079/pano_0006_000054/equirectangular/panorama_8000.jpg"
         """
         self.panorama_path = panorama_path
+        self.panorama_img = None
 
     def get_face_regions(self):
-        panorama_img = Img.get_panorama_image(self.panorama_path)
+        self.panorama_img = Img.get_panorama_image(self.panorama_path)
         face_regions = []
         for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE):
             for y in (JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE):
-                snippet = Img.sample_image(panorama_img, x, y)
+                snippet = Img.sample_image(self.panorama_img, x, y)
                 for zoom in ZOOM_RANGE:
                     zoomed_snippet = Img.prepare_img(snippet, zoom)
                     for cascade_set in CASCADE_SETS:
                         regions = self._detect_regions(zoomed_snippet, cascade_set)
-                        derived = derive(regions, x, y, zoom, cascade_set[-1], scale_factor=cascade_set[1])
+                        derived = derive(regions, x, y, zoom, cascade_set[-1], cascade_set[1], cascade_set[2])
                         face_regions.extend(derived)
 
         return face_regions

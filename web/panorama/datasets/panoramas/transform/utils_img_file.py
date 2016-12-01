@@ -102,5 +102,3 @@ def prepare_img(snippet, zoom, for_cv=True):
     else:
         gray_image = cv2.cvtColor(array(zoomed_snippet), cv2.COLOR_RGB2GRAY)
         return cv2.equalizeHist(gray_image)
-
-

@@ -8,6 +8,7 @@ from datasets.shared.object_store import ObjectStore
 object_store = ObjectStore()
 log = logging.getLogger(__name__)
 
+
 def region_writer(panorama: Panorama, lp=False, detected_by=None):
     output = io.StringIO()
     writer = csv.writer(output)

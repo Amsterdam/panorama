@@ -1,9 +1,11 @@
 import json
+import logging
 import time
 from random import randrange
 
 from datapunt.management.queue import Worker
 from datasets.panoramas.regions import faces
+from . shared_util import save_detected_image
 
 DEFAULT_MIN_NEIGHBOURS = 6
 NORMAL = 1
@@ -29,6 +31,8 @@ CASCADE_SETS = [
      SCALES2, 1, NORMAL, 'alt_tree')
 ]
 
+log = logging.getLogger(__name__)
+
 
 class DetectFaces(Worker):
     _route = 'face_task'
@@ -37,11 +41,11 @@ class DetectFaces(Worker):
     def do_work_with_results(self, messagebody):
         message_dict = json.loads(messagebody.decode('utf-8'))
 
-        rand_casc = randrange(0, len(CASCADE_SETS))
+        rand_casc = randrange(len(CASCADE_SETS))
         if rand_casc + 1 is len(CASCADE_SETS):
             cascade = CASCADE_SETS[-1]
         else:
-            rand_neighbour = randrange(2, 11)
+            rand_neighbour = randrange(2, 10)
             sel_cascade = CASCADE_SETS[rand_casc]
             cascade = (
                 sel_cascade[0],
@@ -51,7 +55,7 @@ class DetectFaces(Worker):
                 sel_cascade[4],
             )
 
-        rand_scale = randrange(0, len(cascade[1]))
+        rand_scale = randrange(len(cascade[1]))
         faces.CASCADE_SETS = [
             (
                 cascade[0],
@@ -62,7 +66,7 @@ class DetectFaces(Worker):
             )
         ]
 
-        rand_zoom = randrange(0, len(ZOOM_RANGE))
+        rand_zoom = randrange(len(ZOOM_RANGE))
         faces.ZOOM_RANGE = [ZOOM_RANGE[rand_zoom]]
 
         start_time = time.time()
@@ -72,9 +76,17 @@ class DetectFaces(Worker):
         for region in regions:
             region[-1] += ', time={}ms'.format(int(round((time.time() - start_time) * 1000)))
 
-        detected_by = "cascade={}, scaleFactor={}, zoom={}, time={}ms".format(
-            cascade[4], cascade[1][rand_scale], faces.ZOOM_RANGE[0],
+        detected_by = "cascade={}, scaleFactor={}, neighbours={}, zoom={}, time={}ms".format(
+            cascade[4], cascade[1][rand_scale], cascade[2], faces.ZOOM_RANGE[0],
             int(round((time.time() - start_time) * 1000)))
+
+        full_image = face_detector.panorama_img
+        pano_id = "_".join(message_dict['panorama_url'].split('/')[-4:-2])
+        target_file = 'detection_test/face/{}/{}/{}/{}/{}.jpg'.format(
+            cascade[4], cascade[1][rand_scale], cascade[2], faces.ZOOM_RANGE[0], pano_id)
+
+        log.info('    saving {}'.format(target_file))
+        save_detected_image(full_image, regions, target_file)
 
         return [{'pano_id': message_dict['pano_id'],
                  'regions': regions,
