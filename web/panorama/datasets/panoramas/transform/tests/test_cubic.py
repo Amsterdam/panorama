@@ -30,4 +30,4 @@ class TestTransformImgCubic(TestTransformer):
             image_tranformer = CubicTransformer(img.path+img.filename, img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
             img_set = image_tranformer.get_projection(target_width=MAX_WIDTH)
-            save_as_file_set(output_path, img_set)
+            # save_as_file_set(output_path, img_set)
