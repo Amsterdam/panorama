@@ -46,7 +46,10 @@ class ObjectStore():
     def _get_full_container_list(self, conn, container, seed, **kwargs):
         kwargs['limit'] = self.RESP_LIMIT
         if len(seed):
-            kwargs['marker'] = seed[-1]['name']
+            if 'subdir' in seed[1]:
+                kwargs['marker'] = seed[-1]['subdir']
+            else:
+                kwargs['marker'] = seed[-1]['name']
 
         _, page = conn.get_container(container, **kwargs)
         seed.extend(page)

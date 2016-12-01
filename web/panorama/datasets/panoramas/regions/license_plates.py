@@ -77,14 +77,15 @@ class LicensePlateDetector:
                               "2016/08/18/TMX7316010203-000079/pano_0006_000054/equirectangular/panorama_8000.jpg"
         """
         self.panorama_path = panorama_path
+        self.panorama_img = None
 
     def get_licenseplate_regions(self):
-        panorama_img = Img.get_panorama_image(self.panorama_path)
+        self.panorama_img = Img.get_panorama_image(self.panorama_path)
         licenseplate_regions = []
         with OpenAlpr() as alpr:
             for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE):
                 for y in (JUST_BELOW_HORIZON, PLATES_NEAR_BY):
-                    snippet = Img.sample_image(panorama_img, x, y)
+                    snippet = Img.sample_image(self.panorama_img, x, y)
                     for zoom in ZOOM_RANGE:
                         zoomed_snippet = Img.prepare_img(snippet, zoom, for_cv=False)
                         results = alpr.recognize_array(Img.image2byte_array(zoomed_snippet))['results']
