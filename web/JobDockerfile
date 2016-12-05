@@ -1,4 +1,4 @@
-FROM python:3.5
+FROM amsterdam/panorama_image_processing:latest
 MAINTAINER datapunt.ois@amsterdam.nl
 
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
