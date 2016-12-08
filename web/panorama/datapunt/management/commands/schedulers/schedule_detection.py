@@ -22,11 +22,11 @@ class DetectionScheduler(Scheduler, PanoramaTableAware):
                 self.schedule_messages('face_task', messages)
                 self.schedule_messages('license_plate_task', messages)
 
-                time.sleep(60)
+                time.sleep(15)
 
     def get_messages(self):
         messages = []
-        for panorama in Panorama.rendered.all()[:1]:
+        for panorama in Panorama.rendered.all()[:15]:
             log.info("Sending detection tasks for: {}".format(panorama.pano_id))
             messages.append({'pano_id': panorama.pano_id,
                              'panorama_url': panorama.equirectangular_img_urls['full']
