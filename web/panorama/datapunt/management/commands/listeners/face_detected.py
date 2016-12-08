@@ -35,6 +35,6 @@ class FaceDone(Listener):
 
             rg.save()
 
-        region_writer(panorama, detected_by=message_dict['detected_by'])
+        region_writer(panorama)
 
         log.warn("   Face done! %r" % message_dict['pano_id'])

@@ -35,6 +35,6 @@ class LicensePlateDone(Listener):
 
             rg.save()
 
-        region_writer(panorama, lp=True, detected_by=message_dict['detected_by'])
+        region_writer(panorama, lp=True)
 
         log.warn("     Licenseplate done! %r" % message_dict['pano_id'])
