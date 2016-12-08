@@ -3,15 +3,15 @@ import io
 from numpy import squeeze, dsplit, dstack, array
 from scipy import misc
 from scipy.ndimage import map_coordinates
-from PIL import Image
+from PIL import Image, ImageOps
 import cv2
 
 from datasets.shared.object_store import ObjectStore
 
 PANORAMA_WIDTH = 8000
 PANORAMA_HEIGHT = 4000
-SAMPLE_WIDTH = 600
-SAMPLE_HEIGHT = 450
+SAMPLE_WIDTH = 480
+SAMPLE_HEIGHT = 320
 
 object_store = ObjectStore()
 
@@ -98,7 +98,7 @@ def prepare_img(snippet, zoom, for_cv=True):
     zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom * SAMPLE_HEIGHT))
     zoomed_snippet = snippet.resize(zoomed_size, Image.BICUBIC)
     if not for_cv:
-        return zoomed_snippet
+        return ImageOps.equalize(zoomed_snippet)
     else:
         gray_image = cv2.cvtColor(array(zoomed_snippet), cv2.COLOR_RGB2GRAY)
         return cv2.equalizeHist(gray_image)

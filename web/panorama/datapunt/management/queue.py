@@ -26,7 +26,9 @@ class QueueInteractor:
         self._route = route
 
     def connect(self):
-        return pika.SelectConnection(pika.URLParameters(settings.AMPQ_CONNECTSTRING),
+        parameters = pika.URLParameters(settings.AMPQ_CONNECTSTRING)
+        parameters.heartbeat = 0
+        return pika.SelectConnection(parameters,
                                      on_close_callback=self.on_connection_closed,
                                      on_open_callback=self.on_connection_open,
                                      on_open_error_callback=self.on_connection_error,

@@ -13,23 +13,26 @@ log = logging.getLogger(__name__)
 
 class ObjectStore():
     RESP_LIMIT = 10000  # serverside limit of the response
+    datapunt_conn = None
+    panorama_conn = None
 
-    datapunt_conn = client.Connection(authurl=settings.AUTHURL,
-                                      user=settings.OBJECTSTORE_USER,
-                                      key=settings.OBJECTSTORE_PASSWORD,
-                                      tenant_name=settings.DATAPUNT_TENANT_NAME,
-                                      auth_version=settings.AUTH_VERSION,
-                                      os_options={'tenant_id': settings.DATAPUNT_TENANT_ID,
-                                                  'region_name': settings.REGION_NAME,
-                                                  'endpoint_type' : 'internalURL'})
-    panorama_conn = client.Connection(authurl=settings.AUTHURL,
-                                      user=settings.OBJECTSTORE_USER,
-                                      key=settings.OBJECTSTORE_PASSWORD,
-                                      tenant_name=settings.PANORAMA_TENANT_NAME,
-                                      auth_version=settings.AUTH_VERSION,
-                                      os_options={'tenant_id': settings.PANORAMA_TENANT_ID,
-                                                  'region_name': settings.REGION_NAME,
-                                                  'endpoint_type' : 'internalURL'})
+    def __init__(self):
+        self.datapunt_conn = client.Connection(authurl=settings.AUTHURL,
+                                               user=settings.OBJECTSTORE_USER,
+                                               key=settings.OBJECTSTORE_PASSWORD,
+                                               tenant_name=settings.DATAPUNT_TENANT_NAME,
+                                               auth_version=settings.AUTH_VERSION,
+                                               os_options={'tenant_id': settings.DATAPUNT_TENANT_ID,
+                                                           'region_name': settings.REGION_NAME,
+                                                           'endpoint_type' : 'internalURL'})
+        self.panorama_conn = client.Connection(authurl=settings.AUTHURL,
+                                               user=settings.OBJECTSTORE_USER,
+                                               key=settings.OBJECTSTORE_PASSWORD,
+                                               tenant_name=settings.PANORAMA_TENANT_NAME,
+                                               auth_version=settings.AUTH_VERSION,
+                                               os_options={'tenant_id': settings.PANORAMA_TENANT_ID,
+                                                           'region_name': settings.REGION_NAME,
+                                                           'endpoint_type' : 'internalURL'})
 
     def get_panorama_store_object(self, object_meta_data):
         return self.panorama_conn.get_object(object_meta_data['container'], object_meta_data['name'])[1]

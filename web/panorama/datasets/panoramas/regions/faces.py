@@ -9,32 +9,29 @@ from datasets.panoramas.transform import utils_img_file as Img
 log = logging.getLogger(__name__)
 object_store = ObjectStore()
 
-JUST_ABOVE_HORIZON = 1900
-LOWEST_EXPECTED_FACE = 2200
-SAMPLE_DISTANCE = 455
-ZOOM_RANGE = [1.12, 1.26, 1.41]
+JUST_ABOVE_HORIZON = 1975
+LOWEST_EXPECTED_FACE = 2400
+SAMPLE_DISTANCE_H = 355
+SAMPLE_DISTANCE_V = 200
 
-DEFAULT_MIN_NEIGHBOURS = 6
+ZOOM = [1.41, 1.18, 1.09]
+
 NORMAL = 1
 FLIPPED = -1
 
 CASCADE_SETS = [
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
-        1.21, DEFAULT_MIN_NEIGHBOURS, NORMAL, 'default'),
+        1.29, 7, NORMAL, 'default'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
-        1.24, DEFAULT_MIN_NEIGHBOURS-3, NORMAL, 'alt'),
+        1.22, 5, NORMAL, 'alt'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
-        1.15, DEFAULT_MIN_NEIGHBOURS, NORMAL, 'alt2'),
+        1.22, 5, NORMAL, 'alt2'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-        1.067, DEFAULT_MIN_NEIGHBOURS, NORMAL, 'profile'),
+        1.118, 5, NORMAL, 'profile'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-        1.067, DEFAULT_MIN_NEIGHBOURS, FLIPPED, 'profile_flip'),
+        1.118, 5, FLIPPED, 'profile_flip'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
-        1.016, 1, NORMAL, 'alt_tree'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
-        1.018, 1, NORMAL, 'alt_tree'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
-        1.02, 1, NORMAL, 'alt_tree'),
+        1.025, 2, NORMAL, 'alt_tree')
 ]
 
 
@@ -62,15 +59,15 @@ class FaceDetector:
     def get_face_regions(self):
         self.panorama_img = Img.get_panorama_image(self.panorama_path)
         face_regions = []
-        for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE):
-            for y in (JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE):
+        for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_H):
+            for idx, y in enumerate(range(JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE, SAMPLE_DISTANCE_V)):
+                zoom = ZOOM[idx]
                 snippet = Img.sample_image(self.panorama_img, x, y)
-                for zoom in ZOOM_RANGE:
-                    zoomed_snippet = Img.prepare_img(snippet, zoom)
-                    for cascade_set in CASCADE_SETS:
-                        regions = self._detect_regions(zoomed_snippet, cascade_set)
-                        derived = derive(regions, x, y, zoom, cascade_set[-1], cascade_set[1], cascade_set[2])
-                        face_regions.extend(derived)
+                zoomed_snippet = Img.prepare_img(snippet, zoom)
+                for cascade_set in CASCADE_SETS:
+                    regions = self._detect_regions(zoomed_snippet, cascade_set)
+                    derived = derive(regions, x, y, zoom, cascade_set[-1], cascade_set[1], cascade_set[2])
+                    face_regions.extend(derived)
 
         return face_regions
 
