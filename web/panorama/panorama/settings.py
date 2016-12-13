@@ -31,6 +31,14 @@ DATAPUNT_API_URL = os.getenv(
 # Application definition
 
 INSTALLED_APPS = (
+    'datapunt',
+    'geo_views',
+    'datapunt_api',
+    'datasets.panoramas',
+    'datasets.tasks',
+
+    'health',
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -45,14 +53,6 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework_gis',
     'rest_framework_swagger',
-
-    'datapunt',
-    'geo_views',
-    'datapunt_api',
-    'datasets.panoramas',
-    'datasets.tasks',
-
-    'health',
 )
 
 MIDDLEWARE_CLASSES = (
