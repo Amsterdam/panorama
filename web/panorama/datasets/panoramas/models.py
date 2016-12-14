@@ -21,7 +21,7 @@ PREVIEW_IMAGE = 'preview.jpg'
 
 
 class Panorama(StatusModel):
-    STATUS = Choices('to_be_rendered', 'rendering', 'rendered', 'blurring', 'blurred')
+    STATUS = Choices('to_be_rendered', 'rendering', 'rendered', 'blurring', 'detecting2', 'blurred')
 
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True)

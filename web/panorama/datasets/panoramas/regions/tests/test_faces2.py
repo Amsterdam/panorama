@@ -1,11 +1,12 @@
 # Python
 import logging
 import os
-from random import randrange
 from unittest import TestCase, skipIf
+from random import randrange
 
 # Packages
 import cv2
+import dlib
 from numpy import array, int32
 
 # Project
@@ -37,6 +38,8 @@ test_set = [
     "2016/03/24/TMX7315120208-000022/pano_0001_000270/equirectangular/panorama_8000.jpg"
 ]
 
+detector = dlib.get_frontal_face_detector()
+
 
 def draw_lines(image, regions):
     for (lt, rt, rb, lb, detected_by) in regions:
@@ -59,22 +62,22 @@ def get_subset():
 
 @skipIf(not os.path.exists('/app/test_output'),
         'Face detection test skipped: no mounted directory found, run in docker container')
-class TestFaceDetection(TestCase):
+class TestFaceDetection2(TestCase):
     """
     This is more an integration test than a unit test
     It requires an installed version of opencv, which is available in the container.
     And also: before starting your container set the environment veriable OBJECTSTORE_PASSWORD
 
-        docker exec -it panorama_web_1 ./manage.py test datasets.panoramas.regions.tests.test_faces
+        docker exec -it panorama_web_1 ./manage.py test datasets.panoramas.regions.tests.test_faces2
 
     Because it's slow not all images are tested all the time.
     look into the .gitignore-ed directory PROJECT/test_output for a visual check of the result
     """
-    def test_detection_faces_runs_without_errors(self):
+    def test_detection_faces2_runs_without_errors(self):
         for pano_idx, panorama_path in enumerate(get_subset()):
             log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_path))
             fd = FaceDetector(panorama_path)
-            found_faces = fd.get_opencv_face_regions()
+            found_faces = fd.get_dlib_face_regions()
 
             full_image = Img.get_panorama_image(panorama_path)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
