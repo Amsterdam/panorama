@@ -87,6 +87,10 @@ class QueueInteractor:
 
 
 class QueueConsumer(QueueInteractor):
+    """
+    Base Class for consuming from queues, drawn from
+        https://pika.readthedocs.io/en/0.10.0/examples/asynchronous_consumer_example.html
+    """
     def __init__(self, callback, route):
         super().__init__(callback, route)
         self._consumer_tag = None

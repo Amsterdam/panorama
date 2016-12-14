@@ -85,12 +85,12 @@ def roll_left(image, shift, width, height):
     return output
 
 
-def sample_image(image, x, y):
-    if PANORAMA_WIDTH < x + SAMPLE_WIDTH:
-        intermediate = roll_left(image, SAMPLE_WIDTH, PANORAMA_WIDTH, PANORAMA_HEIGHT)
-        snippet = intermediate.crop((x - SAMPLE_WIDTH, y, x, y + SAMPLE_HEIGHT))
+def sample_image(image, x, y, sample_width=SAMPLE_WIDTH, sample_height=SAMPLE_HEIGHT):
+    if PANORAMA_WIDTH < x + sample_width:
+        intermediate = roll_left(image, sample_width, PANORAMA_WIDTH, PANORAMA_HEIGHT)
+        snippet = intermediate.crop((x - sample_width, y, x, y + sample_height))
     else:
-        snippet = image.crop((x, y, x + SAMPLE_WIDTH, y + SAMPLE_HEIGHT))
+        snippet = image.crop((x, y, x + sample_width, y + sample_height))
     return snippet
 
 

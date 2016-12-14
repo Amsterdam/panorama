@@ -6,6 +6,8 @@ RUN apt-get update \
 		gdal-bin \
 		libgeos-dev \
 		netcat \
+		python3-dev \
+		libboost-python-dev \
  	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
 	&& adduser --system datapunt \

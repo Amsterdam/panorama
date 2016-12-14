@@ -1,6 +1,5 @@
 import time
 import logging
-from random import randrange
 
 from django.conf import settings
 
