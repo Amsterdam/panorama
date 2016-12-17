@@ -9,7 +9,6 @@ from PIL import Image
 from datasets.shared.object_store import ObjectStore
 from datasets.panoramas.transform import utils_img_file as Img
 
-
 log = logging.getLogger(__name__)
 object_store = ObjectStore()
 
@@ -70,7 +69,6 @@ class FaceDetector:
         face_regions = []
         for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_X):
             for idx, y in enumerate(range(JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE, SAMPLE_DISTANCE_Y)):
-                log.warn("detecting x, y: {}, {}".format(x, y))
                 zoom = OPENCV_ZOOM[idx]
                 snippet = Img.sample_image(self.panorama_img, x, y)
                 zoomed_snippet = Img.prepare_img(snippet, zoom)
