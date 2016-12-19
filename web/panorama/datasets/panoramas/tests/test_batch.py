@@ -21,7 +21,14 @@ def mock_pano_objectstore(container, path):
 
 
 def mock_dp_objectstore(path):
-    return [{'name': f} for f in glob.glob(path[2:]+'*.jpg')]
+    if path.startswith('results/'):
+        path = path[10:30]+'results/'+path[30:]
+
+        def mapback(f):
+            return 'results/1/'+f.replace('results/', '')
+        return [{'name': mapback(f)} for f in glob.glob(path+'/*.csv')]
+    else:
+        return [{'name': f} for f in glob.glob(path[2:]+'*.jpg')]
 
 
 def mock_get_csv(csv):
@@ -53,3 +60,8 @@ class ImportPanoTest(TransactionTestCase):
 
         trajecten = Traject.objects.all()
         self.assertEqual(trajecten.count(), 14)
+
+        self.assertEqual(Panorama.detected_lp.count(), 1)
+        self.assertEqual(Panorama.detected_1.count(), 1)
+        self.assertEqual(Panorama.detected_2.count(), 1)
+        self.assertEqual(Panorama.to_be_rendered.count(), 11)
