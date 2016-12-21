@@ -1,11 +1,9 @@
 import json
 import logging
 import time
-from random import randrange
 
 from datapunt.management.queue import Worker
 from datasets.panoramas.regions import faces
-from . shared_util import save_detected_image
 
 log = logging.getLogger(__name__)
 
