@@ -101,11 +101,16 @@ class ImportPanoramaJob(object):
             log.error('MISSING Panorama: %s/%s/%s', container, path, pano_image)
             return None
 
+        # check if rendered pano file exists
+        rendered_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
+        is_pano_rendered = container+'/'+path+rendered_image in self.files_in_renderdir
+
+        # Creating unique id from mission id and pano id
         pano_id = '%s_%s' % (path.split('/')[-2], base_filename)
 
         return Panorama(
             pano_id=pano_id,
-            status=self.get_status(container, path, base_filename),
+            status=Panorama.STATUS.rendered if is_pano_rendered else Panorama.STATUS.to_be_rendered,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=pano_image,
             path=container+'/'+path,
@@ -163,20 +168,3 @@ class ImportPanoramaJob(object):
         timestamp = datetime.utcfromtimestamp(
             gps_time + UTCfromGPS).replace(tzinfo=UTC_TZ)
         return timestamp
-
-    def get_status(self, container, path, base_filename):
-        rendered_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
-        status = Panorama.STATUS.rendered if container+'/'+path+rendered_image in self.files_in_renderdir \
-                 else Panorama.STATUS.to_be_rendered
-        result_dir = 'results/'+container+'/'+path+base_filename
-        files_in_result = [file['name'] for file in self.object_store.get_datapunt_store_objects(result_dir)]
-        if result_dir+'/regions_lp.csv' in files_in_result:
-            status = Panorama.STATUS.detected_lp
-        if result_dir+'/regions_f.csv' in files_in_result:
-            status = Panorama.STATUS.detected_1
-        if result_dir+'/regions_fd.csv' in files_in_result:
-            status = Panorama.STATUS.detected_2
-        # todo: also make check for status blurred.
-        #       this is not a lame way of ducking that work, production is in an intermediate status,
-        #       if that is resolved this final check can be made, and integrated.
-        return status
