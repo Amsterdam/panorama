@@ -69,6 +69,10 @@ class Panorama(StatusModel):
                 'preview': baseurl + PREVIEW_IMAGE}
 
     @property
+    def detection_result_dir(self):
+        return 'results/{}{}'.format(self.path, self.filename[:-4])
+
+    @property
     def equirectangular_img_urls(self):
         baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4] + EQUIRECTANGULAR_SUBPATH)
         return {'full': baseurl + FULL_IMAGE_NAME,

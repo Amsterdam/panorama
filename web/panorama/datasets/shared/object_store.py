@@ -78,6 +78,22 @@ class ObjectStore():
                                                            prefix=path)
         return [store_object['subdir'] for store_object in objects_from_store if 'subdir' in store_object]
 
+    def get_detection_csvs(self, day):
+        csvs = []
+        log.info('day: {}'.format(day))
+        for trajectory in self.get_datapunt_subdirs(day):
+                for panorama in self.get_datapunt_subdirs(trajectory):
+                    csvs.extend(self._get_datapunt_csv_type(panorama, 'region'))
+        return csvs
+
+    def get_datapunt_subdirs(self, path):
+        objects_from_store = self._get_full_container_list(self.datapunt_conn,
+                                                           settings.DATAPUNT_CONTAINER,
+                                                           [],
+                                                           delimiter='/',
+                                                           prefix=path)
+        return [store_object['subdir'] for store_object in objects_from_store if 'subdir' in store_object]
+
     def _get_csv_type(self, container, path, csv_identifier):
         csvs = self._get_full_container_list(self.panorama_conn,
                                              container,
@@ -88,8 +104,23 @@ class ObjectStore():
             csv_object['container'] = container
         return csvs
 
+    def _get_datapunt_csv_type(self, path, csv_identifier):
+        csvs =  self._get_full_container_list(self.datapunt_conn,
+                                             settings.DATAPUNT_CONTAINER,
+                                             [],
+                                             delimiter='/',
+                                             prefix=path+csv_identifier)
+        return csvs
+
     def put_into_datapunt_store(self, object_name, object_content, content_type):
         self.datapunt_conn.put_object(settings.DATAPUNT_CONTAINER,
+                                      object_name,
+                                      contents=object_content,
+                                      content_type=content_type)
+
+
+    def put_into_panorama_store(self, container, object_name, object_content, content_type):
+        self.panorama_conn.put_object(container,
                                       object_name,
                                       contents=object_content,
                                       content_type=content_type)
