@@ -62,7 +62,8 @@ var scene = viewer.createScene({
 	source: source,
 	geometry: geometry,
 	view: view,
-	pinFirstLevel: true
+	pinFirstLevel: true,
+	stageType: 'css'
 });
 
 // Display scene.

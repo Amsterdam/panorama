@@ -10,8 +10,8 @@ from datapunt.management.queue import Scheduler
 log = logging.getLogger(__name__)
 
 
-class FaceDetection2Scheduler(Scheduler, PanoramaTableAware):
-    _route_out = 'detect_face2_task'
+class LpDetectionScheduler(Scheduler, PanoramaTableAware):
+    _route_out = 'license_plate_task'
 
     def schedule(self):
         with self.panorama_table_present():
@@ -21,14 +21,12 @@ class FaceDetection2Scheduler(Scheduler, PanoramaTableAware):
 
     def get_messages(self):
         messages = []
-        for panorama in Panorama.detected_1.all()[:100]:
-            log.info("Sending face_detect2 task: {}".format(panorama.pano_id))
-
+        for panorama in Panorama.rendered.all()[:15]:
+            log.info("Sending lp_detection task for: {}".format(panorama.pano_id))
             messages.append({'pano_id': panorama.pano_id,
                              'panorama_url': panorama.equirectangular_img_urls['full']
-                            .replace(settings.PANO_IMAGE_URL+'/', '')})
-
-            panorama.status = Panorama.STATUS.detecting2
+                                                .replace(settings.PANO_IMAGE_URL+'/', '')})
+            panorama.status = Panorama.STATUS.detecting_lp
             panorama.save()
 
         return messages

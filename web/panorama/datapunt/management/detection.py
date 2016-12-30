@@ -8,7 +8,7 @@ from datasets.shared.object_store import ObjectStore
 log = logging.getLogger(__name__)
 
 
-def region_writer(panorama: Panorama, lp=False, dlib=False):
+def region_writer(panorama: Panorama, lp=False, dlib=False, profile=False):
     object_store = ObjectStore()
     output = io.StringIO()
     writer = csv.writer(output)
@@ -21,11 +21,12 @@ def region_writer(panorama: Panorama, lp=False, dlib=False):
                          region.right_top_y, region.right_bottom_x, region.right_bottom_y, region.left_bottom_x,
                          region.left_bottom_y, region.detected_by])
 
+    suffix = 'd' if dlib else ('p' if profile else '')
     if lp:
         csv_name = 'results/{}{}/regions_lp.csv'.format(panorama.path, panorama.filename[:-4])
     else:
-        csv_name = 'results/{}{}/regions_f{}.csv'.format(panorama.path, panorama.filename[:-4], 'd' if dlib else '')
-    log.warn('saving {}'.format(csv_name))
+        csv_name = 'results/{}{}/regions_f{}.csv'.format(panorama.path, panorama.filename[:-4], suffix)
+    log.warning('saving {}'.format(csv_name))
 
     object_store.put_into_datapunt_store(csv_name, output.getvalue(), 'text/csv')
 

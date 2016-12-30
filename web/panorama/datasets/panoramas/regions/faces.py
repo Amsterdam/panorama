@@ -23,18 +23,18 @@ NORMAL = 1
 FLIPPED = -1
 
 CASCADE_SETS = [
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
-        1.29, 7, NORMAL, 'default'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
-        1.22, 5, NORMAL, 'alt'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
-        1.22, 5, NORMAL, 'alt2'),
+    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
+    #     1.29, 7, NORMAL, 'default'),
+    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
+    #     1.22, 5, NORMAL, 'alt'),
+    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
+    #     1.22, 5, NORMAL, 'alt2'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-        1.118, 5, NORMAL, 'profile'),
+        1.11, 5, NORMAL, 'profile'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-        1.118, 5, FLIPPED, 'profile_flip'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
-        1.025, 2, NORMAL, 'alt_tree')
+        1.11, 5, FLIPPED, 'profile_flip_correct'),
+    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
+    #     1.025, 2, NORMAL, 'alt_tree')
 ]
 
 DLIB_ZOOM = [2, 1.83, 1.68, 1.54]
@@ -84,7 +84,7 @@ class FaceDetector:
 
         face_cascade = cv2.CascadeClassifier(cascade_set[0])
         if cascade_set[3] is FLIPPED:
-            detect = cv2.flip(snippet, 0)
+            detect = cv2.flip(snippet, 1)
         else:
             detect = snippet
 
@@ -94,7 +94,8 @@ class FaceDetector:
 
         if cascade_set[3] is FLIPPED:
             for detected_face in detected_faces:
-                detected_face[0] = Img.PANORAMA_WIDTH - detected_face[0] - detected_face[2]
+                # comment: left_top_x = snippet_width - flipped_left_top_x - width_of_detected_face
+                detected_face[0] = detect.shape[1] - detected_face[0] - detected_face[2]
 
         if len(detected_faces) > 0:
             log.warning('Cascade {}-{} detected: {}.'.format(
@@ -112,7 +113,7 @@ class FaceDetector:
 
         for zoom in DLIB_ZOOM:
             strip = self.panorama_img.crop((0, 1975, 8000, 2600))
-            zoomed_size = (int(zoom*8000), int(zoom * 625))
+            zoomed_size = (int(zoom*8000), int(zoom*625))
             zoomed = strip.resize(zoomed_size, Image.BICUBIC)
 
             detected_faces, _, _ = detector.run(misc.fromimage(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD)

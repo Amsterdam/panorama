@@ -71,7 +71,7 @@ class TestFaceDetection(TestCase):
     look into the .gitignore-ed directory PROJECT/test_output for a visual check of the result
     """
     def test_detection_faces_runs_without_errors(self):
-        for pano_idx, panorama_path in enumerate(get_subset()):
+        for pano_idx, panorama_path in enumerate(test_set):
             log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_path))
             fd = FaceDetector(panorama_path)
             found_faces = fd.get_opencv_face_regions()
