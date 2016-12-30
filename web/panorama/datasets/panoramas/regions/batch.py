@@ -4,7 +4,7 @@ import logging
 from .. models import Panorama, Region
 from datasets.shared.object_store import ObjectStore
 
-BATCH_SIZE = 50000
+BATCH_SIZE = 1000
 log = logging.getLogger(__name__)
 
 
@@ -12,6 +12,7 @@ class ImportRegions:
     """
     Simple import script.
     It looks through the results-dir for regions. Expects panoramas in database
+    Used for one-off (hopefully) restore of the given data.
     """
     object_store = ObjectStore()
 
@@ -24,7 +25,7 @@ class ImportRegions:
                     for csv_file in csvs:
                         new_regions = self.process_detection_csvs(csv_file)
                         regions.extend(new_regions)
-                        if len(regions) > 60000:
+                        if len(regions) > 1000:
                             Region.objects.bulk_create(regions, batch_size=BATCH_SIZE)
                             regions = []
 

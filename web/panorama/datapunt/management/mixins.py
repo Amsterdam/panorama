@@ -9,10 +9,10 @@ log = logging.getLogger(__name__)
 class _wait_for_panorama_table:
     def __enter__(self):
         while True:
-            log.warn("waiting for panoramas table...")
+            log.warning("waiting for panoramas table...")
             time.sleep(10)
             if self.is_panorama_table_present is True:
-                log.warn("done... waiting for panoramas table")
+                log.warning("done... waiting for panoramas table")
                 break
 
     def __exit__(self, type, value, traceback):

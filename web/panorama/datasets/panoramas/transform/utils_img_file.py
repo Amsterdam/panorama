@@ -63,14 +63,18 @@ def sample_rgb_array_image_as_array(coordinates, rgb_array):
     return dstack((r, g, b))
 
 
-def save_image(image, name):
+def save_image(image, name, in_panorama_store=False):
     byte_array = io.BytesIO()
     image.save(byte_array, format='JPEG', optimize=True, progressive=True)
-    object_store.put_into_datapunt_store(name, byte_array.getvalue(), 'image/jpeg')
+    if in_panorama_store:
+        container, name = name.split('/')[0], '/'.join(name.split('/')[1:])
+        object_store.put_into_panorama_store(container, name, byte_array.getvalue(), 'image/jpeg')
+    else:
+        object_store.put_into_datapunt_store(name, byte_array.getvalue(), 'image/jpeg')
 
 
-def save_array_image(array, name):
-    save_image(Image.fromarray(array), name)
+def save_array_image(array, name, in_panorama_store=False):
+    save_image(Image.fromarray(array), name, in_panorama_store)
 
 
 def roll_left(image, shift, width, height):
@@ -95,7 +99,7 @@ def sample_image(image, x, y, sample_width=SAMPLE_WIDTH, sample_height=SAMPLE_HE
 
 
 def prepare_img(snippet, zoom, for_cv=True):
-    zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom * SAMPLE_HEIGHT))
+    zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom*SAMPLE_HEIGHT))
     zoomed_snippet = snippet.resize(zoomed_size, Image.BICUBIC)
     if not for_cv:
         return ImageOps.equalize(zoomed_snippet)

@@ -35,7 +35,7 @@ class QueueInteractor:
                                      stop_ioloop_on_close=False)
 
     def on_connection_closed(self, connection, code, text):
-        log.warn("connection closed: {} - {}".format(code, text))
+        log.warning("connection closed: {} - {}".format(code, text))
         self._channel = None
         if self._on_exit:
             self._connection.ioloop.stop()
@@ -44,7 +44,7 @@ class QueueInteractor:
             self._connection.add_timeout(5, self.reconnect)
 
     def on_connection_error(self, connection, msg):
-        log.warn("connection error: {}".format(msg))
+        log.warning("connection error: {}".format(msg))
         self.on_connection_closed(connection, '-1', msg)
 
     def reconnect(self):
@@ -68,7 +68,7 @@ class QueueInteractor:
                                        auto_delete=False)
 
     def on_channel_closed(self, _, code, text):
-        log.warn("channel closed: {} - {}".format(code, text))
+        log.warning("channel closed: {} - {}".format(code, text))
         self._connection.close()
 
     def on_exchange_ok(self, _):

@@ -17,5 +17,7 @@ class LicensePlateDone(Listener):
         panorama = Panorama.objects.get(pano_id=message_dict['pano_id'])
         save_regions(message_dict, panorama, region_type='N')
         region_writer(panorama, lp=True)
+        panorama.status = Panorama.STATUS.detected_lp
+        panorama.save()
 
-        log.warn("     Licenseplate done! %r" % message_dict['pano_id'])
+        log.warning("     Licenseplate done! %r" % message_dict['pano_id'])

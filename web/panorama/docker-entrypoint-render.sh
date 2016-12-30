@@ -10,5 +10,5 @@ source docker-wait.sh
 # migrate database tables
 yes yes | python manage.py migrate --noinput
 
-# run import
+# run renderjob
 python manage.py render_panos

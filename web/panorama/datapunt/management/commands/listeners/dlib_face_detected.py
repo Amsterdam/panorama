@@ -17,5 +17,7 @@ class FaceDone(Listener):
         panorama = Panorama.objects.get(pano_id=message_dict['pano_id'])
         save_regions(message_dict, panorama)
         region_writer(panorama, dlib=True)
+        panorama.status = Panorama.STATUS.detected_2
+        panorama.save()
 
-        log.warn("   Face2 done! %r" % message_dict['pano_id'])
+        log.warning("   Face2 done! %r" % message_dict['pano_id'])
