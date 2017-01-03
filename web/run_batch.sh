@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+set -u
+
 for f in parameterfile.par
 do
   echo "Processing $f"
