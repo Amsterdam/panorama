@@ -26,6 +26,7 @@ netaddr==0.7.18
 netifaces==0.10.5
 numpy==1.11.2
 openapi-codec==1.2.1
+opencv-python==3.1.0.3
 oslo.config==3.21.0
 oslo.i18n==3.11.0
 oslo.serialization==2.15.0
