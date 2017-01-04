@@ -1,6 +1,7 @@
 # Python
 import logging
 # Packages
+from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse
 
@@ -20,11 +21,18 @@ def health(request):
         return HttpResponse(
             "Database connectivity failed",
             content_type="text/plain", status=500)
+
+    # check debug
+    if settings.DEBUG:
+        log.exception("Debug mode not allowed in production")
+        return HttpResponse(
+            "Debug mode not allowed in production",
+            content_type="text/plain", status=500)
+
     if Panorama.objects.all().count() < 500000:
         return HttpResponse(
             "Too few Panoramas in the database",
             content_type="text/plain", status=500)
 
     return HttpResponse(
-        "Connectivity OK", content_type='text/plain', status=200)
-
+        "Health OK", content_type='text/plain', status=200)
