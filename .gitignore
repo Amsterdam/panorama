@@ -9,3 +9,5 @@ web/static/*
 .jenkins/backups
 /panoramas_test
 test_output
+.project
+.pydevproject
