@@ -1,7 +1,5 @@
 import logging
-
 from swiftclient import client
-from six.moves.urllib.parse import urlparse, urlunparse
 import panorama.objectstore_settings as settings
 
 logging.getLogger("requests").setLevel(logging.WARNING)

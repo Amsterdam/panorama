@@ -36,8 +36,8 @@ class RegionBlurrer:
         for region in regions:
             (top, left), (bottom, right) = get_rectangle(region)
             snippet = blurred_image[top:bottom, left:right]
-            blur_kernel_size = 2*int((top-bottom)/4)+1
-            snippet = cv2.GaussianBlur(snippet, (blur_kernel_size, blur_kernel_size), 30)
+            blur_kernel_size = 2*int((bottom-top)/6)+1
+            snippet = cv2.GaussianBlur(snippet, (blur_kernel_size, blur_kernel_size), 0)
             blurred_image[top:bottom, left:right] = snippet
 
         return blurred_image

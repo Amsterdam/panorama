@@ -23,18 +23,18 @@ NORMAL = 1
 FLIPPED = -1
 
 CASCADE_SETS = [
-    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
-    #     1.29, 7, NORMAL, 'default'),
-    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
-    #     1.22, 5, NORMAL, 'alt'),
-    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
-    #     1.22, 5, NORMAL, 'alt2'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
+        1.29, 7, NORMAL, 'default'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
+        1.22, 5, NORMAL, 'alt'),
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
+        1.22, 5, NORMAL, 'alt2'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
         1.11, 5, NORMAL, 'profile'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
         1.11, 5, FLIPPED, 'profile_flip_correct'),
-    # ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
-    #     1.025, 2, NORMAL, 'alt_tree')
+    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
+        1.025, 2, NORMAL, 'alt_tree')
 ]
 
 DLIB_ZOOM = [2, 1.83, 1.68, 1.54]
