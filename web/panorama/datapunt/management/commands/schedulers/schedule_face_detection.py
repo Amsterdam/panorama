@@ -21,7 +21,7 @@ class FaceDetectionScheduler(Scheduler, PanoramaTableAware):
 
     def get_messages(self):
         messages = []
-        for panorama in Panorama.detected_lp.all()[:15]:
+        for panorama in Panorama.detected_lp.all()[:50]:
             log.info("Sending face detection task for: {}".format(panorama.pano_id))
             messages.append({'pano_id': panorama.pano_id,
                              'panorama_url': panorama.equirectangular_img_urls['full']
