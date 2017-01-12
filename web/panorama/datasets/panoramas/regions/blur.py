@@ -6,18 +6,10 @@ from scipy import misc
 
 from datasets.shared.object_store import ObjectStore
 from datasets.panoramas.transform import utils_img_file as Img
+from datasets.panoramas.regions.util import get_rectangle, do_split_regions
 
 log = logging.getLogger(__name__)
 object_store = ObjectStore()
-
-
-def get_rectangle(region):
-    top = min(region['left_top_y'], region['right_top_y'])
-    left = min(region['left_top_x'], region['left_bottom_x'])
-    bottom = max(region['left_bottom_y'], region['right_bottom_y'])
-    right = max(region['right_top_x'], region['right_bottom_x'])
-
-    return (top, left), (bottom, right)
 
 
 class RegionBlurrer:
@@ -33,7 +25,7 @@ class RegionBlurrer:
         blurred_image = misc.fromimage(self.panorama_img)
 
         # blur regions
-        for region in regions:
+        for region in do_split_regions(regions):
             (top, left), (bottom, right) = get_rectangle(region)
             snippet = blurred_image[top:bottom, left:right]
             blur_kernel_size = 2*int((bottom-top)/4)+1

@@ -1,5 +1,6 @@
 WIDTH = 8000
 X, Y = 0, 1
+LEFT_TOP, RIGHT_TOP, RIGHT_BOTTOM, LEFT_BOTTOM = 0, 1, 2, 3
 
 
 def intersection(point_left, point_right, width):
@@ -43,3 +44,35 @@ def wrap_around(regions, width=WIDTH):
             split_regions.extend([points_left, points_right])
 
     return split_regions
+
+
+def do_split_regions(regions):
+    split_regions = []
+    for region in regions:
+        for split_region in wrap_around([((region['left_top_x'], region['left_top_y']),
+                                         (region['right_top_x'], region['right_top_y']),
+                                         (region['right_bottom_x'], region['right_bottom_y']),
+                                         (region['left_bottom_x'],region['left_bottom_y']), '')]):
+            split_regions.append({
+                'left_top_x': split_region[LEFT_TOP][X],
+                'left_top_y': split_region[LEFT_TOP][Y],
+                'right_top_x': split_region[RIGHT_TOP][X],
+                'right_top_y': split_region[RIGHT_TOP][Y],
+                'right_bottom_x': split_region[RIGHT_BOTTOM][X],
+                'right_bottom_y': split_region[RIGHT_BOTTOM][Y],
+                'left_bottom_x': split_region[LEFT_BOTTOM][X],
+                'left_bottom_y': split_region[LEFT_BOTTOM][Y]
+            })
+
+    return split_regions
+
+
+def get_rectangle(region_dict):
+    top = min(region_dict['left_top_y'], region_dict['right_top_y'])
+    left = min(region_dict['left_top_x'], region_dict['left_bottom_x'])
+    bottom = max(region_dict['left_bottom_y'], region_dict['right_bottom_y'])
+    right = max(region_dict['right_top_x'], region_dict['right_bottom_x'])
+
+    return (top, left), (bottom, right)
+
+

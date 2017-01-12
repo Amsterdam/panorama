@@ -8,6 +8,7 @@ import cv2
 from numpy import array
 
 from datasets.shared.object_store import ObjectStore
+from . import test_util
 from .. import blur
 
 log = logging.getLogger(__name__)
@@ -33,28 +34,10 @@ test_set = [
 def get_random_regions():
     regions = []
     for _ in range(randint(1, 3)):
-        region = get_random_region()
+        region = test_util.get_random_region()
         regions.append(region)
 
     return regions
-
-
-def get_random_region():
-    start_x = randint(0, 8000)
-    start_y = randint(0, 4000)
-    width = randint(400, 700)
-    log.info("blurring (x, y): ({}, {}) with width {}".format(start_x, start_y, width))
-    region = {
-        'left_top_x': start_x,
-        'left_top_y': start_y,
-        'right_top_x': start_x + width,
-        'right_top_y': start_y,
-        'right_bottom_x': start_x + width,
-        'right_bottom_y': min(4000, start_y + width),
-        'left_bottom_x': start_x,
-        'left_bottom_y': min(4000, start_y + width),
-    }
-    return region
 
 
 @skipIf(not os.path.exists('/app/test_output'),
@@ -77,43 +60,19 @@ class TestBlur(TestCase):
             image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
             cv2.imwrite("/app/test_output/blur_test_{}.jpg".format(pano_idx), image)
 
+    def test_blur_out_of_range(self):
+        panorama_path = test_set[randint(0, len(test_set))]
+        log.warning("blurring out of range: {}, please hold".format(panorama_path))
+        rb = blur.RegionBlurrer(panorama_path)
+        image = rb.get_blurred_image([test_util.get_out_of_range_region()])
+        image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
+        cv2.imwrite("/app/test_output/blur_test_{}.jpg".format('_out_of_range'), image)
 
-class TestGetRectangle(TestCase):
-    def test_get_rectangle(self):
-        fixture = get_random_region()
+    def test_blur_wrap_around(self):
+        panorama_path = test_set[randint(0, len(test_set))]
+        log.warning("blurring wrap around: {}, please hold".format(panorama_path))
+        rb = blur.RegionBlurrer(panorama_path)
+        image = rb.get_blurred_image([test_util.get_wrap_around_region()])
+        image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
+        cv2.imwrite("/app/test_output/blur_test_{}.jpg".format('_wrap_around'), image)
 
-        expected_left = fixture['left_top_x'] if fixture['left_top_x'] < fixture['right_top_x'] \
-            else fixture['right_top_x']
-        expected_top = fixture['left_top_y'] if fixture['left_top_y'] < fixture['right_top_y'] \
-            else fixture['right_top_y']
-        expected_right = fixture['left_bottom_x'] if fixture['left_bottom_x'] > fixture['right_bottom_x'] \
-            else fixture['right_bottom_x']
-        expected_bottom = fixture['left_bottom_y'] if fixture['left_bottom_y'] > fixture['right_bottom_y'] \
-            else fixture['right_bottom_y']
-
-        self.assertEqual(((expected_top, expected_left), (expected_bottom, expected_right)),
-                         blur.get_rectangle(fixture))
-
-    def test_get_x_y_shift(self):
-        self.assertEqual(((120, 100), (520, 500)),
-                         blur.get_rectangle({
-                             'left_top_x': 100,
-                             'left_top_y': 120,
-                             'right_top_x': 400,
-                             'right_top_y': 420,
-                             'right_bottom_x': 500,
-                             'right_bottom_y': 520,
-                             'left_bottom_x': 200,
-                             'left_bottom_y': 220,
-        }))
-        self.assertEqual(((80, 50), (420, 400)),
-                         blur.get_rectangle({
-                             'left_top_x': 100,
-                             'left_top_y': 120,
-                             'right_top_x': 400,
-                             'right_top_y': 80,
-                             'right_bottom_x': 350,
-                             'right_bottom_y': 380,
-                             'left_bottom_x': 50,
-                             'left_bottom_y': 420,
-        }))
