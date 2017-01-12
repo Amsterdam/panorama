@@ -1,8 +1,40 @@
 #Python
 from unittest import TestCase
+from random import randint
 
 # Project
-from datasets.panoramas.regions.util import wrap_around
+from datasets.panoramas.regions.util import wrap_around, get_rectangle
+
+
+def get_random_region_for(start_x):
+    start_y = randint(1000, 2500)
+    width = randint(400, 700)
+    region = {
+        'left_top_x': start_x,
+        'left_top_y': start_y,
+        'right_top_x': start_x + width,
+        'right_top_y': start_y,
+        'right_bottom_x': start_x + width,
+        'right_bottom_y': start_y + width,
+        'left_bottom_x': start_x,
+        'left_bottom_y': start_y + width,
+    }
+    return region
+
+
+def get_random_region():
+    start_x = randint(0, 8000)
+    return get_random_region_for(start_x)
+
+
+def get_wrap_around_region():
+    start_x = 7800
+    return get_random_region_for(start_x)
+
+
+def get_out_of_range_region():
+    start_x = 8050
+    return get_random_region_for(start_x)
 
 
 class TestRegions(TestCase):
@@ -59,3 +91,46 @@ class TestRegions(TestCase):
         self.assertEqual(points[1], (20, 140))
         self.assertEqual(points[2], (25, 230))
         self.assertEqual(points[3], (15, 250))
+
+
+
+class TestGetRectangle(TestCase):
+    def test_get_rectangle(self):
+        fixture = get_random_region()
+
+        expected_left = fixture['left_top_x'] if fixture['left_top_x'] < fixture['right_top_x'] \
+            else fixture['right_top_x']
+        expected_top = fixture['left_top_y'] if fixture['left_top_y'] < fixture['right_top_y'] \
+            else fixture['right_top_y']
+        expected_right = fixture['left_bottom_x'] if fixture['left_bottom_x'] > fixture['right_bottom_x'] \
+            else fixture['right_bottom_x']
+        expected_bottom = fixture['left_bottom_y'] if fixture['left_bottom_y'] > fixture['right_bottom_y'] \
+            else fixture['right_bottom_y']
+
+        self.assertEqual(((expected_top, expected_left), (expected_bottom, expected_right)),
+                         get_rectangle(fixture))
+
+    def test_get_x_y_shift(self):
+        self.assertEqual(((120, 100), (520, 500)),
+                         get_rectangle({
+                             'left_top_x': 100,
+                             'left_top_y': 120,
+                             'right_top_x': 400,
+                             'right_top_y': 420,
+                             'right_bottom_x': 500,
+                             'right_bottom_y': 520,
+                             'left_bottom_x': 200,
+                             'left_bottom_y': 220,
+                         }))
+        self.assertEqual(((80, 50), (420, 400)),
+                         get_rectangle({
+                             'left_top_x': 100,
+                             'left_top_y': 120,
+                             'right_top_x': 400,
+                             'right_top_y': 80,
+                             'right_bottom_x': 350,
+                             'right_bottom_y': 380,
+                             'left_bottom_x': 50,
+                             'left_bottom_y': 420,
+                         }))
+

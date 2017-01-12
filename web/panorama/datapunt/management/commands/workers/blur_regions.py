@@ -1,6 +1,5 @@
 import json
 import logging
-import time
 
 from PIL import Image
 
@@ -9,6 +8,7 @@ from datasets.panoramas.regions import blur
 from datasets.panoramas.transform.cubic import CubicTransformer
 from datasets.panoramas.transform import utils_img_file as Img
 from datasets.panoramas.transform import utils_img_file_cubic as CubeImg
+from datasets.panoramas.regions.util import wrap_around
 
 log = logging.getLogger(__name__)
 
@@ -51,5 +51,5 @@ class BlurRegions(Worker):
             blurred_img = region_blurrer.get_blurred_image(regions)
             save_image_set(panorama_path, blurred_img)
 
-        log.info("done blurring")
+        log.warning("done blurring")
         return [{'pano_id': message_dict['pano_id']}]
