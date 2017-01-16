@@ -31,7 +31,7 @@ class PanoramaRouter(routers.DefaultRouter):
         return Panorama.as_view()
 
 
-panorama = routers.DefaultRouter()
+panorama = PanoramaRouter()
 panorama.register(r'opnamelocatie', PanoramaViewSet, base_name='panorama')
 panorama.register(r'thumbnail', ThumbnailViewSet, base_name='thumbnail')
 

@@ -24,7 +24,7 @@ monotonic==1.2
 msgpack-python==0.4.8
 netaddr==0.7.18
 netifaces==0.10.5
-numpy==1.11.2
+numpy==1.11.3
 openapi-codec==1.2.1
 opencv-python==3.2.0.6
 oslo.config==3.21.0
