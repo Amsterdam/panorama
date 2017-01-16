@@ -31,13 +31,13 @@ def wrap_around(regions, width=WIDTH):
                     points_right.append(curr_coords)
                 elif curr_coords[X] < width:
                     points_left.append(curr_coords)
-                    if next_coords[X] >= width:
+                    if next_coords[X] > width:
                         intersect_to = intersection(curr_coords, next_coords, width)
                         points_left.append(intersect_to)
                         points_right.append(intersect_to)
                 else:
                     points_right.append(curr_coords)
-                    if next_coords[X] <= width:
+                    if next_coords[X] < width:
                         intersect_back = intersection(next_coords, curr_coords, width)
                         points_left.append(intersect_back)
                         points_right.append(intersect_back)

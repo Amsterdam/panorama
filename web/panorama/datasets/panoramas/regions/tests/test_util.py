@@ -94,20 +94,27 @@ class TestWrapAround(TestCase):
         self.assertEqual(points[2], (25, 230))
         self.assertEqual(points[3], (15, 250))
 
+    def test_wrap_around_edge1(self):
+        actual = wrap_around([((7996, 2228), (8066, 2212), (8070, 2230), (8000, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
 
-class TestSplitRegions(TestCase):
-    def test_wrap_around_edge(self):
-        edge_region = {'left_top_x': 7996, 'left_top_y': 2228, 'right_top_x': 8066, 'right_top_y': 2212,
-                       'right_bottom_x': 8070, 'right_bottom_y': 2230, 'left_bottom_x': 8000, 'left_bottom_y': 2245}
-        regions = do_split_regions([edge_region])
+        self.assertEqual(actual[0][0], (7996, 2228))
+        self.assertEqual(actual[0][1], (8000, 2228))
+        self.assertEqual(actual[0][2], (8000, 2245))
+        self.assertEqual(actual[0][3], (8000, 2245))
 
-        self.assertEqual(len(regions), 2)
-        expected0 = {'left_top_x': 7996, 'left_top_y': 2228, 'right_top_x': 8000, 'right_top_y': 2228,
-                     'right_bottom_x': 8000, 'right_bottom_y': 2245, 'left_bottom_x': 8000, 'left_bottom_y': 2245}
-        expected1 = {'left_top_x': 0, 'left_top_y': 2228, 'right_top_x': 66, 'right_top_y': 2212, 'right_bottom_x': 70,
-                     'right_bottom_y': 2230, 'left_bottom_x': 0, 'left_bottom_y': 2245}
-        self.assertEqual(expected0, regions[0])
-        self.assertEqual(expected1, regions[1])
+        self.assertEqual(actual[1][0], (0, 2228))
+        self.assertEqual(actual[1][1], (66, 2212))
+        self.assertEqual(actual[1][2], (70, 2230))
+        self.assertEqual(actual[1][3], (0, 2245))
+
+    def test_wrap_around_edge2(self):
+        actual = wrap_around([((8000, 2228), (8066, 2212), (8070, 2230), (7996, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
 
 
 class TestGetRectangle(TestCase):
