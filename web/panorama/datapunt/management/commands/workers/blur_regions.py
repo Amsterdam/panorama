@@ -8,7 +8,6 @@ from datasets.panoramas.regions import blur
 from datasets.panoramas.transform.cubic import CubicTransformer
 from datasets.panoramas.transform import utils_img_file as Img
 from datasets.panoramas.transform import utils_img_file_cubic as CubeImg
-from datasets.panoramas.regions.util import wrap_around
 
 log = logging.getLogger(__name__)
 

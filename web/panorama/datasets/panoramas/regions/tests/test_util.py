@@ -1,9 +1,11 @@
 #Python
-from unittest import TestCase
+import logging
 from random import randint
+from unittest import TestCase
 
-# Project
-from datasets.panoramas.regions.util import wrap_around, get_rectangle
+from datasets.panoramas.regions.util import wrap_around, get_rectangle, do_split_regions
+
+log = logging.getLogger(__name__)
 
 
 def get_random_region_for(start_x):
@@ -37,7 +39,7 @@ def get_out_of_range_region():
     return get_random_region_for(start_x)
 
 
-class TestRegions(TestCase):
+class TestWrapAround(TestCase):
     def test_wrap_around_x(self):
         actual = wrap_around([((7990, 130), (8010, 130), (8010, 230), (7980, 230), '')])
         self.assertEquals(len(actual), 2)
@@ -93,6 +95,20 @@ class TestRegions(TestCase):
         self.assertEqual(points[3], (15, 250))
 
 
+class TestSplitRegions(TestCase):
+    def test_wrap_around_edge(self):
+        edge_region = {'left_top_x': 7996, 'left_top_y': 2228, 'right_top_x': 8066, 'right_top_y': 2212,
+                       'right_bottom_x': 8070, 'right_bottom_y': 2230, 'left_bottom_x': 8000, 'left_bottom_y': 2245}
+        regions = do_split_regions([edge_region])
+
+        self.assertEqual(len(regions), 2)
+        expected0 = {'left_top_x': 7996, 'left_top_y': 2228, 'right_top_x': 8000, 'right_top_y': 2228,
+                     'right_bottom_x': 8000, 'right_bottom_y': 2245, 'left_bottom_x': 8000, 'left_bottom_y': 2245}
+        expected1 = {'left_top_x': 0, 'left_top_y': 2228, 'right_top_x': 66, 'right_top_y': 2212, 'right_bottom_x': 70,
+                     'right_bottom_y': 2230, 'left_bottom_x': 0, 'left_bottom_y': 2245}
+        self.assertEqual(expected0, regions[0])
+        self.assertEqual(expected1, regions[1])
+
 
 class TestGetRectangle(TestCase):
     def test_get_rectangle(self):
@@ -133,4 +149,3 @@ class TestGetRectangle(TestCase):
                              'left_bottom_x': 50,
                              'left_bottom_y': 420,
                          }))
-
