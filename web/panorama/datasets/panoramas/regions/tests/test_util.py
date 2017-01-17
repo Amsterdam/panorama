@@ -116,6 +116,41 @@ class TestWrapAround(TestCase):
         self.assertEqual(len(actual[0]), 4)
         self.assertEqual(len(actual[1]), 4)
 
+    def test_wrap_around_edge3(self):
+        actual = wrap_around([((7996, 2228), (8000, 2212), (8070, 2230), (7994, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
+
+    def test_wrap_around_edge4(self):
+        actual = wrap_around([((7994, 2228), (8066, 2212), (8000, 2230), (7996, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
+
+    def test_wrap_around_edge5(self):
+        actual = wrap_around([((8000, 2228), (8060, 2212), (8000, 2230), (7994, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
+
+    def test_wrap_around_edge6(self):
+        actual = wrap_around([((7994, 2228), (8000, 2212), (8060, 2230), (8000, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
+
+    def test_wrap_around_edge7(self):
+        actual = wrap_around([((8000, 2228), (8000, 2212), (8060, 2230), (7994, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
+
+    def test_wrap_around_edge8(self):
+        actual = wrap_around([((7994, 2228), (8060, 2212), (8000, 2230), (8000, 2245), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 4)
+        self.assertEqual(len(actual[1]), 4)
 
 class TestGetRectangle(TestCase):
     def test_get_rectangle(self):

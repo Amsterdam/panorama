@@ -7,7 +7,7 @@ def intersection(point_left, point_right, width):
     part_left = width - point_left[X]
     part_right = point_right[X] - width
     intersect_y = point_left[Y] + int((point_right[Y] - point_left[Y]) * part_left / (part_left + part_right))
-    return (width, intersect_y)
+    return width, intersect_y
 
 
 def wrap_around(regions, width=WIDTH):
@@ -17,18 +17,22 @@ def wrap_around(regions, width=WIDTH):
         if all(p[X] >= width for p in coordinates):
             for idx, coordinate_set in enumerate(coordinates):
                 coordinates[idx] = (coordinate_set[X] - width, coordinate_set[Y])
-
-        if all(p[0] < width for p in coordinates):
+            split_regions.append(coordinates)
+        elif all(p[X] <= width for p in coordinates):
             split_regions.append(coordinates)
         else:
             points_left, points_right = [], []
-            for idx, _ in enumerate(coordinates):
-                curr_coords = coordinates[idx]
+            for idx, curr_coords in enumerate(coordinates):
                 next_coords = coordinates[(idx+1) % len(coordinates)]
 
                 if curr_coords[X] == width:
-                    points_left.append(curr_coords)
-                    points_right.append(curr_coords)
+                    if idx == LEFT_TOP or idx == LEFT_BOTTOM:
+                        points_left.append(curr_coords)
+                    else:
+                        points_right.append(curr_coords)
+                    if next_coords[X] != width:
+                        points_left.append(curr_coords)
+                        points_right.append(curr_coords)
                 elif curr_coords[X] < width:
                     points_left.append(curr_coords)
                     if next_coords[X] > width:
