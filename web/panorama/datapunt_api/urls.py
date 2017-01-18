@@ -15,7 +15,7 @@ from .views import PanoramaViewSet
 
 class PanoramaRouter(routers.DefaultRouter):
     """
-    PANORAMAS
+    Panoramabeelden Amsterdam
 
     Deze api geeft toegang tot de panorama beelden van de Gemeente Amsterdam en omstreken.
     """
@@ -24,28 +24,34 @@ class PanoramaRouter(routers.DefaultRouter):
         view = super().get_api_root_view(**kwargs)
         cls = view.cls
 
-        class Panorama(cls):
+        class Panoramabeelden(cls):
             pass
 
-        Panorama.__doc__ = self.__doc__
-        return Panorama.as_view()
+        Panoramabeelden.__doc__ = self.__doc__
+        return Panoramabeelden.as_view()
 
 
 panorama = PanoramaRouter()
 panorama.register(r'opnamelocatie', PanoramaViewSet, base_name='panorama')
 panorama.register(r'thumbnail', ThumbnailViewSet, base_name='thumbnail')
 
+APIS = [
+    url(r'^panorama/', include(panorama.urls))
+]
+
 
 @api_view()
 @renderer_classes(
     [SwaggerUIRenderer, OpenAPIRenderer, renderers.CoreJSONRenderer])
 def swagger_schema_view(request):
-    generator = schemas.SchemaGenerator(title='Panoramas API')
-    return response.Response(generator.get_schema(request=request))
+    generator = schemas.SchemaGenerator(
+        title='Panoramabeelden Amsterdam API', urlpatterns=APIS)
+    return response.Response(
+        generator.get_schema(request=request)
+    )
 
 
-urlpatterns = [
-    url(r'^panorama/', include(panorama.urls)),
+urlpatterns = APIS + [
     url(r'^status/', include('health.urls')),
     url('^panorama/docs/$', swagger_schema_view),
 ]
