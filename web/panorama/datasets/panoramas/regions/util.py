@@ -14,6 +14,11 @@ def wrap_around(regions, width=WIDTH):
     split_regions = []
     for (lt, rt, rb, lb, _) in regions:
         coordinates = [lt, rt, rb, lb]
+
+        if any(p[X] < 0 for p in coordinates):
+            for idx, coordinate_set in enumerate(coordinates):
+                coordinates[idx] = (coordinate_set[X] + width, coordinate_set[Y])
+
         if all(p[X] >= width for p in coordinates):
             for idx, coordinate_set in enumerate(coordinates):
                 coordinates[idx] = (coordinate_set[X] - width, coordinate_set[Y])
@@ -53,13 +58,13 @@ def wrap_around(regions, width=WIDTH):
     return split_regions
 
 
-def do_split_regions(regions):
+def do_split_regions(region_dicts):
     split_regions = []
-    for region in regions:
-        for split_region in wrap_around([((region['left_top_x'], region['left_top_y']),
-                                         (region['right_top_x'], region['right_top_y']),
-                                         (region['right_bottom_x'], region['right_bottom_y']),
-                                         (region['left_bottom_x'],region['left_bottom_y']), '')]):
+    for region_dict in region_dicts:
+        for split_region in wrap_around([((region_dict['left_top_x'], region_dict['left_top_y']),
+                                         (region_dict['right_top_x'], region_dict['right_top_y']),
+                                         (region_dict['right_bottom_x'], region_dict['right_bottom_y']),
+                                         (region_dict['left_bottom_x'],region_dict['left_bottom_y']), '')]):
             split_regions.append({
                 'left_top_x': split_region[LEFT_TOP][X],
                 'left_top_y': split_region[LEFT_TOP][Y],

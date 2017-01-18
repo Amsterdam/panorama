@@ -94,6 +94,20 @@ class TestWrapAround(TestCase):
         self.assertEqual(points[2], (25, 230))
         self.assertEqual(points[3], (15, 250))
 
+    def test_wrap_around_x_below_zero(self):
+        actual = wrap_around([((-75, 2114), (67, 2126), (67, 2160), (-75, 2149), '')])
+        self.assertEquals(len(actual), 2)
+
+        self.assertEqual(actual[0][0], (7925, 2114))
+        self.assertEqual(actual[0][1], (8000, 2120))
+        self.assertEqual(actual[0][2], (8000, 2154))
+        self.assertEqual(actual[0][3], (7925, 2149))
+
+        self.assertEqual(actual[1][0], (0, 2120))
+        self.assertEqual(actual[1][1], (67, 2126))
+        self.assertEqual(actual[1][2], (67, 2160))
+        self.assertEqual(actual[1][3], (0, 2154))
+
     def test_wrap_around_edge1(self):
         actual = wrap_around([((7996, 2228), (8066, 2212), (8070, 2230), (8000, 2245), '')])
         self.assertEqual(len(actual), 2)
@@ -191,3 +205,30 @@ class TestGetRectangle(TestCase):
                              'left_bottom_x': 50,
                              'left_bottom_y': 420,
                          }))
+
+
+class TestMessages(TestCase):
+    messages = [{"pano_id": "TMX7315120208-000031_pano_0000_001060",
+                 "panorama_url": "2016/04/18/TMX7315120208-000031/pano_0000_001060/equirectangular/panorama_8000.jpg",
+                 "regions": [{"left_top_x": 4535, "left_top_y": 2082, "right_top_x": 4578, "right_top_y": 2082,
+                              "right_bottom_x": 4578, "right_bottom_y": 2125, "left_bottom_x": 4535,
+                              "left_bottom_y": 2125},
+                             {"left_top_x": 4535, "left_top_y": 2082, "right_top_x": 4578, "right_top_y": 2082,
+                              "right_bottom_x": 4578, "right_bottom_y": 2125, "left_bottom_x": 4535,
+                              "left_bottom_y": 2125},
+                             {"left_top_x": -1, "left_top_y": 2352, "right_top_x": 92, "right_top_y": 2357,
+                              "right_bottom_x": 95, "right_bottom_y": 2381, "left_bottom_x": 0, "left_bottom_y": 2377},
+                             {"left_top_x": 7961, "left_top_y": 2350, "right_top_x": 8081, "right_top_y": 2359,
+                              "right_bottom_x": 8082, "right_bottom_y": 2383, "left_bottom_x": 7960,
+                              "left_bottom_y": 2372},
+                             {"left_top_x": 7975, "left_top_y": 2351, "right_top_x": 8071, "right_top_y": 2359,
+                              "right_bottom_x": 8072, "right_bottom_y": 2380, "left_bottom_x": 7977,
+                              "left_bottom_y": 2372},
+                             {"left_top_x": 7971, "left_top_y": 2349, "right_top_x": 8053, "right_top_y": 2356,
+                              "right_bottom_x": 8056, "right_bottom_y": 2380, "left_bottom_x": 7974,
+                              "left_bottom_y": 2372}]}]
+
+    def testMesseages(self):
+        for message in self.messages:
+            for region in do_split_regions(message['regions']):
+                (top, left), (bottom, right) = get_rectangle(region)
