@@ -43,7 +43,9 @@ class BlurRegions(Worker):
         # save intermediate - this will be no longer necessary when all intermediates are present
         #   when all are present: the intermediate is input for detection and blurring.
         intermediate_path = 'intermediate/'+panorama_path[:-34]+'.jpg'
+        log.warning("saving intermediate: {}".format(intermediate_path))
         Img.save_image(region_blurrer.panorama_img, intermediate_path, in_panorama_store=True)
+        log.warning("done saving intermediate: blurring now.")
 
         regions = message_dict['regions']
         if len(regions) > 0:
