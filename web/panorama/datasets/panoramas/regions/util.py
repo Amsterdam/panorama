@@ -42,15 +42,20 @@ def wrap_around(regions, width=WIDTH):
                     points_left.append(curr_coords)
                     if next_coords[X] > width:
                         intersect_to = intersection(curr_coords, next_coords, width)
-                        points_left.append(intersect_to)
                         points_right.append(intersect_to)
+                        if idx == RIGHT_TOP:
+                            points_right.append(intersect_to)
+                        else:
+                            points_left.append(intersect_to)
                 else:
                     points_right.append(curr_coords)
                     if next_coords[X] < width:
                         intersect_back = intersection(next_coords, curr_coords, width)
                         points_left.append(intersect_back)
-                        points_right.append(intersect_back)
-
+                        if idx == LEFT_BOTTOM:
+                            points_left.append(intersect_back)
+                        else:
+                            points_right.append(intersect_back)
             for idx, point in enumerate(points_right):
                 points_right[idx] = (point[X] - width, point[Y])
             split_regions.extend([points_left, points_right])

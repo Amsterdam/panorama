@@ -208,25 +208,18 @@ class TestGetRectangle(TestCase):
 
 
 class TestMessages(TestCase):
-    messages = [{"pano_id": "TMX7315120208-000031_pano_0000_001060",
-                 "panorama_url": "2016/04/18/TMX7315120208-000031/pano_0000_001060/equirectangular/panorama_8000.jpg",
-                 "regions": [{"left_top_x": 4535, "left_top_y": 2082, "right_top_x": 4578, "right_top_y": 2082,
-                              "right_bottom_x": 4578, "right_bottom_y": 2125, "left_bottom_x": 4535,
-                              "left_bottom_y": 2125},
-                             {"left_top_x": 4535, "left_top_y": 2082, "right_top_x": 4578, "right_top_y": 2082,
-                              "right_bottom_x": 4578, "right_bottom_y": 2125, "left_bottom_x": 4535,
-                              "left_bottom_y": 2125},
-                             {"left_top_x": -1, "left_top_y": 2352, "right_top_x": 92, "right_top_y": 2357,
-                              "right_bottom_x": 95, "right_bottom_y": 2381, "left_bottom_x": 0, "left_bottom_y": 2377},
-                             {"left_top_x": 7961, "left_top_y": 2350, "right_top_x": 8081, "right_top_y": 2359,
-                              "right_bottom_x": 8082, "right_bottom_y": 2383, "left_bottom_x": 7960,
-                              "left_bottom_y": 2372},
-                             {"left_top_x": 7975, "left_top_y": 2351, "right_top_x": 8071, "right_top_y": 2359,
-                              "right_bottom_x": 8072, "right_bottom_y": 2380, "left_bottom_x": 7977,
-                              "left_bottom_y": 2372},
-                             {"left_top_x": 7971, "left_top_y": 2349, "right_top_x": 8053, "right_top_y": 2356,
-                              "right_bottom_x": 8056, "right_bottom_y": 2380, "left_bottom_x": 7974,
-                              "left_bottom_y": 2372}]}]
+    messages = [{"pano_id": "TMX7316010203-000050_pano_0000_007872",
+                 "panorama_url": "2016/08/08/TMX7316010203-000050/pano_0000_007872/equirectangular/panorama_8000.jpg",
+                 "regions": [{"left_top_x": 7810, "left_top_y": 2677, "right_top_x": 7998, "right_top_y": 2654,
+                              "right_bottom_x": 8004, "right_bottom_y": 2696, "left_bottom_x": 7815,
+                              "left_bottom_y": 2721}]
+                 },
+                {"pano_id": "TMX7315120208-000067_pano_0013_000416",
+                 "panorama_url": "2016/06/06/TMX7315120208-000067/pano_0013_000416/equirectangular/panorama_8000.jpg",
+                 "regions": [{"left_top_x": 7996, "left_top_y": 2585, "right_top_x": 8139, "right_top_y": 2584,
+                              "right_bottom_x": 8145, "right_bottom_y": 2618, "left_bottom_x": 8002,
+                              "left_bottom_y": 2620}]}
+                ]
 
     def testMesseages(self):
         for message in self.messages:
