@@ -19,7 +19,7 @@ class TestModel(TestCase):
              'https://acc.atlas.amsterdam.nl/panorama/container/path/image/cubic/preview.jpg'),
         ]
         for c in cases:
-            p = models.Panorama(path=c[0], filename=c[1], geolocation=Point(1,1,1))
+            p = models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
             self.assertEqual(c[2], p.equirectangular_img_urls['full'])
             self.assertEqual(c[3], p.equirectangular_img_urls['medium'])
             self.assertEqual(c[4], p.equirectangular_img_urls['small'])
@@ -29,9 +29,9 @@ class TestModel(TestCase):
 
     def get_raw_image_objectstore_id(self):
         cases = [
-            ('container/path/', 'image.jpg', {'container':'container', 'name': 'path/image.jpg'}),
+            ('container/path/', 'image.jpg', {'container': 'container', 'name': 'path/image.jpg'}),
         ]
 
         for c in cases:
-            p = models.Panorama(path=c[0], filename=c[1], geolocation=Point(1,1,1))
+            p = models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
             self.assertEqual(c[2], p.get_raw_image_objectstore_id())

@@ -32,11 +32,10 @@ DATAPUNT_API_URL = os.getenv(
 # Application definition
 
 INSTALLED_APPS = (
-    'datapunt',
     'geo_views',
     'datapunt_api',
     'datasets.panoramas',
-    'datasets.tasks',
+    'panorama',
 
     'health',
 
@@ -72,9 +71,9 @@ if DEBUG:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
     DEBUG_TOOLBAR_PATCH_SETTINGS = False
-    DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False,}
+    DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False, }
 
-ROOT_URLCONF = 'datapunt_api.urls'
+ROOT_URLCONF = 'panorama.urls'
 
 TEMPLATES = [
     {

@@ -1,9 +1,9 @@
 import sys
 
-from datasets.panoramas.transform import utils_img_file as Img
-from datasets.panoramas.transform import utils_img_file_cubic as CubeImg
-from datasets.panoramas.transform.equirectangular import EquirectangularTransformer
-from datasets.panoramas.transform.cubic import CubicTransformer
+from panorama.transform import utils_img_file as Img
+from panorama.transform import utils_img_file_cubic as CubeImg
+from panorama.transform.equirectangular import EquirectangularTransformer
+from panorama.transform.cubic import CubicTransformer
 
 
 def render(panorama_path, heading_in, pitch_in, roll_in):

@@ -4,8 +4,6 @@ from rest_framework import renderers, serializers
 from rest_framework import pagination, response
 from rest_framework import viewsets, filters, reverse
 
-# from rest_framework.reverse import reverse
-
 from rest_framework.utils.urls import replace_query_param
 from rest_framework_extensions.mixins import DetailSerializerMixin
 

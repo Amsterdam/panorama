@@ -24,7 +24,9 @@ class AdjacencySerializer(serializers.ModelSerializer):
 class ImageLinksSerializer(serializers.ModelSerializer):
     equirectangular = serializers.ReadOnlyField(source='equirectangular_img_urls')
     cubic = serializers.ReadOnlyField(source='cubic_img_urls')
-    thumbnail = serializers.HyperlinkedIdentityField(view_name='thumbnail-detail', lookup_field='pano_id', format='html')
+    thumbnail = serializers.HyperlinkedIdentityField(view_name='thumbnail-detail',
+                                                     lookup_field='pano_id',
+                                                     format='html')
 
     class Meta:
         model = models.Panorama
@@ -55,7 +57,7 @@ class PanoSerializer(HALSerializer):
 
     class Meta:
         model = models.Panorama
-        exclude = ('path','geolocation','adjacent_panos','_geolocation_2d', 'status', 'status_changed')
+        exclude = ('path', 'geolocation', 'adjacent_panos', '_geolocation_2d', 'status', 'status_changed')
 
     def to_representation(self, instance):
         return super().to_representation(instance)
@@ -68,8 +70,8 @@ class PanoSerializer(HALSerializer):
 class FilteredPanoSerializer(PanoSerializer):
     adjacent = serializers.SerializerMethodField(source='get_adjacent')
 
-    def __init__(self, instance=None, data=empty, filter={}, **kwargs):
-        self.filter = filter
+    def __init__(self, instance=None, data=empty, filter_dict={}, **kwargs):
+        self.filter = filter_dict
         super().__init__(instance, data, **kwargs)
 
     def get_adjacent(self, instance):
