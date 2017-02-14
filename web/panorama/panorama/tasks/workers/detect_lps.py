@@ -2,13 +2,13 @@ import json
 import time
 import logging
 
-from panorama.tasks.queue import Worker
+from panorama.tasks.queue import BaseWorker
 from panorama.regions import license_plates
 
 log = logging.getLogger(__name__)
 
 
-class DetectLicensePlates(Worker):
+class DetectLicensePlates(BaseWorker):
     _route = 'license_plate_task'
     _route_out = 'license_plate_done'
 

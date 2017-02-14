@@ -2,10 +2,10 @@ from numpy import arange, meshgrid
 
 from . import utils_img_file as Img
 from . import utils_math_array as Math
-from . transformer import SOURCE_WIDTH, PANO_HEIGHT, PanoramaTransformer
+from . transformer import SOURCE_WIDTH, PANO_HEIGHT, BasePanoramaTransformer
 
 
-class EquirectangularTransformer(PanoramaTransformer):
+class EquirectangularTransformer(BasePanoramaTransformer):
 
     def get_projection(self, target_width=SOURCE_WIDTH):
 

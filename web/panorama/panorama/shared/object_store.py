@@ -9,7 +9,7 @@ logging.getLogger("swiftclient").setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
 
-class ObjectStore:
+class ObjectStore(object):
     RESP_LIMIT = 10000  # serverside limit of the response
     datapunt_conn = None
     panorama_conn = None

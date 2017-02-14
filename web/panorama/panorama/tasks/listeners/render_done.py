@@ -1,13 +1,13 @@
 import logging
 import json
 
-from panorama.tasks.queue import Listener
+from panorama.tasks.queue import BaseListener
 from datasets.panoramas.models import Panorama
 
 log = logging.getLogger(__name__)
 
 
-class RenderDone(Listener):
+class RenderDone(BaseListener):
     _route = 'render_done'
 
     def on_message(self, messagebody):

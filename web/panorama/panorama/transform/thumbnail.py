@@ -32,7 +32,7 @@ def choose_source_image_and_width(target_fov, target_width):
     return 'small', 2000
 
 
-class Thumbnail:
+class Thumbnail(object):
     def __init__(self, panorama: Panorama):
         self.panorama = panorama
 

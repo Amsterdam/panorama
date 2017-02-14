@@ -3,7 +3,7 @@ import logging
 
 from PIL import Image
 
-from panorama.tasks.queue import Worker
+from panorama.tasks.queue import BaseWorker
 from panorama.regions import blur
 from panorama.transform.cubic import CubicTransformer
 from panorama.transform import utils_img_file as Img
@@ -31,7 +31,7 @@ def save_image_set(panorama_path, array_image):
     CubeImg.save_as_file_set(cubic_dir, projections)
 
 
-class BlurRegions(Worker):
+class BlurRegions(BaseWorker):
     _route = 'blur_task'
     _route_out = 'blur_done'
 

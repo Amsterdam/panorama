@@ -10,7 +10,7 @@ from job import render
 log = logging.getLogger(__name__)
 
 
-class RenderPanorama:
+class RenderPanorama(object):
     object_store = ObjectStore()
 
     def process(self):

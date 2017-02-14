@@ -8,7 +8,7 @@ BATCH_SIZE = 1000
 log = logging.getLogger(__name__)
 
 
-class ImportRegions:
+class ImportRegions(object):
     """
     Simple import script.
     It looks through the results-dir for regions. Expects panoramas in database

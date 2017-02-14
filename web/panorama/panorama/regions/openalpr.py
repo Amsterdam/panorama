@@ -19,10 +19,10 @@ class OpenAlprError(Exception):
         return repr(self.value)
 
 
-class OpenAlpr:
+class OpenAlpr(object):
     alpr = None
 
-    def __enter__(self):
+    def __init__(self):
         if not self.alpr:
             self.alpr = Alpr(LICENSEPLATE_REGION, OPENALPR_CONF, OPENALPR_DATA)
             if not self.alpr.is_loaded():
@@ -30,8 +30,3 @@ class OpenAlpr:
             else:
                 log.info("Using OpenALPR {}".format(self.alpr.get_version()))
 
-        return self.alpr
-
-    def __exit__(self, type, value, traceback):
-        # Keep alive in this project, self.alpr.unload() also ends python process, we don't want that
-        pass

@@ -32,7 +32,7 @@ class TestTransformImgEquirectangular(TestTransformer):
     def test_transform_runs_without_errors(self, _):
 
         for img in self.images:
-            image_tranformer = EquirectangularTransformer(img.path+img.filename,
+            image_tranformer = EquirectangularTransformer(img.path + img.filename,
                                                           img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
 

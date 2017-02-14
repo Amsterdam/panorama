@@ -3,10 +3,10 @@ from numpy import arange, meshgrid
 from . import utils_img_file as Img
 from . import utils_math_array as Math
 from . import utils_math_cubic as Cube
-from . transformer import SOURCE_WIDTH, PANO_HEIGHT, PanoramaTransformer
+from . transformer import SOURCE_WIDTH, PANO_HEIGHT, BasePanoramaTransformer
 
 
-class CubicTransformer(PanoramaTransformer):
+class CubicTransformer(BasePanoramaTransformer):
 
     def get_projection(self, target_width=Cube.MAX_CUBIC_WIDTH):
         cube_projections = {}

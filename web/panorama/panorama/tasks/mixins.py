@@ -6,7 +6,7 @@ from django.db import connection
 log = logging.getLogger(__name__)
 
 
-class _wait_for_panorama_table:
+class _wait_for_panorama_table(object):
     def __enter__(self):
         while True:
             log.warning("waiting for panoramas table...")
@@ -29,7 +29,7 @@ class _wait_for_panorama_table:
         return False
 
 
-class PanoramaTableAware:
+class PanoramaTableAware(object):
     def panorama_table_present(self):
         return _wait_for_panorama_table()
 

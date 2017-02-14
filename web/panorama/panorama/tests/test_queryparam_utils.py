@@ -5,7 +5,7 @@ from django.utils.datastructures import MultiValueDict
 from panorama.queryparam_utils import get_int_value, get_float_value, get_request_coord
 
 
-class Request:
+class Request(object):
 
     def __init__(self):
         self.query_params = MultiValueDict()

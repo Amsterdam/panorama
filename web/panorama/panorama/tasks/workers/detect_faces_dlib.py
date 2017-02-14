@@ -2,13 +2,13 @@ import json
 import logging
 import time
 
-from panorama.tasks.queue import Worker
+from panorama.tasks.queue import BaseWorker
 from panorama.regions import faces
 
 log = logging.getLogger(__name__)
 
 
-class DetectFacesDlib(Worker):
+class DetectFacesDlib(BaseWorker):
     _route = 'detect_face2_task'
     _route_out = 'face2_done'
 
