@@ -66,7 +66,7 @@ class ImportPanoramaJob(object):
                 batch_size=BATCH_SIZE
             )
 
-    def process_csv(self, csv_file, process_row_callback):
+    def process_csv(self, csv_file, process_row_callback, *args):
         """
         Process a single csv file
         """
