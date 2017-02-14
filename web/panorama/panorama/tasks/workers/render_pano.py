@@ -1,10 +1,10 @@
 import json
 
 from job import render
-from panorama.tasks.queue import Worker
+from panorama.tasks.queue import BaseWorker
 
 
-class RenderPano(Worker):
+class RenderPano(BaseWorker):
     _route = 'render_pano'
     _route_out = 'pano_done'
 

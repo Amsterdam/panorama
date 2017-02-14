@@ -4,7 +4,7 @@ import time
 from django.conf import settings
 
 from panorama.tasks.mixins import PanoramaTableAware
-from panorama.tasks.queue import Scheduler
+from panorama.tasks.queue import BaseScheduler
 from datasets.panoramas.models import Panorama, Region
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def dict_from(region):
     }
 
 
-class BlurScheduler(Scheduler, PanoramaTableAware):
+class BlurScheduler(BaseScheduler, PanoramaTableAware):
     _route_out = 'blur_task'
 
     def schedule(self):

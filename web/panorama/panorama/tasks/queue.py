@@ -12,7 +12,7 @@ EXCHANGE = 'topic'
 EXCHANGE_TYPE = 'topic'
 
 
-class QueueInteractor:
+class BaseQueueInteractor(object):
     """
     Base Class for interacting with queues, drawn from
         https://pika.readthedocs.io/en/0.10.0/examples/asynchronous_consumer_example.html
@@ -86,9 +86,9 @@ class QueueInteractor:
         pass
 
 
-class QueueConsumer(QueueInteractor):
+class QueueConsumer(BaseQueueInteractor):
     """
-    Base Class for consuming from queues, drawn from
+    Class for consuming from queues, drawn from
         https://pika.readthedocs.io/en/0.10.0/examples/asynchronous_consumer_example.html
     """
     def __init__(self, callback, route):
@@ -135,7 +135,11 @@ class QueueConsumer(QueueInteractor):
         self._connection.ioloop.start()
 
 
-class QueuePublisher(QueueInteractor):
+class QueuePublisher(BaseQueueInteractor):
+    """
+    Class for publishing to queues, drawn from
+        https://pika.readthedocs.io/en/0.10.0/examples/asynchronous_consumer_example.html
+    """
     def __init__(self, callback, route):
         super().__init__(callback, route)
         self._deliveries = None
@@ -188,7 +192,10 @@ class QueuePublisher(QueueInteractor):
         self.close_connection()
 
 
-class Scheduler:
+class BaseScheduler(object):
+    """
+    Base class for scheduling messages to a queue
+    """
     _route_out = ''
 
     def schedule_messages(self, override_route, messages):
@@ -204,13 +211,33 @@ class Scheduler:
         qp.stop()
 
     def schedule(self):
-        pass
+        """
+        Implement this method with the call to self.queue_result()
+
+        for running a single time:
+        `
+        self.queue_result()
+        `
+
+        for continuous scheduling, a batch every minute:
+        `
+        while True:
+            self.queue_result()
+            time.sleep(60)
+        `
+        """
+        return NotImplemented
 
     def get_messages(self):
-        pass
+        """
+        Implement this method to generate the messages to be scheduled
+
+        :return: an array of messages (json-ifiable dicts)
+        """
+        return NotImplemented
 
 
-class Listener:
+class BaseListener(object):
     _route = ''
     _with_ack = True
 
@@ -229,10 +256,21 @@ class Listener:
                 channel.basic_ack(delivery_tag=method.delivery_tag)
 
     def on_message(self, messagebody):
-        pass
+        """
+        Implement this method to process the message
+
+        get the content of the message
+        `
+        message_dict = json.loads(messagebody.decode('utf-8'))
+        `
+        and process the content.
+
+        :param messagebody: un-expanded, un-extracted messagebody
+        """
+        return NotImplemented
 
 
-class Worker(Scheduler, Listener):
+class BaseWorker(BaseScheduler, BaseListener):
     _messages = []
 
     def get_messages(self):
@@ -243,4 +281,16 @@ class Worker(Scheduler, Listener):
         self.queue_result()
 
     def do_work_with_results(self, messagebody):
-        return None
+        """
+        Implement this method to process the message
+
+        get the content of the message
+        `
+        message_dict = json.loads(messagebody.decode('utf-8'))
+        `
+        process the content and send a message back.
+
+        :param messagebody: un-expanded, un-extracted messagebody
+        :return: an array of messages (json-ifiable dicts)
+        """
+        return NotImplemented

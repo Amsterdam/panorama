@@ -5,12 +5,12 @@ from django.conf import settings
 
 from datasets.panoramas.models import Panorama
 from panorama.tasks.mixins import PanoramaTableAware
-from panorama.tasks.queue import Scheduler
+from panorama.tasks.queue import BaseScheduler
 
 log = logging.getLogger(__name__)
 
 
-class ProfileDetectionScheduler(Scheduler, PanoramaTableAware):
+class ProfileDetectionScheduler(BaseScheduler, PanoramaTableAware):
     _route_out = 'detect_profile_task'
 
     def schedule(self):

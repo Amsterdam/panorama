@@ -3,12 +3,12 @@ import logging
 
 from datasets.panoramas.models import Panorama
 from panorama.tasks.mixins import PanoramaTableAware
-from panorama.tasks.queue import Scheduler
+from panorama.tasks.queue import BaseScheduler
 
 log = logging.getLogger(__name__)
 
 
-class RenderScheduler(Scheduler, PanoramaTableAware):
+class RenderScheduler(BaseScheduler, PanoramaTableAware):
     _route_out = 'render_pano'
 
     def schedule(self):

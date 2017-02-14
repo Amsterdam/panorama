@@ -54,7 +54,7 @@ def derive(faces, x, y, zoom, cascade, scale_factor, neighbours):
     return derived
 
 
-class FaceDetector:
+class FaceDetector(object):
     def __init__(self, panorama_path: str):
         """
         :param panorama_path: path of type

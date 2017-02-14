@@ -5,12 +5,12 @@ from django.conf import settings
 
 from datasets.panoramas.models import Panorama
 from panorama.tasks.mixins import PanoramaTableAware
-from panorama.tasks.queue import Scheduler
+from panorama.tasks.queue import BaseScheduler
 
 log = logging.getLogger(__name__)
 
 
-class FaceDetection2Scheduler(Scheduler, PanoramaTableAware):
+class FaceDetection2Scheduler(BaseScheduler, PanoramaTableAware):
     _route_out = 'detect_face2_task'
 
     def schedule(self):

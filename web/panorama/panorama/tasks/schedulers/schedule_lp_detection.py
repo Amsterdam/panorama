@@ -5,12 +5,12 @@ from django.conf import settings
 
 from datasets.panoramas.models import Panorama
 from panorama.tasks.mixins import PanoramaTableAware
-from panorama.tasks.queue import Scheduler
+from panorama.tasks.queue import BaseScheduler
 
 log = logging.getLogger(__name__)
 
 
-class LpDetectionScheduler(Scheduler, PanoramaTableAware):
+class LpDetectionScheduler(BaseScheduler, PanoramaTableAware):
     _route_out = 'license_plate_task'
 
     def schedule(self):

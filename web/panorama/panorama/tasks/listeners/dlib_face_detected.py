@@ -1,14 +1,14 @@
 import logging
 import json
 
-from panorama.tasks.queue import Listener
+from panorama.tasks.queue import BaseListener
 from panorama.tasks.detection import save_regions, region_writer
 from datasets.panoramas.models import Panorama
 
 log = logging.getLogger(__name__)
 
 
-class FaceDone(Listener):
+class FaceDone(BaseListener):
     _route = 'face2_done'
 
     def on_message(self, messagebody):

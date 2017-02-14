@@ -27,5 +27,5 @@ class TestTransformImgCubic(TestTransformer):
                 side_effect=mock_get_raw_pano)
     def test_transform_cubic_runs_without_errors(self, _):
         for img in self.images:
-            image_tranformer = CubicTransformer(img.path+img.filename, img.heading, img.pitch, img.roll)
+            image_tranformer = CubicTransformer(img.path + img.filename, img.heading, img.pitch, img.roll)
             image_tranformer.get_projection(target_width=MAX_WIDTH)

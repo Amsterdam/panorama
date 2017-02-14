@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 object_store = ObjectStore()
 
 
-class RegionBlurrer:
+class RegionBlurrer(object):
     def __init__(self, panorama_path: str):
         """
         :param panorama_path: path of type
