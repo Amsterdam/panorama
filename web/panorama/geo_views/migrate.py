@@ -51,7 +51,6 @@ class ManageView(Operation):
         return "Create view {}".format(self.view_name)
 
 
-
 class ManageMaterializedView(ManageView):
 
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
