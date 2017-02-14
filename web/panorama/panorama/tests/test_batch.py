@@ -29,7 +29,7 @@ def mock_get_csv(csv):
     with open(csv['name'], mode='rb') as file:
         return file.read()
 
-mock_objectstore = 'datasets.panoramas.batch.ImportPanoramaJob.object_store.%s'
+mock_objectstore = 'panorama.batch.ImportPanoramaJob.object_store.%s'
 
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
