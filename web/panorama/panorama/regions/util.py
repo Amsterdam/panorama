@@ -4,6 +4,14 @@ LEFT_TOP, RIGHT_TOP, RIGHT_BOTTOM, LEFT_BOTTOM = 0, 1, 2, 3
 
 
 def intersection(point_left, point_right, width):
+    """
+    Utility method for calculating the point where a line crossing border of the image intersects with border
+
+    :param point_left: set of x, y coordanates for the point left of the border
+    :param point_right: set of x, y coordanates for the point right of the border
+    :param width: width of the image
+    :return: set of x, y coordinates where the line from left to right intersects with the border
+    """
     part_left = width - point_left[X]
     part_right = point_right[X] - width
     intersect_y = point_left[Y] + int((point_right[Y] - point_left[Y]) * part_left / (part_left + part_right))
@@ -11,6 +19,14 @@ def intersection(point_left, point_right, width):
 
 
 def wrap_around(regions, width=WIDTH):
+    """
+    Utility method to split regions that intersect with the border of the image into a region left to the
+    right border, and right to the left border (all within image).
+
+    :param regions: array of coordinate-sets (left-top, right-top, right-bottom, leftbottom, description)
+    :param width: width of the image
+    :return: set of split regions
+    """
     split_regions = []
     for (lt, rt, rb, lb, _) in regions:
         coordinates = [lt, rt, rb, lb]
@@ -85,6 +101,12 @@ def do_split_regions(region_dicts):
 
 
 def get_rectangle(region_dict):
+    """
+    Utility method to create rectangles that encompass the freeform described by 4 points.
+
+    :param region_dict: a dictionary with coordinates
+    :return: two coordinate sets, top-left, bottom-right
+    """
     top = min(region_dict['left_top_y'], region_dict['right_top_y'])
     left = min(region_dict['left_top_x'], region_dict['left_bottom_x'])
     bottom = max(region_dict['left_bottom_y'], region_dict['right_bottom_y'])

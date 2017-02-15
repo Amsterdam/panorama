@@ -13,6 +13,9 @@ PANO_HEIGHT = SOURCE_WIDTH / PANO_ASPECT
 
 
 class BasePanoramaTransformer(object):
+    """
+    BaseClass for transforming source panorama images
+    """
 
     def __init__(self, panorama_path=None, heading=0, pitch=0, roll=0, rotation_matrix=None, pano_rgb=None):
         self.rotation_matrix = rotation_matrix if rotation_matrix is not None \

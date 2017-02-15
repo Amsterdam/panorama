@@ -166,11 +166,11 @@ def sample_image(image, x, y, sample_width=SAMPLE_WIDTH, sample_height=SAMPLE_HE
     """
     Utility method to take a sample from an image
 
-    :param image: PIL image to wrap around
-    :param x:
-    :param y:
-    :param sample_width:
-    :param sample_height:
+    :param image: PIL image to sample from
+    :param x: left-top-x of sample
+    :param y: left-top-y of sample
+    :param sample_width: width of sample
+    :param sample_height: height of sample
     :return:
     """
     if PANORAMA_WIDTH < x + sample_width:
@@ -182,6 +182,14 @@ def sample_image(image, x, y, sample_width=SAMPLE_WIDTH, sample_height=SAMPLE_HE
 
 
 def prepare_img(snippet, zoom, for_cv=True):
+    """
+    Prepare an image-snippet for detection (of licensplate or face)
+
+    :param snippet: snippet of PIL image
+    :param zoom: zoom-factor
+    :param for_cv: flag for preparing in OpenCV (default)
+    :return: equalized and zoomed snippet
+    """
     zoomed_size = (int(zoom*SAMPLE_WIDTH), int(zoom*SAMPLE_HEIGHT))
     zoomed_snippet = snippet.resize(zoomed_size, Image.BICUBIC)
     if not for_cv:

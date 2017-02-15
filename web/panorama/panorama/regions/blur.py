@@ -13,6 +13,9 @@ object_store = ObjectStore()
 
 
 class RegionBlurrer(object):
+    """
+    Class to blur the regions of a panorama image
+    """
     def __init__(self, panorama_path: str):
         """
         :param panorama_path: path of type
@@ -22,6 +25,11 @@ class RegionBlurrer(object):
         self.panorama_img = Img.get_panorama_image(self.panorama_path)
 
     def get_blurred_image(self, regions):
+        """
+        Get the blurred image of a panoramas
+        :param regions: Regions to blur
+        :return: PIL image of the panorama with blurred regions
+        """
         blurred_image = misc.fromimage(self.panorama_img)
 
         # blur regions
