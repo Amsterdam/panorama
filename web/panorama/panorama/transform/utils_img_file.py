@@ -17,16 +17,32 @@ object_store = ObjectStore()
 
 
 def image2byte_array(image: Image):
+    """
+    Translate PIL image to byte array
+    :param image: PIL image
+    :return: bytearray
+    """
     img_byte_array = io.BytesIO()
     image.save(img_byte_array, format='JPEG')
     return img_byte_array.getvalue()
 
 
 def byte_array2image(byte_array):
+    """
+    Translate byte array to PIL image
+    :param byte_array:
+    :return: PIL image
+    """
     return Image.open(io.BytesIO(byte_array))
 
 
 def get_raw_panorama_image(panorama_path):
+    """
+
+    :param panorama_path:
+    :return:
+    """
+
     # construct objectstore_id
     container = panorama_path.split('/')[0]
     name = panorama_path.replace(container + '/', '')
@@ -45,12 +61,19 @@ def get_rgb_channels_from_array_image(array_img):
 
 
 def get_raw_panorama_as_rgb_array(panorama_path):
-    # read image as numpy array
+    # read image as scipy rgb image array
     panorama_array_image = misc.fromimage(get_raw_panorama_image(panorama_path))
     return get_rgb_channels_from_array_image(panorama_array_image)
 
 
 def sample_rgb_array_image_as_array(coordinates, rgb_array):
+    """
+
+    :param coordinates: meshgrid of numpy arrays where eacht target coordinate is mapped to a coordinateset
+    of the source
+    :param rgb_array: the source image as a scipy rgb array representation
+    :return: the sampled target image as a scipy rgb array representation
+    """
     x = coordinates[0]
     y = coordinates[1]
 

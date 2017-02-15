@@ -124,7 +124,7 @@ class ImportPanoramaJob(object):
             heading=float(row['heading[deg]']),
         )
 
-    def process_traject_row(self, row):
+    def process_traject_row(self, row, *args):
         """
         Process a single row in the trajectory csv file
         """
