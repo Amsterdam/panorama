@@ -11,6 +11,15 @@ MAX_WIDTH = 2048
 
 
 def save_as_file_set(cubic_dir, projections, max_width=MAX_WIDTH):
+    """
+    Saves a set of cubic projections (the 6 sides of maximum resolution)
+    as a Marzipano fileset
+
+    :param cubic_dir: target directory for the fileset
+    :param projections: dict of 6 projections, keys are the faces of the cube
+    :param max_width: the maximum cubesize
+    :return:
+    """
     previews = {}
     for side, img_array in projections.items():
         cube_face = Image.fromarray(img_array)
