@@ -38,9 +38,10 @@ def byte_array2image(byte_array):
 
 def get_raw_panorama_image(panorama_path):
     """
+    Gets the un-rendered, un-blurred source image from the source container
 
-    :param panorama_path:
-    :return:
+    :param panorama_path: path of the image
+    :return: PIL image
     """
 
     # construct objectstore_id
@@ -52,15 +53,33 @@ def get_raw_panorama_image(panorama_path):
 
 
 def get_panorama_image(panorama_path):
+    """
+    Gets the rendered, blurred result image of the panorama
+
+    :param panorama_path: path of the image
+    :return: PIL image
+    """
     return byte_array2image(object_store.get_datapunt_store_object(panorama_path))
 
 
 def get_rgb_channels_from_array_image(array_img):
+    """
+    Orders the dimensions of the scipy image array around, so that it becomes an array of three color channels
+
+    :param array_img: image array
+    :return: reordered image array
+    """
     # split image in the 3 RGB channels
     return squeeze(dsplit(array_img, 3))
 
 
 def get_raw_panorama_as_rgb_array(panorama_path):
+    """
+    Gets the raw image prepared for calculations.
+
+    :param panorama_path: path of the image
+    :return: scipy image array, an array of three color channels
+    """
     # read image as scipy rgb image array
     panorama_array_image = misc.fromimage(get_raw_panorama_image(panorama_path))
     return get_rgb_channels_from_array_image(panorama_array_image)
@@ -68,6 +87,7 @@ def get_raw_panorama_as_rgb_array(panorama_path):
 
 def sample_rgb_array_image_as_array(coordinates, rgb_array):
     """
+    Resampling of the source image
 
     :param coordinates: meshgrid of numpy arrays where eacht target coordinate is mapped to a coordinateset
     of the source
@@ -94,6 +114,13 @@ def sample_rgb_array_image_as_array(coordinates, rgb_array):
 
 
 def save_image(image, name, in_panorama_store=False):
+    """
+    Save an PIL image in the objectstore
+
+    :param image: PIL image to save
+    :param name: path to save the image at
+    :param in_panorama_store: flag for choosing specific store
+    """
     byte_array = io.BytesIO()
     image.save(byte_array, format='JPEG', optimize=True, progressive=True)
     if in_panorama_store:
@@ -104,10 +131,26 @@ def save_image(image, name, in_panorama_store=False):
 
 
 def save_array_image(array_img, name, in_panorama_store=False):
+    """
+    Save a scipy image array in the objectstore
+
+    :param array_img: scipy image array to save
+    :param name: path to save the image at
+    :param in_panorama_store: flag for choosing specific store
+    """
     save_image(Image.fromarray(array_img), name, in_panorama_store)
 
 
 def roll_left(image, shift, width, height):
+    """
+    Utility method to wrap an image around to the left
+
+    :param image: PIL image to wrap around
+    :param shift: the amount of pixels to shift
+    :param width:  width of the image
+    :param height: height of the image
+    :return: shifted PIL image
+    """
     part1 = image.crop((0, 0, shift, height))
     part2 = image.crop((shift, 0, width, height))
     part1.load()
@@ -120,6 +163,16 @@ def roll_left(image, shift, width, height):
 
 
 def sample_image(image, x, y, sample_width=SAMPLE_WIDTH, sample_height=SAMPLE_HEIGHT):
+    """
+    Utility method to take a sample from an image
+
+    :param image: PIL image to wrap around
+    :param x:
+    :param y:
+    :param sample_width:
+    :param sample_height:
+    :return:
+    """
     if PANORAMA_WIDTH < x + sample_width:
         intermediate = roll_left(image, sample_width, PANORAMA_WIDTH, PANORAMA_HEIGHT)
         snippet = intermediate.crop((x - sample_width, y, x, y + sample_height))
