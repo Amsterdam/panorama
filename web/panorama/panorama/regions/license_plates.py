@@ -27,7 +27,7 @@ def calculate_shear_data(shear_angle):
         and: http://stackoverflow.com/questions/14177744/how-does-perspective-transformation-work-in-pil
 
         We use a vertical shear and stretch the image horizontally to emulate a perspective correction
-        Because from these calculating the original coordinates back is simpler and easier to do
+        Because from these, calculating the original coordinates back is simpler and easier to do
             than from a full blown perspective correction
     """
     shear_factor = tan(radians(shear_angle))
@@ -46,6 +46,19 @@ def calculate_shear_data(shear_angle):
 
 
 def derive(coordinates, x, y, zoom, shear_angle, widen, detected_by):
+    """
+    Calculate the coordinates of a detected region in a warped image back to the original coordinates of the
+    original equirectangular panorama
+
+    :param coordinates: the coordinate-set in the sample image to be calculated back
+    :param x: top left-x of the sample
+    :param y: top left-y of the sample
+    :param zoom: zoom of the sample
+    :param shear_angle: shear of the sample
+    :param widen: the factor with which the sample has been widened
+    :param detected_by: description of the matched region
+    :return: coordinateset, including description
+    """
     derived = []
     for coordinate_set in coordinates:
         x1 = int(coordinate_set['x']/widen/zoom)
@@ -60,6 +73,17 @@ def derive(coordinates, x, y, zoom, shear_angle, widen, detected_by):
 
 
 def parse(results, x, y, zoom, shear_angle, widen):
+    """
+    Parse the results of detection (create set of information that can be fed to Region)
+
+    :param results: array of resultsets
+    :param x: top left-x of the sample
+    :param y: top left-y of the sample
+    :param zoom: zoom of the sample
+    :param shear_angle: shear of the sample
+    :param widen: the factor with which the sample has been widened
+    :return: array of sets for Region
+    """
     parsed = []
     detected_by = "shear_angle={}, zoom={}".format(shear_angle, zoom)
     for result in results:
@@ -70,6 +94,15 @@ def parse(results, x, y, zoom, shear_angle, widen):
 
 
 def resize_sheared(sheared, size, widen, zoom):
+    """
+    Stretch and zoom a sheared image
+
+    :param sheared: PIL image to stretch
+    :param size: set of width and height of the image
+    :param widen: the factor to widen the image
+    :param zoom: the factor to zoom the image
+    :return: PIL image that is resized.
+    """
     width = size[0] * zoom * widen
     height = size[1] * zoom
     resized = sheared.resize((int(width), int(height)), BICUBIC)
@@ -86,6 +119,11 @@ class LicensePlateDetector(object):
         self.panorama_img = None
 
     def get_licenseplate_regions(self):
+        """
+        Detect Regions in Panorama that are licenseplates
+
+        :return: array of sets for Region
+        """
         self.panorama_img = Img.get_panorama_image(self.panorama_path)
         licenseplate_regions = []
         alpr = OpenAlpr().alpr

@@ -9,6 +9,15 @@ log = logging.getLogger(__name__)
 
 
 def region_writer(panorama: Panorama, lp=False, dlib=False, profile=False):
+    """
+    Save detected regions to the objectstore
+
+    :param panorama: panorama that has been sent for detection
+    :param lp: flag to denote selected regions are Licenseplates
+    :param dlib: flag to denote if selected regions are faces, detected by dlib
+    :param profile: flag to denote of selected regeions are profile faces
+    :return:
+    """
     object_store = ObjectStore()
     output = io.StringIO()
     writer = csv.writer(output)

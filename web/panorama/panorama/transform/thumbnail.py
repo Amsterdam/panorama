@@ -10,6 +10,16 @@ object_store = ObjectStore()
 
 
 def calculate_crop(source_width, target_fov, target_aspect, target_heading, target_horizon):
+    """
+    Calculate coordinates for cropping a thumbnail from an equirectangular panorama
+
+    :param source_width: width of the source panorama
+    :param target_fov: field of view of the thumbnail
+    :param target_aspect: aspect ratio of the thumbnail width/height
+    :param target_heading:  heading of the thumbnail
+    :param target_horizon:  fraction of the image below the horizon
+    :return: 4 coordinates: left, top, right, bottom
+    """
     target_center = source_width / 2 + target_heading * source_width / 360
     chunk_width = source_width * target_fov / PANO_FOV
     chunk_height = chunk_width / target_aspect
@@ -24,6 +34,13 @@ def calculate_crop(source_width, target_fov, target_aspect, target_heading, targ
 
 
 def choose_source_image_and_width(target_fov, target_width):
+    """
+    Select smallest image-size of equirectangular panorama that will allow for field of view and width
+
+    :param target_fov: field of view of the thumbnail
+    :param target_width: width of the thumbnail
+    :return: name and size in pixels of the selected image-size
+    """
     pixels_per_degree = target_width / target_fov
     if pixels_per_degree > 4000 / 360:
         return 'full', 8000
@@ -33,10 +50,23 @@ def choose_source_image_and_width(target_fov, target_width):
 
 
 class Thumbnail(object):
+    """
+        Thambnail for a panorama
+    """
     def __init__(self, panorama: Panorama):
         self.panorama = panorama
 
     def get_image(self, target_width=750, target_fov=80, target_horizon=0.3, target_heading=0, target_aspect=1.5):
+        """
+        Method to get the thumbnail with given parameters cut out the given panorama.
+
+        :param target_fov: field of view of the thumbnail
+        :param target_aspect: aspect ratio of the thumbnail width/height
+        :param target_heading:  heading of the thumbnail
+        :param target_horizon:  fraction of the image below the horizon
+        :param target_width: target width of the thumbnail
+        :return: PIL image of the thumbnail.
+        """
         source_image, source_width = choose_source_image_and_width(target_fov, target_width)
 
         # calculate the crop as part of the source_image, meeting requested fov, aspect, heading and horizon

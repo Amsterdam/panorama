@@ -1,10 +1,9 @@
 import logging
 
-# These dependencies are available in the docker container, which has the binaries and bindings installed
 import cv2
 import dlib
-from scipy import misc
 from PIL import Image
+from scipy import misc
 
 from panorama.shared.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
@@ -24,17 +23,17 @@ FLIPPED = -1
 
 CASCADE_SETS = [
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
-        1.29, 7, NORMAL, 'default'),
+     1.29, 7, NORMAL, 'default'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
-        1.22, 5, NORMAL, 'alt'),
+     1.22, 5, NORMAL, 'alt'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
-        1.22, 5, NORMAL, 'alt2'),
+     1.22, 5, NORMAL, 'alt2'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-        1.11, 5, NORMAL, 'profile'),
+     1.11, 5, NORMAL, 'profile'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-        1.11, 5, FLIPPED, 'profile_flip_correct'),
+     1.11, 5, FLIPPED, 'profile_flip_correct'),
     ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
-        1.025, 2, NORMAL, 'alt_tree')
+     1.025, 2, NORMAL, 'alt_tree')
 ]
 
 DLIB_ZOOM = [2, 1.83, 1.68, 1.54]
@@ -43,14 +42,27 @@ DLIB_UPSCALE = 1
 
 
 def derive(faces, x, y, zoom, cascade, scale_factor, neighbours):
+    """
+    Calculate the coordinates of a detected region in a snippet back to the original coordinates of the
+    source equirectangular panorama
+
+    :param faces: list of detected face-regions
+    :param x: left-top x of sample
+    :param y: left-top y of sample
+    :param zoom: zoom of sample
+    :param cascade: the filter that has been used to detect faces
+    :param scale_factor: the scale factor that has been used to detect faces
+    :param neighbours: the amount of neighbours to detect faces
+    :return: a set consisting of 4 coordinate sets, and a description
+    """
     derived = []
     detected_by = "cascade={}, scaleFactor={}, neighbours={}, zoom={}".format(cascade, scale_factor, neighbours, zoom)
     for (x0, y0, width, height) in faces:
-        x1 = int(x0/zoom) + x
-        y1 = int(y0/zoom) + y
-        w1 = int(width/zoom)
-        h1 = int(height/zoom)
-        derived.append([(x1, y1), (x1+w1, y1), (x1+w1, y1+h1), (x1, y1+h1), detected_by])
+        x1 = int(x0 / zoom) + x
+        y1 = int(y0 / zoom) + y
+        w1 = int(width / zoom)
+        h1 = int(height / zoom)
+        derived.append([(x1, y1), (x1 + w1, y1), (x1 + w1, y1 + h1), (x1, y1 + h1), detected_by])
     return derived
 
 
@@ -64,6 +76,10 @@ class FaceDetector(object):
         self.panorama_img = None
 
     def get_opencv_face_regions(self):
+        """
+        Detect face regions with OpenCV
+        :return: list of Regions
+        """
         if self.panorama_img is None:
             self.panorama_img = Img.get_panorama_image(self.panorama_path)
         face_regions = []
@@ -106,20 +122,25 @@ class FaceDetector(object):
         return regions
 
     def get_dlib_face_regions(self):
+        """
+        Detect face regions with DLIB
+        :return: list of Regions
+        """
         if self.panorama_img is None:
             self.panorama_img = Img.get_panorama_image(self.panorama_path)
+
         face_regions = []
         detector = dlib.get_frontal_face_detector()
 
         for zoom in DLIB_ZOOM:
             strip = self.panorama_img.crop((0, 1975, 8000, 2600))
-            zoomed_size = (int(zoom*8000), int(zoom*625))
+            zoomed_size = (int(zoom * 8000), int(zoom * 625))
             zoomed = strip.resize(zoomed_size, Image.BICUBIC)
 
             detected_faces, _, _ = detector.run(misc.fromimage(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD)
             regions = []
             for d in detected_faces:
-                regions.append((d.left(), d.top(), d.right()-d.left(), d.bottom()-d.top()))
+                regions.append((d.left(), d.top(), d.right() - d.left(), d.bottom() - d.top()))
 
             derived = derive(regions, 0, 1975, zoom, 'dlib', DLIB_UPSCALE, '>{}'.format(DLIB_THRESHOLD))
             face_regions.extend(derived)
