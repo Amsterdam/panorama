@@ -88,7 +88,7 @@ class LicensePlateDetector(object):
     def get_licenseplate_regions(self):
         self.panorama_img = Img.get_panorama_image(self.panorama_path)
         licenseplate_regions = []
-        alpr = OpenAlpr()
+        alpr = OpenAlpr().alpr
         for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_H):
             for idx, y in enumerate(range(JUST_BELOW_HORIZON, PLATES_NEAR_BY, SAMPLE_DISTANCE_V)):
                 zoom = ZOOM1 if idx is 0 else ZOOM2
