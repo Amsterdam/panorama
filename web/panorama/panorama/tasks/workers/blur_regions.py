@@ -36,21 +36,27 @@ class BlurRegions(BaseWorker):
     _route_out = 'blur_done'
 
     def do_work_with_results(self, messagebody):
-        message_dict = json.loads(messagebody.decode('utf-8'))
-        panorama_path = message_dict['panorama_url']
-        region_blurrer = blur.RegionBlurrer(panorama_path)
+        return NotImplemented
 
-        # save intermediate - this will be no longer necessary when all intermediates are present
-        #   when all are present: the intermediate is input for detection and blurring.
-        intermediate_path = 'intermediate/'+panorama_path[:-34]+'.jpg'
-        log.warning("saving intermediate: {}".format(intermediate_path))
-        Img.save_image(region_blurrer.panorama_img, intermediate_path, in_panorama_store=True)
-        log.warning("done saving intermediate: blurring now.")
+        # Fixme: this the prerequisite is now met, all images are in intermediate!
 
-        regions = message_dict['regions']
-        if len(regions) > 0:
-            blurred_img = region_blurrer.get_blurred_image(regions)
-            save_image_set(panorama_path, blurred_img)
+        # message_dict = json.loads(messagebody.decode('utf-8'))
+        # panorama_path = message_dict['panorama_url']
 
-        log.warning("done blurring")
-        return [{'pano_id': message_dict['pano_id']}]
+
+        # region_blurrer = blur.RegionBlurrer(panorama_path)
+        #
+        # # save intermediate - this will be no longer necessary when all intermediates are present
+        # #   when all are present: the intermediate is input for detection and blurring.
+        # intermediate_path = 'intermediate/'+panorama_path[:-34]+'.jpg'
+        # log.warning("saving intermediate: {}".format(intermediate_path))
+        # Img.save_image(region_blurrer.panorama_img, intermediate_path, in_panorama_store=True)
+        # log.warning("done saving intermediate: blurring now.")
+        #
+        # regions = message_dict['regions']
+        # if len(regions) > 0:
+        #     blurred_img = region_blurrer.get_blurred_image(regions)
+        #     save_image_set(panorama_path, blurred_img)
+        #
+        # log.warning("done blurring")
+        # return [{'pano_id': message_dict['pano_id']}]
