@@ -14,7 +14,7 @@ class BlurDone(BaseListener):
         message_dict = json.loads(messagebody.decode('utf-8'))
 
         panorama = Panorama.objects.get(pano_id=message_dict['pano_id'])
-        panorama.status = Panorama.STATUS.blurred
+        panorama.status = Panorama.STATUS.done
         panorama.save()
 
         log.warning("*Blurring* done! %r" % message_dict['pano_id'])

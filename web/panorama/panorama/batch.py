@@ -34,6 +34,7 @@ class ImportPanoramaJob(object):
     """
     files_in_panodir = []
     files_in_renderdir = []
+    files_in_blurdir = []
     object_store = ObjectStore()
 
     def process(self):
@@ -53,7 +54,11 @@ class ImportPanoramaJob(object):
             self.files_in_panodir = [file['name'] for file in
                                      self.object_store.get_panorama_store_objects(container, path)]
             self.files_in_renderdir = [file['name'] for file in
-                                       self.object_store.get_datapunt_store_objects(container + '/' + path)]
+                                       self.object_store.get_panorama_store_objects('intermediate',
+                                                                                    "/{}/{}".format(container, path))]
+            log.warning("renderdir: /{}/{}".format(container, path))
+            self.files_in_blurdir = [file['name'] for file in
+                                     self.object_store.get_datapunt_store_objects(container + '/' + path)]
             Panorama.objects.bulk_create(
                 self.process_csv(csv_file, self.process_panorama_row),
                 batch_size=BATCH_SIZE
@@ -102,15 +107,23 @@ class ImportPanoramaJob(object):
             return None
 
         # check if rendered pano file exists
+        blurred_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
         rendered_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
-        is_pano_rendered = container+'/'+path+rendered_image in self.files_in_renderdir
+        is_pano_rendered = 'intermediate/'+container+'/'+path+rendered_image in self.files_in_renderdir
+        is_pano_blurred = container+'/'+path+rendered_image in self.files_in_blurdir
+
+        pano_status = Panorama.STATUS.to_be_rendered
+        if is_pano_blurred:
+            pano_status = Panorama.STATUS.done
+        elif is_pano_rendered:
+            pano_status = Panorama.STATUS.rendered
 
         # Creating unique id from mission id and pano id
         pano_id = '%s_%s' % (path.split('/')[-2], base_filename)
 
         return Panorama(
             pano_id=pano_id,
-            status=Panorama.STATUS.rendered if is_pano_rendered else Panorama.STATUS.to_be_rendered,
+            status=pano_status,
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=pano_image,
             path=container+'/'+path,

@@ -1,9 +1,10 @@
 import sys
+import logging
 
 from panorama.transform import utils_img_file as Img
-from panorama.transform import utils_img_file_cubic as CubeImg
 from panorama.transform.equirectangular import EquirectangularTransformer
-from panorama.transform.cubic import CubicTransformer
+
+log = logging.getLogger(__name__)
 
 
 def render(panorama_path, heading_in, pitch_in, roll_in):
@@ -11,28 +12,13 @@ def render(panorama_path, heading_in, pitch_in, roll_in):
     pitch = float(pitch_in)
     roll = float(roll_in)
 
-    print('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_path))
-    equirectangular_dir = panorama_path[:-4] + '/equirectangular/'
-
+    log.info('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_path))
     equi_t = EquirectangularTransformer(panorama_path, yaw, pitch, roll)
-
-    projection = equi_t.get_projection(target_width=2000)
-    Img.save_array_image(projection, equirectangular_dir+"panorama_2000.jpg")
-
-    projection = equi_t.get_projection(target_width=4000)
-    Img.save_array_image(projection, equirectangular_dir+"panorama_4000.jpg")
-
     projection = equi_t.get_projection(target_width=8000)
-    Img.save_array_image(projection, equirectangular_dir+"panorama_8000.jpg")
 
-    print('START RENDERING panorama: {} in cubic projection.'.format(panorama_path))
-    cubic_dir = panorama_path[:-4] + '/cubic'
-
-    # for less overhead base cubic projection on normalized equirectangular pano_rgb
-    cubic_t = CubicTransformer(None, rotation_matrix=equi_t.rotation_matrix,
-                               pano_rgb=Img.get_rgb_channels_from_array_image(projection))
-    projections = cubic_t.get_normalized_projection(target_width=CubeImg.MAX_WIDTH)
-    CubeImg.save_as_file_set(cubic_dir, projections)
+    intermediate_path = 'intermediate/{}'.format(panorama_path)
+    log.info("saving intermediate: {}".format(intermediate_path))
+    Img.save_array_image(projection, intermediate_path, in_panorama_store=True)
 
 if __name__ == "__main__":
     if not len(sys.argv) == 5:
