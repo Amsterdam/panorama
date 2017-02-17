@@ -11,4 +11,4 @@ source docker-wait.sh
 yes yes | python manage.py migrate --noinput
 
 # run renderjob
-python panorama.tasks.render_task
+python manage.py render_panos

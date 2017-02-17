@@ -40,6 +40,3 @@ class RenderPanorama(object):
     def _set_renderstatus_to(self, panorama, status):
         panorama.status = status
         panorama.save()
-
-if __name__ == "__main__":
-    RenderPanorama().process()
