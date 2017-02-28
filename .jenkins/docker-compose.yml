@@ -28,6 +28,7 @@ importer:
     - database:database
   environment:
     DB_NAME: panorama
+    DB_USER: panorama
     DB_PASSWORD: insecure
     OBJECTSTORE_PASSWORD:
   command: >
@@ -60,5 +61,6 @@ render:
     - database:database
   environment:
     DB_NAME: panorama
+    DB_USER: panorama
     DB_PASSWORD: insecure
     OBJECTSTORE_PASSWORD:
