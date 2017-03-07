@@ -64,12 +64,12 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
     def _get_filter_and_queryset(self, coords, request):
         queryset = Panorama.objects.extra(
             select={
-                'distance': " geolocation <-> 'SRID=4326;POINT(%s %s)' "},
+                'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "},
             select_params=[coords[0], coords[1]])
         max_range = get_int_value(request, 'radius', 20)
         queryset = queryset.extra(
             where=[""" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'),
-                   geography(geolocation), %s) """],
+                   geography(_geolocation_2d), %s) """],
             params=[coords[0], coords[1], max_range])
         adjacent_filter = {}
         start_date = convert_to_date(request, 'vanaf')
