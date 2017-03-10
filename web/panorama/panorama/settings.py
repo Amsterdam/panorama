@@ -209,3 +209,9 @@ PANORAMA_CONTAINERS = objectstore_settings.PANORAMA_CONTAINERS
 DATAPUNT_CONTAINER = objectstore_settings.DATAPUNT_CONTAINER
 
 REGION_NAME = objectstore_settings.REGION_NAME
+
+# Generate https links
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Setup support for proxy headers
+USE_X_FORWARDED_HOST = True
