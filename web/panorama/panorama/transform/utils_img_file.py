@@ -52,6 +52,18 @@ def get_raw_panorama_image(panorama_path):
     return byte_array2image(object_store.get_panorama_store_object(objectstore_id))
 
 
+def get_intermediate_panorama_image(panorama_path):
+    """
+    Gets the rendered, but un-blurred intermediate image from the
+
+    :param panorama_path: path of the image
+    :return: PIL image
+    """
+
+    objectstore_id = {'container': 'intermediate', 'name': panorama_path}
+    return byte_array2image(object_store.get_panorama_store_object(objectstore_id))
+
+
 def get_panorama_image(panorama_path):
     """
     Gets the rendered, blurred result image of the panorama

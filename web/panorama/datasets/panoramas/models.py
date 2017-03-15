@@ -61,6 +61,10 @@ class Panorama(StatusModel):
         name = (self.path+self.filename).replace(container+'/', '')
         return {'container': container, 'name': name}
 
+    def get_intermediate_url(self):
+        objectstore_id = self.get_raw_image_objectstore_id()
+        return "{}/{}".format(objectstore_id['container'], objectstore_id['name'])
+
     @property
     def cubic_img_urls(self):
         baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4] + CUBIC_SUBPATH)

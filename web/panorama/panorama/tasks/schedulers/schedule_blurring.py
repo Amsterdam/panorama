@@ -41,7 +41,7 @@ class BlurScheduler(BaseScheduler, PanoramaTableAware):
                 regions.append(dict_from(region))
 
             messages.append({'pano_id': panorama.pano_id,
-                             'panorama_url': panorama.equirectangular_img_urls['full']
+                             'panorama_path': panorama.equirectangular_img_urls['full']
                                              .replace(settings.PANO_IMAGE_URL + '/', ''),
                              'regions': regions})
 

@@ -80,8 +80,7 @@ class FaceDetector(object):
         Detect face regions with OpenCV
         :return: list of Regions
         """
-        if self.panorama_img is None:
-            self.panorama_img = Img.get_panorama_image(self.panorama_path)
+        self._assert_image_loaded()
         face_regions = []
         for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_X):
             for idx, y in enumerate(range(JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE, SAMPLE_DISTANCE_Y)):
@@ -94,6 +93,10 @@ class FaceDetector(object):
                     face_regions.extend(derived)
 
         return face_regions
+
+    def _assert_image_loaded(self):
+        if self.panorama_img is None:
+            self.panorama_img = Img.get_intermediate_panorama_image(self.panorama_path)
 
     def _detect_opencv_regions(self, snippet, cascade_set):
         regions = []
@@ -126,8 +129,7 @@ class FaceDetector(object):
         Detect face regions with DLIB
         :return: list of Regions
         """
-        if self.panorama_img is None:
-            self.panorama_img = Img.get_panorama_image(self.panorama_path)
+        self._assert_image_loaded()
 
         face_regions = []
         detector = dlib.get_frontal_face_detector()

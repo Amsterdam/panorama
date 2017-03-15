@@ -113,7 +113,7 @@ class LicensePlateDetector(object):
     def __init__(self, panorama_path: str):
         """
         :param panorama_path: path of type
-                              "2016/08/18/TMX7316010203-000079/pano_0006_000054/equirectangular/panorama_8000.jpg"
+                              "2016/08/18/TMX7316010203-000079/pano_0006_000054.jpg"
         """
         self.panorama_path = panorama_path
         self.panorama_img = None
@@ -124,7 +124,7 @@ class LicensePlateDetector(object):
 
         :return: array of sets for Region
         """
-        self.panorama_img = Img.get_panorama_image(self.panorama_path)
+        self.panorama_img = Img.get_intermediate_panorama_image(self.panorama_path)
         licenseplate_regions = []
         alpr = OpenAlpr().alpr
         for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_H):
