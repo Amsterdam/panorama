@@ -210,13 +210,13 @@ class TestGetRectangle(TestCase):
 
 class TestMessages(TestCase):
     messages = [{"pano_id": "TMX7316010203-000050_pano_0000_007872",
-                 "panorama_url": "2016/08/08/TMX7316010203-000050/pano_0000_007872/equirectangular/panorama_8000.jpg",
+                 "panorama_path": "2016/08/08/TMX7316010203-000050/pano_0000_007872.jpg",
                  "regions": [{"left_top_x": 7810, "left_top_y": 2677, "right_top_x": 7998, "right_top_y": 2654,
                               "right_bottom_x": 8004, "right_bottom_y": 2696, "left_bottom_x": 7815,
                               "left_bottom_y": 2721}]
                  },
                 {"pano_id": "TMX7315120208-000067_pano_0013_000416",
-                 "panorama_url": "2016/06/06/TMX7315120208-000067/pano_0013_000416/equirectangular/panorama_8000.jpg",
+                 "panorama_path": "2016/06/06/TMX7315120208-000067/pano_0013_000416.jpg",
                  "regions": [{"left_top_x": 7996, "left_top_y": 2585, "right_top_x": 8139, "right_top_y": 2584,
                               "right_bottom_x": 8145, "right_bottom_y": 2618, "left_bottom_x": 8002,
                               "left_bottom_y": 2620}]}

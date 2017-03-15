@@ -1,4 +1,4 @@
-from numpy import arange, meshgrid
+from numpy import arange, meshgrid, float64
 
 from . import utils_img_file as Img
 from . import utils_math_array as Math
@@ -32,5 +32,5 @@ class EquirectangularTransformer(BasePanoramaTransformer):
 
         steps = SOURCE_WIDTH / target_width
 
-        return meshgrid(arange(left_top_x, right_bottom_x, steps),
-                        arange(left_top_y, right_bottom_y, steps))
+        return meshgrid(arange(left_top_x, right_bottom_x, steps, dtype=float64),
+                        arange(left_top_y, right_bottom_y, steps, dtype=float64))

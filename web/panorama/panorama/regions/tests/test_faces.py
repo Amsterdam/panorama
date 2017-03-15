@@ -18,23 +18,23 @@ log = logging.getLogger(__name__)
 object_store = ObjectStore()
 
 test_set = [
-    "2016/06/07/TMX7315120208-000070/pano_0006_000457/equirectangular/panorama_8000.jpg",
-    "2016/06/07/TMX7315120208-000070/pano_0006_000415/equirectangular/panorama_8000.jpg",
-    "2016/08/17/TMX7316060226-000030/pano_0008_000377/equirectangular/panorama_8000.jpg",
-    "2016/08/17/TMX7316060226-000030/pano_0008_000311/equirectangular/panorama_8000.jpg",
-    "2016/08/02/TMX7316060226-000011/pano_0000_001789/equirectangular/panorama_8000.jpg",
-    "2016/08/09/TMX7316010203-000053/pano_0000_001613/equirectangular/panorama_8000.jpg",
-    "2016/08/08/TMX7316060226-000015/pano_0005_001143/equirectangular/panorama_8000.jpg",
-    "2016/08/08/TMX7316060226-000015/pano_0005_001470/equirectangular/panorama_8000.jpg",
-    "2016/06/13/TMX7315120208-000075/pano_0000_001549/equirectangular/panorama_8000.jpg",
-    "2016/05/17/TMX7315120208-000052/pano_0000_005096/equirectangular/panorama_8000.jpg",
-    "2016/04/18/TMX7315120208-000029/pano_0000_001306/equirectangular/panorama_8000.jpg",
-    "2016/07/21/TMX7315120208-000158/pano_0000_003364/equirectangular/panorama_8000.jpg",
-    "2016/06/21/TMX7315120208-000089/pano_0000_002776/equirectangular/panorama_8000.jpg",
-    "2016/05/11/TMX7315120208-000047/pano_0000_001976/equirectangular/panorama_8000.jpg",
-    "2016/05/11/TMX7315120208-000047/pano_0000_001975/equirectangular/panorama_8000.jpg",
-    "2016/06/01/TMX7315120208-000064/pano_0002_000150/equirectangular/panorama_8000.jpg",
-    "2016/03/24/TMX7315120208-000022/pano_0001_000270/equirectangular/panorama_8000.jpg"
+    "2016/06/07/TMX7315120208-000070/pano_0006_000457.jpg",
+    "2016/06/07/TMX7315120208-000070/pano_0006_000415.jpg",
+    "2016/08/17/TMX7316060226-000030/pano_0008_000377.jpg",
+    "2016/08/17/TMX7316060226-000030/pano_0008_000311.jpg",
+    "2016/08/02/TMX7316060226-000011/pano_0000_001789.jpg",
+    "2016/08/09/TMX7316010203-000053/pano_0000_001613.jpg",
+    "2016/08/08/TMX7316060226-000015/pano_0005_001143.jpg",
+    "2016/08/08/TMX7316060226-000015/pano_0005_001470.jpg",
+    "2016/06/13/TMX7315120208-000075/pano_0000_001549.jpg",
+    "2016/05/17/TMX7315120208-000052/pano_0000_005096.jpg",
+    "2016/04/18/TMX7315120208-000029/pano_0000_001306.jpg",
+    "2016/07/21/TMX7315120208-000158/pano_0000_003364.jpg",
+    "2016/06/21/TMX7315120208-000089/pano_0000_002776.jpg",
+    "2016/05/11/TMX7315120208-000047/pano_0000_001976.jpg",
+    "2016/05/11/TMX7315120208-000047/pano_0000_001975.jpg",
+    "2016/06/01/TMX7315120208-000064/pano_0002_000150.jpg",
+    "2016/03/24/TMX7315120208-000022/pano_0001_000270.jpg"
 ]
 
 
@@ -71,14 +71,13 @@ class TestFaceDetection(TestCase):
     look into the .gitignore-ed directory PROJECT/test_output for a visual check of the result
     """
     def test_detection_faces_runs_without_errors(self):
-        for pano_idx, panorama_path in enumerate(test_set):
+        for pano_idx, panorama_path in enumerate(get_subset()):
             log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_path))
             fd = FaceDetector(panorama_path)
             found_faces = fd.get_opencv_face_regions()
 
-            full_image = Img.get_panorama_image(panorama_path)
+            full_image = Img.get_intermediate_panorama_image(panorama_path)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
-
             image = draw_lines(image, found_faces)
 
             cv2.imwrite("/app/test_output/face_detection_{}.jpg".format(pano_idx), image)

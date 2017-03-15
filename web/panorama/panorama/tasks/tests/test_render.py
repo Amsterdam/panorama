@@ -63,12 +63,9 @@ class TestRender(TestCase):
                 side_effect=mock_get_raw_pano)
     def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
         to_render = Panorama.to_be_rendered.all()[0]
-        self.assertEquals('TMX7315120208-000073_pano_0004_000087',
-                          to_render.pano_id)
+        self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
         render_task.RenderPanorama().process()
         self.assertEquals(0, len(Panorama.to_be_rendered.all()))
         self.assertTrue(mock_read_raw.called, msg='Read Raw was not called')
-        self.assertTrue(
-            mock_write_transformed.called,
-            msg='Write transformed was not called')
+        self.assertTrue(mock_write_transformed.called, msg='Write transformed was not called')

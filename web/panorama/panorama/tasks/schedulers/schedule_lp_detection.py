@@ -24,8 +24,7 @@ class LpDetectionScheduler(BaseScheduler, PanoramaTableAware):
         for panorama in Panorama.rendered.all()[:50]:
             log.info("Sending lp_detection task for: {}".format(panorama.pano_id))
             messages.append({'pano_id': panorama.pano_id,
-                             'panorama_url': panorama.equirectangular_img_urls['full']
-                                                .replace(settings.PANO_IMAGE_URL+'/', '')})
+                             'panorama_path': panorama.get_intermediate_url()})
             panorama.status = Panorama.STATUS.detecting_lp
             panorama.save()
 

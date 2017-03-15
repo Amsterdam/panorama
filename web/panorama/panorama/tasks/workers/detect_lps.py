@@ -16,7 +16,7 @@ class DetectLicensePlates(BaseWorker):
         message_dict = json.loads(messagebody.decode('utf-8'))
 
         start_time = time.time()
-        lp_detector = license_plates.LicensePlateDetector(message_dict['panorama_url'])
+        lp_detector = license_plates.LicensePlateDetector(message_dict['panorama_path'])
 
         regions = lp_detector.get_licenseplate_regions()
         for region in regions:

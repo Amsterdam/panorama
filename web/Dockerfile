@@ -1,4 +1,4 @@
-FROM amsterdam/panorama_image_processing:latest
+FROM amsterdam/panorama_image_processing:full_image_processing
 MAINTAINER datapunt.ois@amsterdam.nl
 
 RUN apt-get update \

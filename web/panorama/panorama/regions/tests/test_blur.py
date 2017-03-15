@@ -15,19 +15,19 @@ log = logging.getLogger(__name__)
 object_store = ObjectStore()
 
 test_set = [
-    "2016/04/18/TMX7315120208-000030/pano_0000_000853/equirectangular/panorama_8000.jpg",  # 3
-    "2016/05/09/TMX7315120208-000038/pano_0002_000466/equirectangular/panorama_8000.jpg",  # 1
-    "2016/06/09/TMX7315120208-000073/pano_0004_000087/equirectangular/panorama_8000.jpg",  # 2, taxi, buitenlands
-    "2016/05/09/TMX7315120208-000038/pano_0000_000321/equirectangular/panorama_8000.jpg",  # 1
-    "2016/05/26/TMX7315120208-000059/pano_0005_000402/equirectangular/panorama_8000.jpg",  # 1, vallende lijn
-    "2016/06/14/TMX7315120208-000085/pano_0000_002422/equirectangular/panorama_8000.jpg",  # 2, schuin
-    "2016/06/21/TMX7315080123-000304/pano_0000_001220/equirectangular/panorama_8000.jpg",  # 2, waarvan 1 schuin
-    "2016/07/12/TMX7315120208-000110/pano_0000_000175/equirectangular/panorama_8000.jpg",  # 3
-    "2016/07/27/TMX7316060226-000006/pano_0001_001524/equirectangular/panorama_8000.jpg",  # 5
-    "2016/08/02/TMX7316010203-000040/pano_0001_001871/equirectangular/panorama_8000.jpg",  # 6
-    "2016/08/04/TMX7316010203-000046/pano_0000_000743/equirectangular/panorama_8000.jpg",  # 2, misschien 3
-    "2016/03/17/TMX7315120208-000020/pano_0000_000175/equirectangular/panorama_8000.jpg",  # 1
-    "2016/08/18/TMX7316010203-000079/pano_0006_000054/equirectangular/panorama_8000.jpg"   # 1
+    "2016/04/18/TMX7315120208-000030/pano_0000_000853.jpg",  # 3
+    "2016/05/09/TMX7315120208-000038/pano_0002_000466.jpg",  # 1
+    "2016/06/09/TMX7315120208-000073/pano_0004_000087.jpg",  # 2, taxi, buitenlands
+    "2016/05/09/TMX7315120208-000038/pano_0000_000321.jpg",  # 1
+    "2016/05/26/TMX7315120208-000059/pano_0005_000402.jpg",  # 1, vallende lijn
+    "2016/06/14/TMX7315120208-000085/pano_0000_002422.jpg",  # 2, schuin
+    "2016/06/21/TMX7315080123-000304/pano_0000_001220.jpg",  # 2, waarvan 1 schuin
+    "2016/07/12/TMX7315120208-000110/pano_0000_000175.jpg",  # 3
+    "2016/07/27/TMX7316060226-000006/pano_0001_001524.jpg",  # 5
+    "2016/08/02/TMX7316010203-000040/pano_0001_001871.jpg",  # 6
+    "2016/08/04/TMX7316010203-000046/pano_0000_000743.jpg",  # 2, misschien 3
+    "2016/03/17/TMX7315120208-000020/pano_0000_000175.jpg",  # 1
+    "2016/08/18/TMX7316010203-000079/pano_0006_000054.jpg"   # 1
 ]
 
 
@@ -66,7 +66,7 @@ class TestBlur(TestCase):
         rb = blur.RegionBlurrer(panorama_path)
         image = rb.get_blurred_image([test_util.get_out_of_range_region()])
         image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
-        cv2.imwrite("/app/test_output/blur_test_{}.jpg".format('_out_of_range'), image)
+        cv2.imwrite("/app/test_output/blur_test_{}.jpg".format('out_of_range'), image)
 
     def test_blur_wrap_around(self):
         panorama_path = test_set[randint(0, len(test_set)-1)]
@@ -74,5 +74,5 @@ class TestBlur(TestCase):
         rb = blur.RegionBlurrer(panorama_path)
         image = rb.get_blurred_image([test_util.get_wrap_around_region()])
         image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
-        cv2.imwrite("/app/test_output/blur_test_{}.jpg".format('_wrap_around'), image)
+        cv2.imwrite("/app/test_output/blur_test_{}.jpg".format('wrap_around'), image)
 
