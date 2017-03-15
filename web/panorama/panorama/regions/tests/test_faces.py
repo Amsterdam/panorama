@@ -51,8 +51,8 @@ def draw_lines(image, regions):
 
 
 def get_subset():
-    test_1 = randrange(0, len(test_set))
-    test_2 = randrange(0, len(test_set))
+    test_1 = randrange(0, len(test_set)-1)
+    test_2 = randrange(0, len(test_set)-1)
 
     return [test_set[test_1], test_set[test_2]]
 

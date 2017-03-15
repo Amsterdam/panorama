@@ -61,7 +61,7 @@ class TestBlur(TestCase):
             cv2.imwrite("/app/test_output/blur_test_{}.jpg".format(pano_idx), image)
 
     def test_blur_out_of_range(self):
-        panorama_path = test_set[randint(0, len(test_set))]
+        panorama_path = test_set[randint(0, len(test_set)-1)]
         log.warning("blurring out of range: {}, please hold".format(panorama_path))
         rb = blur.RegionBlurrer(panorama_path)
         image = rb.get_blurred_image([test_util.get_out_of_range_region()])
@@ -69,7 +69,7 @@ class TestBlur(TestCase):
         cv2.imwrite("/app/test_output/blur_test_{}.jpg".format('_out_of_range'), image)
 
     def test_blur_wrap_around(self):
-        panorama_path = test_set[randint(0, len(test_set))]
+        panorama_path = test_set[randint(0, len(test_set)-1)]
         log.warning("blurring wrap around: {}, please hold".format(panorama_path))
         rb = blur.RegionBlurrer(panorama_path)
         image = rb.get_blurred_image([test_util.get_wrap_around_region()])
