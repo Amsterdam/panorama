@@ -22,7 +22,7 @@ def region_writer(panorama: Panorama, lp=False, dlib=False, profile=False):
     output = io.StringIO()
     writer = csv.writer(output)
 
-    regions = Region.objects.filter(panorama=panorama)
+    regions = Region.objects.filter(pano_id=panorama.pano_id)
     writer.writerow(['region_type', 'left_top_x', 'left_top_y', 'right_top_x', 'right_top_y', 'right_bottom_x',
                      'right_bottom_y', 'left_bottom_x', 'left_bottom_y', 'detected_by'])
     for region in regions:
@@ -40,11 +40,11 @@ def region_writer(panorama: Panorama, lp=False, dlib=False, profile=False):
     object_store.put_into_datapunt_store(csv_name, output.getvalue(), 'text/csv')
 
 
-def save_regions(message_dict, panorama, region_type='G'):
+def save_regions(message_dict, panorama: Panorama, region_type='G'):
     for region in message_dict['regions']:
         rg = Region()
 
-        rg.panorama = panorama
+        rg.pano_id = panorama.pano_id
         rg.region_type = region_type
         rg.detected_by = region[-1]
 
