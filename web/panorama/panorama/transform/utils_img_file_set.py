@@ -1,7 +1,9 @@
 from math import log
 
 from PIL import Image
+from PIL import Image
 
+from panorama.transform.cubic import CubicTransformer
 from panorama.transform import utils_img_file as Img
 from panorama.transform import utils_math_cubic as Cube
 
@@ -10,7 +12,33 @@ PREVIEW_WIDTH = 256
 MAX_WIDTH = 2048
 
 
-def save_as_file_set(cubic_dir, projections, max_width=MAX_WIDTH):
+def save_image_set(panorama_path, array_image):
+    """
+    Saves as a complete set of client images (equirectangular an cubic, in several resolutions)
+
+    :param panorama_path: path of the panorama
+    :param array_image: source of the image as a numpy array
+    :return:
+    """
+
+    base_panorama_dir = panorama_path[:-4]
+    equirectangular_dir = base_panorama_dir + '/equirectangular/'
+
+    image = Image.fromarray(array_image)
+    Img.save_image(image, equirectangular_dir+"panorama_8000.jpg")
+    medium_img = image.resize((4000, 2000), Image.ANTIALIAS)
+    Img.save_image(medium_img, equirectangular_dir+"panorama_4000.jpg")
+    small_img = image.resize((2000, 1000), Image.ANTIALIAS)
+    Img.save_image(small_img, equirectangular_dir+"panorama_2000.jpg")
+
+    # save cubic set
+    cubic_dir = base_panorama_dir + '/cubic'
+    cubic_t = CubicTransformer(None, 0, 0, 0, pano_rgb=Img.get_rgb_channels_from_array_image(array_image))
+    projections = cubic_t.get_normalized_projection(target_width=MAX_WIDTH)
+    save_as_cubic_file_set(cubic_dir, projections)
+
+
+def save_as_cubic_file_set(cubic_dir, projections, max_width=MAX_WIDTH):
     """
     Saves a set of cubic projections (the 6 sides of maximum resolution)
     as a Marzipano fileset

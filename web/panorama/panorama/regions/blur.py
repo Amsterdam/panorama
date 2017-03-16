@@ -12,6 +12,19 @@ log = logging.getLogger(__name__)
 object_store = ObjectStore()
 
 
+def dict_from(region):
+    return {
+        'left_top_x': region.left_top_x,
+        'left_top_y': region.left_top_y,
+        'right_top_x': region.right_top_x,
+        'right_top_y': region.right_top_y,
+        'right_bottom_x': region.right_bottom_x,
+        'right_bottom_y': region.right_bottom_y,
+        'left_bottom_x': region.left_bottom_x,
+        'left_bottom_y': region.left_bottom_y
+    }
+
+
 class RegionBlurrer(object):
     """
     Class to blur the regions of a panorama image

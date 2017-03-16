@@ -1,7 +1,7 @@
 from math import pi, tan, sqrt, cos, sin
 
 CUBE_FRONT, CUBE_BACK, CUBE_LEFT, CUBE_RIGHT, CUBE_UP, CUBE_DOWN = 'f', 'b', 'l', 'r', 'u', 'd'
-#   preserve order - the preview.jpg in utils_img_file_cubic depends on it:
+#   preserve order - the preview.jpg in utils_img_file_set depends on it:
 CUBE_SIDES = [CUBE_BACK, CUBE_DOWN, CUBE_FRONT, CUBE_LEFT, CUBE_RIGHT, CUBE_UP]
 
 MAX_CUBIC_WIDTH = 2048  # width of cubic edges
