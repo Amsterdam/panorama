@@ -37,7 +37,7 @@ class BlurScheduler(BaseScheduler, PanoramaTableAware):
         for panorama in Panorama.detected_2.all()[:100]:
             log.info("Sending blur task: {}".format(panorama.pano_id))
             regions = []
-            for region in Region.objects.filter(panorama=panorama).all():
+            for region in Region.objects.filter(pano_id=panorama.pano_id).all():
                 regions.append(dict_from(region))
 
             messages.append({'pano_id': panorama.pano_id,

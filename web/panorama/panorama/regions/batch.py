@@ -54,14 +54,14 @@ class ImportRegions(object):
 
         return regions
 
-    def process_region_row(self, model_data, panorama):
+    def process_region_row(self, model_data, panorama: Panorama):
         try:
             region_type = model_data['region_type']
         except KeyError:
             return None
 
         return Region(
-            panorama=panorama,
+            pano_id=panorama.pano_id,
             region_type=region_type,
             detected_by=model_data['detected_by'],
 

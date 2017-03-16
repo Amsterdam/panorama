@@ -38,8 +38,7 @@ class TestRender(TestCase):
             pano.save()
 
         try:
-            pano = Panorama.objects.filter(
-                pano_id='TMX7315120208-000073_pano_0004_000087')[0]
+            pano = Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
             pano.status = Panorama.STATUS.to_be_rendered
             pano.save()
         except IndexError:

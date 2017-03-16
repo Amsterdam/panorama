@@ -48,6 +48,7 @@ db-backup:
             && pg_dump --clean \
                         -Fc \
                         -t panoramas* \
+                        -T panoramas_region \
                         -t geo*  \
                         -T auth*    \
                         -U panorama \

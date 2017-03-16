@@ -124,7 +124,7 @@ class Region(models.Model):
         ('G', 'Gezicht')
     )
     id = models.AutoField(primary_key=True)
-    panorama = models.ForeignKey(Panorama)
+    pano_id = models.CharField(max_length=37, default='')
     region_type = models.CharField(max_length=1, choices=REGION_TYPES)
     detected_by = models.CharField(max_length=255)
 
