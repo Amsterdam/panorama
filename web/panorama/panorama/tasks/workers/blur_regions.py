@@ -1,34 +1,11 @@
 import json
 import logging
 
-from PIL import Image
-
 from panorama.tasks.queue import BaseWorker
 from panorama.regions import blur
-from panorama.transform.cubic import CubicTransformer
-from panorama.transform import utils_img_file as Img
-from panorama.transform import utils_img_file_cubic as CubeImg
+from panorama.transform import utils_img_file_set as ImgSet
 
 log = logging.getLogger(__name__)
-
-
-def save_image_set(panorama_path, array_image):
-    # save blurred equirectangular set
-    equirectangular_dir = panorama_path[:-17]
-
-    image = Image.fromarray(array_image)
-    Img.save_image(image, equirectangular_dir+"panorama_8000.jpg")
-    medium_img = image.resize((4000, 2000), Image.ANTIALIAS)
-    Img.save_image(medium_img, equirectangular_dir+"panorama_4000.jpg")
-    small_img = image.resize((2000, 1000), Image.ANTIALIAS)
-    Img.save_image(small_img, equirectangular_dir+"panorama_2000.jpg")
-
-    # save blurred cubic set
-    cubic_dir = panorama_path[:-34] + '/cubic'
-
-    cubic_t = CubicTransformer(None, 0, 0, 0, pano_rgb=Img.get_rgb_channels_from_array_image(array_image))
-    projections = cubic_t.get_normalized_projection(target_width=CubeImg.MAX_WIDTH)
-    CubeImg.save_as_file_set(cubic_dir, projections)
 
 
 class BlurRegions(BaseWorker):
@@ -44,7 +21,7 @@ class BlurRegions(BaseWorker):
         regions = message_dict['regions']
         if len(regions) > 0:
             blurred_img = region_blurrer.get_blurred_image(regions)
-            save_image_set(panorama_path, blurred_img)
+            ImgSet.save_image_set(panorama_path, blurred_img)
 
         log.warning("done blurring")
         return [{'pano_id': message_dict['pano_id']}]
