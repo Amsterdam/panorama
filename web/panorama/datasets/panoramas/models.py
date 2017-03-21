@@ -25,7 +25,7 @@ class Panorama(StatusModel):
                      'detected_1', 'detecting2', 'detected_2', 'blurring', 'done')
 
     id = models.AutoField(primary_key=True)
-    pano_id = models.CharField(max_length=37, unique=True)
+    pano_id = models.CharField(max_length=37, unique=True, db_index=True)
     timestamp = models.DateTimeField()
     filename = models.CharField(max_length=255)
     path = models.CharField(max_length=400)
@@ -124,7 +124,7 @@ class Region(models.Model):
         ('G', 'Gezicht')
     )
     id = models.AutoField(primary_key=True)
-    pano_id = models.CharField(max_length=37, default='')
+    pano_id = models.CharField(max_length=37, default='', db_index=True)
     region_type = models.CharField(max_length=1, choices=REGION_TYPES)
     detected_by = models.CharField(max_length=255)
 
