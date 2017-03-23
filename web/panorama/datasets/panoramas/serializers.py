@@ -75,7 +75,9 @@ class FilteredPanoSerializer(PanoSerializer):
         super().__init__(instance, data, **kwargs)
 
     def get_adjacent(self, instance):
-        qs = models.Adjacency.objects.filter(from_pano=instance, distance__lt=MAX_ADJACENCY)
+        qs = models.Adjacency.objects.filter(from_pano=instance,
+                                             distance__lt=MAX_ADJACENCY,
+                                             to_pano__status=models.Panorama.STATUS.done)
         if 'vanaf' in self.filter:
             qs = qs.exclude(to_pano__timestamp__lt=self.filter['vanaf'])
         if 'tot' in self.filter:
