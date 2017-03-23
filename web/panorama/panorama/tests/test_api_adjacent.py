@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 # Project
 from datasets.panoramas.tests import factories
 from panorama.management.commands import refresh_views
+from datasets.panoramas.models import Panorama
 
 
 class PanoramaApiTest(APITestCase):
@@ -20,6 +21,7 @@ class PanoramaApiTest(APITestCase):
         # Adding locations
         factories.PanoramaFactory.create(
             pano_id='PANO_1_2014',
+            status=Panorama.STATUS.done,
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename=factory.fuzzy.FuzzyText(length=30),
@@ -31,6 +33,7 @@ class PanoramaApiTest(APITestCase):
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_2_2014_CLOSE',
+            status=Panorama.STATUS.done,
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename=factory.fuzzy.FuzzyText(length=30),
@@ -42,11 +45,24 @@ class PanoramaApiTest(APITestCase):
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_3_2015_CLOSE',
+            status=Panorama.STATUS.done,
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2015, 1, 1, tzinfo=UTC_TZ), force_year=2015),
             filename=factory.fuzzy.FuzzyText(length=30),
             path=factory.fuzzy.FuzzyText(length=30),
             geolocation=Point(4.94439711277457, 52.3510810574283, 10),
+            roll=factory.fuzzy.FuzzyFloat(-10, 10),
+            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
+            heading=factory.fuzzy.FuzzyFloat(-10, 10),
+        )
+        factories.PanoramaFactory.create(
+            pano_id='PANO_5_2014_CLOSE_BUT_NO_CIGAR',
+            status=Panorama.STATUS.detected_2,
+            timestamp=factory.fuzzy.FuzzyDateTime(
+                datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
+            filename=factory.fuzzy.FuzzyText(length=30),
+            path=factory.fuzzy.FuzzyText(length=30),
+            geolocation=Point(4.94439711277457, 52.3510810574283, 12),
             roll=factory.fuzzy.FuzzyFloat(-10, 10),
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),

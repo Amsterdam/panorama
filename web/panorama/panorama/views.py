@@ -31,7 +31,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             if 'vanaf' and 'tot' are given, tot >= vanaf
     """
     lookup_field = 'pano_id'
-    queryset = Panorama.objects.all()
+    queryset = Panorama.done.all()
     serializer_detail_class = serializers.FilteredPanoSerializer
     serializer_class = serializers.PanoSerializer
 
@@ -62,7 +62,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
         return Response(pano)
 
     def _get_filter_and_queryset(self, coords, request):
-        queryset = Panorama.objects.extra(
+        queryset = Panorama.done.extra(
             select={
                 'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "},
             select_params=[coords[0], coords[1]])
