@@ -17,4 +17,4 @@ yes yes | python manage.py migrate --noinput
 # python manage.py create_geo_tables
 
 # run uwsgi
-exec uwsgi --ini /app/uwsgi.ini
+exec uwsgi
