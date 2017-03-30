@@ -20,10 +20,9 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
 node {
     stage("Checkout") {
         checkout scm
-    }
-
-    stage("Inject key") {
-		writeFile file: "web/panorama/google-application-credentials.json", text: "${GOOGLE_APP_CREDENTIALS}"
+        withCredentials([[$class: 'StringBinding', credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'APP_CREDENTIALS']]) {
+            writeFile file: "web/panorama/google-application-credentials.json", text: "${APP_CREDENTIALS}"
+        }
     }
 
     stage('Test') {
@@ -32,7 +31,7 @@ node {
             withCredentials([[$class: 'StringBinding', credentialsId: 'DATAPUNT_OBJECTSTORE_PASSWORD', variable: 'OBJECTSTORE_PASSWORD']]) {
                 sh "docker-compose -p panorama -f .jenkins/docker-compose.yml build && " +
                    "docker-compose -p panorama -f .jenkins/docker-compose.yml run -u root --rm tests"
-        }
+            }
         }, {
             sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
         }
