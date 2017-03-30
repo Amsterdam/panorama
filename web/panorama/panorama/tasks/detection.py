@@ -8,14 +8,14 @@ from panorama.shared.object_store import ObjectStore
 log = logging.getLogger(__name__)
 
 
-def region_writer(panorama: Panorama, lp=False, dlib=False, profile=False):
+def region_writer(panorama: Panorama, lp=False, dlib=False, google=False):
     """
     Save detected regions to the objectstore
 
     :param panorama: panorama that has been sent for detection
     :param lp: flag to denote selected regions are Licenseplates
     :param dlib: flag to denote if selected regions are faces, detected by dlib
-    :param profile: flag to denote of selected regeions are profile faces
+    :param google: flag to denote of selected regions are detected by google
     :return:
     """
     object_store = ObjectStore()
@@ -30,7 +30,7 @@ def region_writer(panorama: Panorama, lp=False, dlib=False, profile=False):
                          region.right_top_y, region.right_bottom_x, region.right_bottom_y, region.left_bottom_x,
                          region.left_bottom_y, region.detected_by])
 
-    suffix = 'd' if dlib else ('p' if profile else '')
+    suffix = 'd' if dlib else ('g' if google else '')
     if lp:
         csv_name = 'results/{}{}/regions_lp.csv'.format(panorama.path, panorama.filename[:-4])
     else:

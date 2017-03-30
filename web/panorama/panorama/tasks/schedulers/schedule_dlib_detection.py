@@ -1,8 +1,6 @@
 import time
 import logging
 
-from django.conf import settings
-
 from datasets.panoramas.models import Panorama
 from panorama.tasks.mixins import PanoramaTableAware
 from panorama.tasks.queue import BaseScheduler
@@ -23,10 +21,8 @@ class FaceDetection2Scheduler(BaseScheduler, PanoramaTableAware):
         messages = []
         for panorama in Panorama.detected_1.all()[:100]:
             log.info("Sending face_detect2 task: {}".format(panorama.pano_id))
-
             messages.append({'pano_id': panorama.pano_id,
                              'panorama_path': panorama.get_intermediate_url()})
-
             panorama.status = Panorama.STATUS.detecting2
             panorama.save()
 

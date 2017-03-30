@@ -1,8 +1,6 @@
 import time
 import logging
 
-from django.conf import settings
-
 from datasets.panoramas.models import Panorama
 from panorama.tasks.mixins import PanoramaTableAware
 from panorama.tasks.queue import BaseScheduler
