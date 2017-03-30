@@ -4,13 +4,17 @@ import cv2
 import dlib
 from PIL import Image
 from scipy import misc
+from google.cloud import vision
 
 from panorama.shared.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
+GOOGLE_VISION_MAX_SIZE = 4000000
+
 log = logging.getLogger(__name__)
 object_store = ObjectStore()
 
+PANORAMA_WIDTH = 8000
 JUST_ABOVE_HORIZON = 1975
 LOWEST_EXPECTED_FACE = 2400
 SAMPLE_DISTANCE_X = 355
@@ -39,6 +43,10 @@ CASCADE_SETS = [
 DLIB_ZOOM = [2, 1.83, 1.68, 1.54]
 DLIB_THRESHOLD = -0.05
 DLIB_UPSCALE = 1
+
+GOOGLE_VISION_ZOOM = 2.05
+GOOGLE_VISION_START_HEIGHT = 1750
+GOOGLE_VISION_END_HEIGHT = 3050
 
 
 def derive(faces, x, y, zoom, cascade, scale_factor, neighbours):
@@ -135,8 +143,8 @@ class FaceDetector(object):
         detector = dlib.get_frontal_face_detector()
 
         for zoom in DLIB_ZOOM:
-            strip = self.panorama_img.crop((0, 1975, 8000, 2600))
-            zoomed_size = (int(zoom * 8000), int(zoom * 625))
+            strip = self.panorama_img.crop((0, 1975, PANORAMA_WIDTH, 2600))
+            zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * 625))
             zoomed = strip.resize(zoomed_size, Image.BICUBIC)
 
             detected_faces, _, _ = detector.run(misc.fromimage(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD)
@@ -145,6 +153,37 @@ class FaceDetector(object):
                 regions.append((d.left(), d.top(), d.right() - d.left(), d.bottom() - d.top()))
 
             derived = derive(regions, 0, 1975, zoom, 'dlib', DLIB_UPSCALE, '>{}'.format(DLIB_THRESHOLD))
+            face_regions.extend(derived)
+
+        return face_regions
+
+    def get_vision_api_face_regions(self):
+        """
+        Detect face regions with Google Vision API
+        :return: list of Regions
+        """
+        self._assert_image_loaded()
+        face_regions = []
+
+        strip = self.panorama_img.crop((0, GOOGLE_VISION_START_HEIGHT, PANORAMA_WIDTH, GOOGLE_VISION_END_HEIGHT))
+        google_image_height = GOOGLE_VISION_END_HEIGHT - GOOGLE_VISION_START_HEIGHT
+
+        zoom = GOOGLE_VISION_ZOOM
+        zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * google_image_height))
+        zoomed = strip.resize(zoomed_size, Image.BICUBIC)
+
+        upload = Img.image2byte_array_sized(zoomed, size=GOOGLE_VISION_MAX_SIZE)
+
+        vision_client = vision.Client()
+        image = vision_client.image(content=upload)
+
+        regions = []
+        for df in image.detect_faces():
+            lt, _, rb, _ =  df.bounds.vertices
+            regions.append((lt.x_coordinate, lt.y_coordinate,
+                            rb.x_coordinate - lt.x_coordinate, rb.y_coordinate - lt.y_coordinate))
+
+            derived = derive(regions, 0, GOOGLE_VISION_START_HEIGHT, zoom, 'google_vision api', 1, 'no treshold')
             face_regions.extend(derived)
 
         return face_regions

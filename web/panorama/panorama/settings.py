@@ -215,3 +215,5 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Setup support for proxy headers
 USE_X_FORWARDED_HOST = True
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(BASE_DIR, 'google-application-credentials.json')
