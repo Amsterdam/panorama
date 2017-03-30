@@ -20,6 +20,9 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
 node {
     stage("Checkout") {
         checkout scm
+    }
+
+    stage("Inject key") {
 		writeFile file: "web/panorama/google-application-credentials.json", text: "${GOOGLE_APP_CREDENTIALS}"
     }
 
