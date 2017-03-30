@@ -13,6 +13,7 @@ drf-nested-fields
 factory-boy
 Faker
 futures
+google-cloud-vision
 imutils
 numpy
 opencv-python

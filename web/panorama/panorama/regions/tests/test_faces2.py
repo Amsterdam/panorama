@@ -38,8 +38,6 @@ test_set = [
     "2016/03/24/TMX7315120208-000022/pano_0001_000270.jpg"
 ]
 
-detector = dlib.get_frontal_face_detector()
-
 
 def draw_lines(image, regions):
     for (lt, rt, rb, lb, detected_by) in regions:
