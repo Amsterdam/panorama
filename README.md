@@ -19,6 +19,9 @@ Ontwikkelen
 -----------
 
 Gebruik `docker-compose` om een lokale versie op te starten
+(Wanneer je gebruik maakt van Google Vision API is een bestand 
+`google-application-credentials.json` nodig in de web/panorama map 
+met daarin geldige credentials voor Google Vision API)
 
 	(sudo) docker-compose start
 
