@@ -19,11 +19,11 @@ class FaceDetection3Scheduler(BaseScheduler, PanoramaTableAware):
 
     def get_messages(self):
         messages = []
-        for panorama in Panorama.detected_2.all()[:200]:
+        for panorama in Panorama.detected_2.all()[:2000]:
             log.info("Sending google face detection task for: {}".format(panorama.pano_id))
             messages.append({'pano_id': panorama.pano_id,
                              'panorama_path': panorama.get_intermediate_url()})
-            panorama.status = Panorama.STATUS.detecting1
+            panorama.status = Panorama.STATUS.detecting3
             panorama.save()
 
         return messages
