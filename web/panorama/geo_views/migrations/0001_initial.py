@@ -27,7 +27,7 @@ SELECT
     pp.filename AS url, 'panoramas/opnamelocatie/' || pp.pano_id || '/' AS uri
 FROM
     panoramas_panorama pp
-AND
+WHERE
     pp.geolocation IS NOT NULL
 """
         ),
