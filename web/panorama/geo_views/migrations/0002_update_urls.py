@@ -25,15 +25,11 @@ SELECT
     pp.geolocation AS geometrie,
     'https://atlas.amsterdam.nl/panorama/' || pp.path || trim(trailing '.jpg' from pp.filename)
     || '/equirectangular/panorama_8000.jpg' AS url,
-    site.domain || 'panorama/opnamelocatie/' || pp.pano_id || '/' AS uri
+    'panorama/opnamelocatie/' || pp.pano_id || '/' AS uri
 FROM
-    panoramas_panorama pp,
-    django_site site
+    panoramas_panorama pp
 WHERE
-    site.name = 'API Domain'
-AND
     pp.geolocation IS NOT NULL
 """
         ),
-
     ]
