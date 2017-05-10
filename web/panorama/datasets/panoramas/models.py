@@ -117,6 +117,10 @@ class Adjacency(models.Model):
         else:
             return degrees(atan2(self.elevation, self.distance))
 
+    @property
+    def year(self):
+        return self.to_pano.timestamp.year
+
 
 class Region(models.Model):
     REGION_TYPES = (

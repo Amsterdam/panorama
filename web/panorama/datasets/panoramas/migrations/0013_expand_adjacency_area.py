@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
 SELECT row_number() OVER (ORDER BY pp.id, pp1.id) AS id,
   pp.id AS from_pano_id,
   pp1.id AS to_pano_id,
+  EXTRACT(YEAR FROM pp1.timestamp) AS to_year,
   degrees(st_azimuth(geography(pp.geolocation), geography(pp1.geolocation))) AS heading,
   st_distance(geography(pp.geolocation), geography(pp1.geolocation)) AS distance,
   st_z(pp1.geolocation) - st_z(pp.geolocation) AS elevation
