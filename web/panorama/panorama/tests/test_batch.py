@@ -5,7 +5,8 @@ from unittest import mock, skipIf
 from django.test import TransactionTestCase
 
 from panorama.batch import ImportPanoramaJob
-from datasets.panoramas.models import Panorama, Traject
+from panorama.management.commands.refresh_views import Command
+from datasets.panoramas.models import Panorama, Traject, Adjacency
 
 
 def mock_get_csvs(csv_type):
@@ -54,3 +55,11 @@ class ImportPanoTest(TransactionTestCase):
 
         trajecten = Traject.objects.all()
         self.assertEqual(trajecten.count(), 14)
+
+        refresh_materialized_view = Command()
+        refresh_materialized_view.refresh_views()
+
+        adjecencies = Adjacency.objects.all()
+        self.assertEqual(adjecencies.count(), 2)
+
+        self.assertEqual(adjecencies[0].year, 2016)
