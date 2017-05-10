@@ -15,7 +15,7 @@ class AdjacencySerializer(serializers.ModelSerializer):
     angle = serializers.DecimalField(max_digits=20, decimal_places=2)
     pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
     distance = serializers.DecimalField(max_digits=20, decimal_places=2)
-    year = serializers.DecimalField(max_digits=4, decimal_places=0)
+    year = serializers.IntegerField()
 
     class Meta:
         model = models.Adjacency
