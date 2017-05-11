@@ -19,6 +19,10 @@ FULL_IMAGE_NAME = 'panorama_8000.jpg'
 MARZIPANO_URL_PATTERN = '{z}/{f}/{y}/{x}.jpg'
 PREVIEW_IMAGE = 'preview.jpg'
 
+MISSION_TYPE_CHOICES = (
+    ('L', 'land'),
+    ('W', 'water'),
+)
 
 class Panorama(StatusModel):
     STATUS = Choices('to_be_rendered', 'rendering', 'rendered', 'detecting_lp', 'detected_lp', 'detecting1',
@@ -35,6 +39,7 @@ class Panorama(StatusModel):
     pitch = models.FloatField()
     heading = models.FloatField()
     adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
+    mission_type = models.CharField(max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
 
     objects = geo.GeoManager()
 
@@ -166,3 +171,13 @@ class Traject(models.Model):
 
     def __str__(self):
         return '<Traject %d>' % self.pk
+
+
+class Mission(models.Model):
+    def __str__(self):
+        return f'<Mission {self.name} {self.type} - {self.neighbourhood}>'
+
+    name = models.TextField(max_length=24, unique=True)
+    type = models.CharField(max_length=1, choices=MISSION_TYPE_CHOICES)
+    date = models.DateField()
+    neighbourhood = models.TextField(max_length=50)
