@@ -1,12 +1,12 @@
 import glob
+
 import os
+from django.test import TransactionTestCase
 from unittest import mock, skipIf
 
-from django.test import TransactionTestCase
-
+from datasets.panoramas.models import Panorama, Traject, Adjacency
 from panorama.batch import ImportPanoramaJob
 from panorama.management.commands.refresh_views import Command
-from datasets.panoramas.models import Panorama, Traject, Adjacency
 
 
 def mock_get_csvs(csv_type):
@@ -63,3 +63,32 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(adjecencies.count(), 2)
 
         self.assertEqual(adjecencies[0].year, 2016)
+
+
+    def test_panoramarow_sets_status(self, *args):
+        job = ImportPanoramaJob()
+        basic_row_fields = {
+            'gps_seconds[s]': 2000,
+            'longitude[deg]': 50,
+            'latitude[deg]': 5,
+            'altitude_ellipsoidal[m]': 6.0,
+            'roll[deg]': 3.0,
+            'pitch[deg]': 7.2,
+            'heading[deg]': 320
+        }
+        row_to_be_rendered = {'panorama_file_name': 'row_to_be_rendered', **basic_row_fields}
+        row_rendered = {'panorama_file_name': 'row_rendered', **basic_row_fields}
+        row_done = {'panorama_file_name': 'row_done', **basic_row_fields}
+        job.files_in_panodir = ['path/row_to_be_rendered.jpg', 'path/row_rendered.jpg', 'path/row_done.jpg']
+        job.files_in_renderdir = ['intermediate/container/path/row_rendered.jpg',
+                                  'intermediate/container/path/row_done.jpg']
+        job.files_in_blurdir = ['container/path/row_done/equirectangular/panorama_8000.jpg']
+
+        actual = job.process_panorama_row(row_to_be_rendered, 'container', 'path/')
+        self.assertEqual(actual.status, Panorama.STATUS.to_be_rendered)
+
+        actual = job.process_panorama_row(row_rendered, 'container', 'path/')
+        self.assertEqual(actual.status, Panorama.STATUS.rendered)
+
+        actual = job.process_panorama_row(row_done, 'container', 'path/')
+        self.assertEqual(actual.status, Panorama.STATUS.done)

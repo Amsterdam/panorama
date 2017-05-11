@@ -107,10 +107,11 @@ class ImportPanoramaJob(object):
             return None
 
         # check if rendered pano file exists
+        is_pano_rendered = 'intermediate/'+container+'/'+path+pano_image in self.files_in_renderdir
+
+        # check if blurred pano file exists
         blurred_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
-        rendered_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
-        is_pano_rendered = 'intermediate/'+container+'/'+path+rendered_image in self.files_in_renderdir
-        is_pano_blurred = container+'/'+path+rendered_image in self.files_in_blurdir
+        is_pano_blurred = is_pano_rendered and container+'/'+path+blurred_image in self.files_in_blurdir
 
         pano_status = Panorama.STATUS.to_be_rendered
         if is_pano_blurred:

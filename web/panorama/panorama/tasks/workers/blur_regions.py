@@ -20,8 +20,9 @@ class BlurRegions(BaseWorker):
 
         regions = message_dict['regions']
         if len(regions) > 0:
-            blurred_img = region_blurrer.get_blurred_image(regions)
-            ImgSet.save_image_set(panorama_path, blurred_img)
+            ImgSet.save_image_set(panorama_path, region_blurrer.get_blurred_image(regions))
+        else:
+            ImgSet.save_image_set(panorama_path, region_blurrer.get_unblurred_image())
 
         log.warning("done blurring")
         return [{'pano_id': message_dict['pano_id']}]
