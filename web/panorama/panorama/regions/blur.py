@@ -54,3 +54,6 @@ class RegionBlurrer(object):
             blurred_image[top:bottom, left:right] = snippet
 
         return blurred_image
+
+    def get_unblurred_image(self):
+        return misc.fromimage(self.panorama_img)
