@@ -4,13 +4,15 @@ import os
 from django.test import TransactionTestCase
 from unittest import mock, skipIf
 
-from datasets.panoramas.models import Panorama, Traject, Adjacency
+from datasets.panoramas.models import Panorama, Traject, Adjacency, Mission
 from panorama.batch import ImportPanoramaJob
 from panorama.management.commands.refresh_views import Command
 
 
 def mock_get_csvs(csv_type):
     files = []
+    if csv_type == 'missiegegevens':
+        files = glob.glob('/app/panoramas_test/**/missiegegevens.csv', recursive=True)
     if csv_type == 'panorama':
         files = glob.glob('/app/panoramas_test/**/panorama*.csv', recursive=True)
     if csv_type == 'trajectory':
@@ -50,6 +52,9 @@ class ImportPanoTest(TransactionTestCase):
     def test_import(self, *args):
         ImportPanoramaJob().process()
 
+        missies = Mission.objects.all()
+        self.assertEqual(missies.count(), 10)
+
         panos = Panorama.objects.all()
         self.assertEqual(panos.count(), 14)
 
@@ -63,6 +68,10 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(adjecencies.count(), 2)
 
         self.assertEqual(adjecencies[0].year, 2016)
+
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_type, 'L')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'W')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'L')
 
 
     def test_panoramarow_sets_status(self, *args):
@@ -84,11 +93,11 @@ class ImportPanoTest(TransactionTestCase):
                                   'intermediate/container/path/row_done.jpg']
         job.files_in_blurdir = ['container/path/row_done/equirectangular/panorama_8000.jpg']
 
-        actual = job.process_panorama_row(row_to_be_rendered, 'container', 'path/')
+        actual = job.process_panorama_row(row_to_be_rendered, 'container', 'path/', 'L')
         self.assertEqual(actual.status, Panorama.STATUS.to_be_rendered)
 
-        actual = job.process_panorama_row(row_rendered, 'container', 'path/')
+        actual = job.process_panorama_row(row_rendered, 'container', 'path/', 'L')
         self.assertEqual(actual.status, Panorama.STATUS.rendered)
 
-        actual = job.process_panorama_row(row_done, 'container', 'path/')
+        actual = job.process_panorama_row(row_done, 'container', 'path/', 'L')
         self.assertEqual(actual.status, Panorama.STATUS.done)
