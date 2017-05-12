@@ -89,8 +89,8 @@ class ImportPanoTest(TransactionTestCase):
         row_rendered = {'panorama_file_name': 'row_rendered', **basic_row_fields}
         row_done = {'panorama_file_name': 'row_done', **basic_row_fields}
         job.files_in_panodir = ['path/row_to_be_rendered.jpg', 'path/row_rendered.jpg', 'path/row_done.jpg']
-        job.files_in_renderdir = ['intermediate/container/path/row_rendered.jpg',
-                                  'intermediate/container/path/row_done.jpg']
+        job.files_in_renderdir = ['container/path/row_rendered.jpg',
+                                  'container/path/row_done.jpg']
         job.files_in_blurdir = ['container/path/row_done/equirectangular/panorama_8000.jpg']
 
         actual = job.process_panorama_row(row_to_be_rendered, 'container', 'path/', 'L')
