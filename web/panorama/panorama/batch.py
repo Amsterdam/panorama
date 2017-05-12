@@ -53,7 +53,6 @@ class ImportPanoramaJob(object):
                 batch_size=BATCH_SIZE
             )
 
-
         for csv_file in self.object_store.get_csvs('panorama'):
             log.info('READING panorama: %s', csv_file['name'])
             container = csv_file['container']
@@ -132,7 +131,7 @@ class ImportPanoramaJob(object):
             return None
 
         # check if rendered pano file exists
-        is_pano_rendered = 'intermediate/'+container+'/'+path+pano_image in self.files_in_renderdir
+        is_pano_rendered = container+'/'+path+pano_image in self.files_in_renderdir
 
         # check if blurred pano file exists
         blurred_image = base_filename + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
