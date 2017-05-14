@@ -61,8 +61,7 @@ class ImportPanoramaJob(object):
                                      self.object_store.get_panorama_store_objects(container, path)]
             self.files_in_renderdir = [file['name'] for file in
                                        self.object_store.get_panorama_store_objects('intermediate',
-                                                                                    "/{}/{}".format(container, path))]
-            log.warning("renderdir: /{}/{}".format(container, path))
+                                                                                    "{}/{}".format(container, path))]
             self.files_in_blurdir = [file['name'] for file in
                                      self.object_store.get_datapunt_store_objects(container + '/' + path)]
             Panorama.objects.bulk_create(
