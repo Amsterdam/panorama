@@ -3,11 +3,12 @@ from math import atan2, degrees, cos, sin, radians
 from django.contrib.gis.db import models as geo
 from django.contrib.gis.geos import Point
 from django.db import models
+from django.conf import settings
+
 from model_utils.models import StatusModel
 from model_utils import Choices
 
 # Project
-from django.conf import settings
 
 CUBIC_SUBPATH = '/cubic/'
 EQUIRECTANGULAR_SUBPATH = '/equirectangular/'
@@ -24,9 +25,12 @@ MISSION_TYPE_CHOICES = (
     ('W', 'water'),
 )
 
+
 class Panorama(StatusModel):
-    STATUS = Choices('to_be_rendered', 'rendering', 'rendered', 'detecting_lp', 'detected_lp', 'detecting1',
-                     'detected_1', 'detecting2', 'detected_2', 'detecting3', 'detected_3', 'blurring', 'done')
+    STATUS = Choices(
+        'to_be_rendered', 'rendering', 'rendered', 'detecting_lp',
+        'detected_lp', 'detecting1', 'detected_1', 'detecting2',
+        'detected_2', 'detecting3', 'detected_3', 'blurring', 'done')
 
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True, db_index=True)
@@ -38,8 +42,10 @@ class Panorama(StatusModel):
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
-    adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
-    mission_type = models.CharField(max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
+    adjacent_panos = models.ManyToManyField(
+        'self', through='Adjacency', symmetrical=False)
+    mission_type = models.CharField(
+        max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
 
     objects = geo.GeoManager()
 
@@ -68,11 +74,15 @@ class Panorama(StatusModel):
 
     def get_intermediate_url(self):
         objectstore_id = self.get_raw_image_objectstore_id()
-        return "{}/{}".format(objectstore_id['container'], objectstore_id['name'])
+        return f"{objectstore_id['container']}/{objectstore_id['name']}"
 
     @property
     def cubic_img_urls(self):
-        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4] + CUBIC_SUBPATH)
+
+        baseurl = '{}/{}{}'.format(
+            settings.PANO_IMAGE_URL, self.path,
+            self.filename[:-4] + CUBIC_SUBPATH)
+
         return {'baseurl': baseurl,
                 'pattern': baseurl + MARZIPANO_URL_PATTERN,
                 'preview': baseurl + PREVIEW_IMAGE}
@@ -83,7 +93,11 @@ class Panorama(StatusModel):
 
     @property
     def equirectangular_img_urls(self):
-        baseurl = '{}/{}{}'.format(settings.PANO_IMAGE_URL, self.path, self.filename[:-4] + EQUIRECTANGULAR_SUBPATH)
+        baseurl = '{}/{}{}'.format(
+            settings.PANO_IMAGE_URL,
+            self.path,
+            self.filename[:-4] + EQUIRECTANGULAR_SUBPATH)
+
         return {'full': baseurl + FULL_IMAGE_NAME,
                 'medium': baseurl + MEDIUM_IMAGE_NAME,
                 'small': baseurl + SMALL_IMAGE_NAME}
@@ -119,8 +133,7 @@ class Adjacency(models.Model):
     def pitch(self):
         if not self.elevation or self.distance <= 0.0:
             return 0.0
-        else:
-            return degrees(atan2(self.elevation, self.distance))
+        return degrees(atan2(self.elevation, self.distance))
 
     @property
     def year(self):
@@ -151,7 +164,7 @@ class Region(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return '<Region {} of Panorama {}>'.format(self.id, self.panorama.pano_id)
+        return f"<Region {self.id} of Panorama {self.panorama.pano_id}>"
 
 
 class Traject(models.Model):
@@ -175,7 +188,7 @@ class Traject(models.Model):
 
 class Mission(models.Model):
     def __str__(self):
-        return f'<Mission {self.name} {self.type} - {self.neighbourhood}>'
+        return f"<Mission {self.name} {self.type} - {self.neighbourhood}>"
 
     name = models.TextField(max_length=24, unique=True)
     type = models.CharField(max_length=1, choices=MISSION_TYPE_CHOICES)
