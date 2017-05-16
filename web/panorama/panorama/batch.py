@@ -9,10 +9,11 @@ import logging
 
 # Package
 from django.contrib.gis.geos import Point
-from django.utils.timezone import utc as UTC_TZ
+from django.utils.timezone import utc as utc_tz
 
 # Project
-from datasets.panoramas.models import Panorama, Traject, Mission, EQUIRECTANGULAR_SUBPATH, FULL_IMAGE_NAME
+from datasets.panoramas.models import Panorama, Traject, Mission
+from datasets.panoramas.models import EQUIRECTANGULAR_SUBPATH, FULL_IMAGE_NAME
 from panorama.shared.object_store import ObjectStore
 
 BATCH_SIZE = 50000
@@ -56,14 +57,22 @@ class ImportPanoramaJob(object):
         for csv_file in self.object_store.get_csvs('panorama'):
             log.info('READING panorama: %s', csv_file['name'])
             container = csv_file['container']
-            path = csv_file['name'].replace(csv_file['name'].split('/')[-1], '')
-            self.files_in_panodir = [file['name'] for file in
-                                     self.object_store.get_panorama_store_objects(container, path)]
-            self.files_in_renderdir = [file['name'] for file in
-                                       self.object_store.get_panorama_store_objects('intermediate',
-                                                                                    "{}/{}".format(container, path))]
-            self.files_in_blurdir = [file['name'] for file in
-                                     self.object_store.get_datapunt_store_objects(container + '/' + path)]
+
+            last_part = csv_file['name'].split('/')[-1]
+            path = csv_file['name'].replace(last_part, '')
+
+            self.files_in_panodir = [
+                file['name'] for file in
+                self.object_store.get_panorama_store_objects(container, path)]
+
+            self.files_in_renderdir = [
+                file['name'] for file in
+                self.object_store.get_panorama_store_objects('intermediate', "{}/{}".format(container, path))]
+
+            self.files_in_blurdir = [
+                file['name'] for file in
+                self.object_store.get_datapunt_store_objects(container + '/' + path)]
+
             Panorama.objects.bulk_create(
                 self.process_csv(csv_file, self.process_panorama_row, with_mision=True),
                 batch_size=BATCH_SIZE
@@ -82,7 +91,9 @@ class ImportPanoramaJob(object):
         """
         models = []
 
-        csv_file_iterator = iter(self.object_store.get_panorama_store_object(csv_file).decode("utf-8").split('\n'))
+        os_csv = self.object_store.get_panorama_store_object(csv_file)
+        csv_file_iterator = iter(os_csv.decode("utf-8").split('\n'))
+
         rows = csv.reader(csv_file_iterator,
                           delimiter='\t',
                           quotechar=None,
@@ -220,5 +231,5 @@ class ImportPanoramaJob(object):
         # later code changes. Therefore
         # the timezone is manually set to utc.
         timestamp = datetime.utcfromtimestamp(
-            gps_time + UTCfromGPS).replace(tzinfo=UTC_TZ)
+            gps_time + UTCfromGPS).replace(tzinfo=utc_tz)
         return timestamp
