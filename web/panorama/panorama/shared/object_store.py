@@ -122,3 +122,8 @@ class ObjectStore(object):
                                       contents=object_content,
                                       content_type=content_type)
 
+    def get_containerroot_csvs(self, csv_identifier):
+        csvs = []
+        for container in settings.PANORAMA_CONTAINERS:
+            csvs.extend(self._get_csv_type(container, '', csv_identifier))
+        return csvs

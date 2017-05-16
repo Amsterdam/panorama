@@ -31,14 +31,11 @@ class DataSetSerializerMixin(object):
 class LinksField(serializers.HyperlinkedIdentityField):
     def to_representation(self, value):
         request = self.context.get('request')
-
-        result = OrderedDict([
+        return OrderedDict([
             ('self', dict(
                 href=self.get_url(value, self.view_name, request, None))
              ),
         ])
-
-        return result
 
 
 class HALSerializer(serializers.HyperlinkedModelSerializer):

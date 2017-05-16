@@ -26,7 +26,7 @@ MISSION_TYPE_CHOICES = (
 )
 
 
-class Panorama(StatusModel):
+class AbstractPanorama(StatusModel):
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_lp',
         'detected_lp', 'detecting1', 'detected_1', 'detecting2',
@@ -38,7 +38,8 @@ class Panorama(StatusModel):
     filename = models.CharField(max_length=255)
     path = models.CharField(max_length=400)
     geolocation = geo.PointField(dim=3, srid=4326, spatial_index=True)
-    _geolocation_2d = geo.PointField(dim=2, srid=4326, spatial_index=True)
+    _geolocation_2d = geo.PointField(dim=2, srid=4326, spatial_index=True, null=True)
+    _geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True, null=True)
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
@@ -51,14 +52,16 @@ class Panorama(StatusModel):
 
     class Meta:
         ordering = ('id',)
+        abstract = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self._geolocation_2d:
+        if not self._geolocation_2d or not self._geolocation_2d_rd:
             self._derive_calculated_fields()
 
     def _derive_calculated_fields(self):
-        self._geolocation_2d = Point(self.geolocation[0], self.geolocation[1])
+        self._geolocation_2d = Point(self.geolocation[0], self.geolocation[1], srid=4326)
+        self._geolocation_2d_rd = self._geolocation_2d.transform(28992, clone=True)
 
     def save(self, *args, **kwargs):
         self._derive_calculated_fields()
@@ -103,18 +106,23 @@ class Panorama(StatusModel):
                 'small': baseurl + SMALL_IMAGE_NAME}
 
 
-class Adjacency(models.Model):
+class Panorama(AbstractPanorama):
+    class Meta(AbstractPanorama.Meta):
+        abstract = False
+
+
+class AbstractAdjacency(models.Model):
     from_pano = models.ForeignKey(Panorama, related_name='to_adjacency')
-    to_pano = models.ForeignKey(Panorama,  related_name='from_adjacency')
-    direction = models.FloatField()
+    to_pano = models.ForeignKey(Panorama, related_name='from_adjacency')
     heading = models.DecimalField(max_digits=20, decimal_places=2)
+    to_year = models.IntegerField()
     distance = models.FloatField()
     elevation = models.FloatField()
 
     class Meta:
+        abstract = True
         index_together = [['from_pano', 'distance']]
         managed = False
-        db_table = "panoramas_adjacencies"
 
     def __str__(self):
         return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.to_pano_id)
@@ -135,9 +143,11 @@ class Adjacency(models.Model):
             return 0.0
         return degrees(atan2(self.elevation, self.distance))
 
-    @property
-    def year(self):
-        return self.to_pano.timestamp.year
+
+class Adjacency(AbstractAdjacency):
+    class Meta(AbstractAdjacency.Meta):
+        abstract = False
+        db_table = "panoramas_adjacencies"
 
 
 class Region(models.Model):

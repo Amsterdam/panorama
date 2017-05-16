@@ -26,21 +26,28 @@ docker build --build-arg OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD --build-arg 
 docker push master.swarm.datapunt.amsterdam.nl:5000/worker
 ```
 
-
-Dan als gewone user, uitgaande van een cluster met 295 cpu's:
+Start het cluster - uitgaande van 32 nodes:
 
 ```
-docker -H :4000 pull master.swarm.datapunt.amsterdam.nl:5000/worker:latest
-for ((i=1;i<=295;i++)); do docker -H :4000 run -d master.swarm.datapunt.amsterdam.nl:5000/worker; done
+docker service create --replicas 32 --name worker --constraint 'node.hostname != master.swarm.datapunt.amsterdam.nl' master.swarm.datapunt.amsterdam.nl:5000/worker:latest
+```
+
+En als het cluster succesvol is opgestart - uitgaande van 5cpu's, en > 16GB memory per node:
+
+```
+docker service scale worker=160
 ```
 
 
 Stop swarm:
+
 ```
-for container_id in $(docker -H :4000 ps -q);do nohup docker -H :4000 stop $container_id & done;
+docker service stop worker
 ```
 
 Clear stopped containers in swarm
+
 ```
-for container_id in $(docker -H :4000 ps -a --filter status=exited -q);do docker -H :4000 rm $container_id;done
+docker service rm worker
 ```
+

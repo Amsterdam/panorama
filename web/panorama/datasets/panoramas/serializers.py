@@ -1,3 +1,4 @@
+import logging
 # Packages
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -5,6 +6,8 @@ from rest_framework_gis import fields
 # Project
 from datasets.panoramas import models
 from datapunt_api.datapunt_rest import LinksField, HALSerializer
+
+log = logging.getLogger(__name__)
 
 MAX_ADJACENCY = 21
 
@@ -15,7 +18,7 @@ class AdjacencySerializer(serializers.ModelSerializer):
     angle = serializers.DecimalField(max_digits=20, decimal_places=2)
     pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
     distance = serializers.DecimalField(max_digits=20, decimal_places=2)
-    year = serializers.IntegerField()
+    year = serializers.IntegerField(source='to_year')
 
     class Meta:
         model = models.Adjacency
@@ -58,7 +61,8 @@ class PanoSerializer(HALSerializer):
 
     class Meta:
         model = models.Panorama
-        exclude = ('path', 'geolocation', 'adjacent_panos', '_geolocation_2d', 'status', 'status_changed')
+        exclude = ('path', 'geolocation', 'adjacent_panos', '_geolocation_2d',
+                   '_geolocation_2d_rd', 'status', 'status_changed')
 
     def to_representation(self, instance):
         return super().to_representation(instance)
@@ -71,18 +75,26 @@ class PanoSerializer(HALSerializer):
 class FilteredPanoSerializer(PanoSerializer):
     adjacent = serializers.SerializerMethodField(source='get_adjacent')
 
+    class Models:
+        adjacency_model = models.Adjacency
+        panorama_model = models.Panorama
+        adjacency_serializer = AdjacencySerializer
+
     def __init__(self, instance=None, data=empty, filter_dict={}, **kwargs):
         self.filter = filter_dict
         super().__init__(instance, data, **kwargs)
 
     def get_adjacent(self, instance):
-        qs = models.Adjacency.objects.filter(from_pano=instance,
-                                             distance__lt=MAX_ADJACENCY,
-                                             to_pano__status=models.Panorama.STATUS.done)
+        qs = self.Models.adjacency_model.objects.filter(
+            from_pano=instance,
+            distance__lt=MAX_ADJACENCY,
+            to_pano__status=self.Models.panorama_model.STATUS.done
+        )
         if 'vanaf' in self.filter:
             qs = qs.exclude(to_pano__timestamp__lt=self.filter['vanaf'])
         if 'tot' in self.filter:
             qs = qs.exclude(to_pano__timestamp__gt=self.filter['tot'])
 
-        serializer = AdjacencySerializer(instance=qs, many=True)
+        serializer = self.Models.adjacency_serializer(instance=qs, many=True)
         return serializer.data
+

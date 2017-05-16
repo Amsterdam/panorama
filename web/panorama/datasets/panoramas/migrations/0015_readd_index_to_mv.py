@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             "CREATE INDEX from_pano_idx ON public.panoramas_adjacencies (from_pano_id) ",
-            "DROP INDEX from_pano_distance_idx ",
+            "DROP INDEX from_pano_idx ",
         ),
     ]

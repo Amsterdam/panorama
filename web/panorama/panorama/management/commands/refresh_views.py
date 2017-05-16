@@ -5,18 +5,24 @@ from django.db import connection
 
 log = logging.getLogger(__name__)
 
+PREPARED_YEARS = range(2016, 2021)
+
 
 class Command(BaseCommand):
-    views = ['panoramas_adjacencies']
+    views = ['panoramas_adjacencies', 'panoramas_recent_ids_all']
+    for year in PREPARED_YEARS:
+        views.append(f"panoramas_recent_ids_{year}")
 
     def handle(self, *args, **options):
         self.refresh_views()
 
-    def refresh_views(self):
-        cursor = connection.cursor()
+    def refresh_views(self, conn=None):
+        if not conn:
+            conn = connection
 
         for view in self.views:
-            self.stdout.write('refreshing materialized view {}'.format(view))
-            cursor.execute("REFRESH MATERIALIZED VIEW {}".format(view))
+            with conn.cursor() as cursor:
+                self.stdout.write(f'refreshing materialized view {view}')
+                cursor.execute(f"REFRESH MATERIALIZED VIEW public.{view}")
 
         self.stdout.write('refresh {} views'.format(len(self.views)))

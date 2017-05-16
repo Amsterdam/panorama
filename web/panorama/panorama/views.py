@@ -54,7 +54,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             coords, request)
 
         try:
-            pano = serializers.FilteredPanoSerializer(
+            pano = self.serializer_detail_class(
                 queryset[0], filter_dict=adjacent_filter,
                 context={'request': request}).data
         except IndexError:
@@ -64,7 +64,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
         return Response(pano)
 
     def _get_filter_and_queryset(self, coords, request):
-        queryset = Panorama.done.extra(
+        queryset = self.pano_object.done.extra(
             select={
                 'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "},
             select_params=[coords[0], coords[1]])
