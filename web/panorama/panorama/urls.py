@@ -11,6 +11,7 @@ from rest_framework_swagger.renderers import SwaggerUIRenderer
 
 from .view_imgs import ThumbnailViewSet
 from .views import PanoramaViewSet
+from .derived_views import RecentPanoramaViewSet
 
 
 class PanoramaView(routers.APIRootView):
@@ -19,6 +20,7 @@ class PanoramaView(routers.APIRootView):
 
     - panorama's
     - thumbnails
+    - recente panorama's
     """
 
 
@@ -33,6 +35,7 @@ class PanoramaRouter(routers.DefaultRouter):
 
 panorama = PanoramaRouter()
 panorama.register(r'opnamelocatie', PanoramaViewSet, base_name='panorama')
+panorama.register(r'recente_opnames', RecentPanoramaViewSet, base_name='recentpanorama')
 panorama.register(r'thumbnail', ThumbnailViewSet, base_name='thumbnail')
 
 APIS = [

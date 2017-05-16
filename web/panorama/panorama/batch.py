@@ -47,7 +47,7 @@ class ImportPanoramaJob(object):
         then all the trajectory
         files.
         """
-        for csv_file in self.object_store.get_csvs('missiegegevens'):
+        for csv_file in self.object_store.get_containerroot_csvs('missiegegevens'):
             log.info('READING missions: %s', csv_file['name'])
             Mission.objects.bulk_create(
                 self.process_csv(csv_file, self.process_mission_row),
@@ -57,21 +57,18 @@ class ImportPanoramaJob(object):
         for csv_file in self.object_store.get_csvs('panorama'):
             log.info('READING panorama: %s', csv_file['name'])
             container = csv_file['container']
+            file_name = csv_file['name'].split('/')[-1]
+            path = csv_file['name'].replace(file_name, '')
 
-            last_part = csv_file['name'].split('/')[-1]
-            path = csv_file['name'].replace(last_part, '')
+            file_entries_in_source_dir = self.object_store.get_panorama_store_objects(container, path)
+            self.files_in_panodir = [file['name'] for file in file_entries_in_source_dir]
 
-            self.files_in_panodir = [
-                file['name'] for file in
-                self.object_store.get_panorama_store_objects(container, path)]
+            renderdir = "{}/{}".format(container, path)
+            file_entries_in_renderdir = self.object_store.get_panorama_store_objects('intermediate', renderdir)
+            self.files_in_renderdir = [file['name'] for file in file_entries_in_renderdir]
 
-            self.files_in_renderdir = [
-                file['name'] for file in
-                self.object_store.get_panorama_store_objects('intermediate', "{}/{}".format(container, path))]
-
-            self.files_in_blurdir = [
-                file['name'] for file in
-                self.object_store.get_datapunt_store_objects(container + '/' + path)]
+            file_entries_in_target_dir = self.object_store.get_datapunt_store_objects(container + '/' + path)
+            self.files_in_blurdir = [file['name'] for file in file_entries_in_target_dir]
 
             Panorama.objects.bulk_create(
                 self.process_csv(csv_file, self.process_panorama_row, with_mision=True),
@@ -91,8 +88,8 @@ class ImportPanoramaJob(object):
         """
         models = []
 
-        os_csv = self.object_store.get_panorama_store_object(csv_file)
-        csv_file_iterator = iter(os_csv.decode("utf-8").split('\n'))
+        csv_binary = self.object_store.get_panorama_store_object(csv_file)
+        csv_file_iterator = iter(csv_binary.decode("utf-8").split('\n'))
 
         rows = csv.reader(csv_file_iterator,
                           delimiter='\t',
@@ -187,7 +184,6 @@ class ImportPanoramaJob(object):
                 float(row['latitude[deg]']),
                 float(row['altitude_ellipsoidal[m]'])
             ),
-
             north_rms=float(row['north_rms[m]']),
             east_rms=float(row['east_rms[m]']),
             down_rms=float(row['down_rms[m]']),

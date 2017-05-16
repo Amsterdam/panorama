@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+from django.contrib.gis.db.models.fields import PointField
 
 from geo_views import migrate
 
@@ -14,9 +15,19 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='panorama',
+            name='_geolocation_2d',
+            field=PointField(default=None, null=True, srid=4326),
+            preserve_default=False,
+        ),
         migrations.RunSQL(
-            "ALTER TABLE public.panoramas_panorama RENAME geopoint TO _geolocation_2d ",
-            "ALTER TABLE <public.panoramas_panorama RENAME _geolocation_2d TO geopoint ",
+            "update public.panoramas_panorama set _geolocation_2d = geopoint",
+            "update public.panoramas_panorama set geopoint = _geolocation_2d"
+        ),
+        migrations.RemoveField(
+            model_name='panorama',
+            name='geopoint'
         ),
         migrate.ManageMaterializedView(
             view_name="panoramas_adjacencies",
