@@ -13,22 +13,22 @@ from .view_imgs import ThumbnailViewSet
 from .views import PanoramaViewSet
 
 
+class PanoramaView(routers.APIRootView):
+    """
+    De panoramas van de stad worden in een lijst getoond
+
+    - panorama's
+    - thumbnails
+    """
+
+
 class PanoramaRouter(routers.DefaultRouter):
     """
     Panoramabeelden Amsterdam
 
     Deze api geeft toegang tot de panorama beelden van de Gemeente Amsterdam en omstreken.
     """
-
-    def get_api_root_view(self, **kwargs):
-        view = super().get_api_root_view(**kwargs)
-        cls = view.cls
-
-        class Panoramabeelden(cls):
-            pass
-
-        Panoramabeelden.__doc__ = self.__doc__
-        return Panoramabeelden.as_view()
+    APIRootView = PanoramaView
 
 
 panorama = PanoramaRouter()
