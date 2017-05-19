@@ -40,7 +40,9 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         radius: (int) denoting search radius in meters (default = 20m)
 
-        when providing a Accept: image/* header, you will be redirected to the specific thumbnail
+        when providing a Accept: image/* header, you will be redirected to the
+        specific thumbnail so you can use this link in an
+        <img src=this_api_endpoint/>
 
     Optional Parameters for the thumbnail:
 
@@ -49,11 +51,50 @@ class ThumbnailViewSet(PanoramaViewSet):
         horizon: fraction of image that is below horizon (default 0.3)
         heading: direction to look at in degrees (default 0)
         aspect: aspect ratio of thumbnail (width/height, min 1) (default 1.5 (3/2)
-
     """
 
     lookup_field = 'pano_id'
-    renderer_classes = (renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
+    renderer_classes = (
+        renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
+
+    def get_close_thumbnail_fast(self, coords, request):
+        """
+        return 1 single pano closest to given coordinatates.
+
+        this method/sql also returns FAST if there is NO thumbnail
+        within range.
+        """
+
+        max_range = get_int_value(request, 'radius', 20)
+
+        lon, lat = coords
+
+        queryset = Panorama.objects.raw(f"""
+SELECT *
+FROM (
+    SELECT
+        ST_Distance(geography(_geolocation_2d), ST_GeogFromText(
+            'SRID=4326;POINT({lon} {lat})'))               AS distance_meters,
+        _geolocation_2d <-> 'SRID=4326;POINT({lon} {lat})' AS distance,
+        status,
+        status_changed,
+        id,
+        pano_id,
+        timestamp,
+        filename,
+        path,
+        geolocation,
+        _geolocation_2d,
+        roll,
+        pitch,
+        heading
+    FROM panoramas_panorama
+    ORDER BY distance ASC
+    LIMIT 1) AS selectie
+WHERE distance_meters < {max_range};
+        """)
+
+        return queryset
 
     def list(self, request, **kwargs):
         """
@@ -62,16 +103,17 @@ class ThumbnailViewSet(PanoramaViewSet):
         :param **kwargs:
         """
         coords = get_request_coord(request.query_params)
+
         if not coords:
             return Response({'error': 'pano_id'})
 
-        _, queryset = self._get_filter_and_queryset(coords, request)
+        queryset = self.get_close_thumbnail_fast(coords, request)
 
         try:
             pano = queryset[0]
-        except IndexError:
+        except (IndexError, TypeError):
             # No results were found
-            return Response([])
+            return Response([], status=404)
 
         heading = round(self._get_heading(pano.geolocation, coords))
         url = self._get_thumb_url(pano.pano_id, heading, request)
@@ -109,14 +151,22 @@ class ThumbnailViewSet(PanoramaViewSet):
         return degrees(atan2(d_lon, d_phi)) % 360.0
 
     def retrieve(self, request, pano_id=None, heading=0):
-        target_heading = get_int_value(request, 'heading', default=heading, upper=360, strategy='modulo')
+        target_heading = get_int_value(
+            request, 'heading', default=heading, upper=360, strategy='modulo')
 
-        target_width = get_int_value(request, 'width', default=750, lower=1, upper=1600, strategy='cutoff')
-        target_fov = get_int_value(request, 'fov', default=80, upper=120, strategy='cutoff')
+        target_width = get_int_value(
+            request, 'width', default=750,
+            lower=1, upper=1600, strategy='cutoff')
+
+        target_fov = get_int_value(
+            request, 'fov', default=80, upper=120, strategy='cutoff')
+
         target_width, target_fov = self._max_fov_per_width(target_width, target_fov)
 
-        target_horizon = get_float_value(request, 'horizon', default=0.3, lower=0.0, upper=1.0)
-        target_aspect = get_float_value(request, 'aspect', default=1.5, lower=1.0)
+        target_horizon = get_float_value(
+            request, 'horizon', default=0.3, lower=0.0, upper=1.0)
+        target_aspect = get_float_value(
+            request, 'aspect', default=1.5, lower=1.0)
 
         pano = get_object_or_404(Panorama, pano_id=pano_id)
         thumb = Thumbnail(pano)
