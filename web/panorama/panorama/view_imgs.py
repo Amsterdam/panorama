@@ -40,9 +40,12 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         radius: (int) denoting search radius in meters (default = 20m)
 
-        when providing a Accept: image/* header, you will be redirected to the
-        specific thumbnail so you can use this link in an
+        when either providing
+            - an Accept: image/* header, or
+            - the image_redirect queryparam
+        you will be redirected to the specific thumbnail so you can use this link in an
         <img src=this_api_endpoint/>
+
 
     Optional Parameters for the thumbnail:
 
@@ -117,8 +120,10 @@ WHERE distance_meters < {max_range};
 
         heading = round(self._get_heading(pano.geolocation, coords))
         url = self._get_thumb_url(pano.pano_id, heading, request)
+        image_redirect = 'image/' in request.accepted_renderer.media_type \
+                         or 'image_redirect' in request.query_params
 
-        if 'image/' in request.accepted_renderer.media_type:
+        if image_redirect:
             return HttpResponseRedirect(url)
         else:
             resp = ThumbnailSerializer({'url': url,
