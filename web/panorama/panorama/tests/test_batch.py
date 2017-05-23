@@ -83,7 +83,6 @@ class ImportPanoTest(TransactionTestCase):
 
         adjecencies = Adjacency.objects.all()
         self.assertEqual(adjecencies.count(), 12)
-        self.assertEqual(adjecencies[0].to_year, 2016)
 
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_type, 'L')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'W')
@@ -94,6 +93,7 @@ class ImportPanoTest(TransactionTestCase):
 
         recent_adjacencies = RecentAdjacency.objects.all()
         self.assertEqual(recent_adjacencies.count(), 2)
+        self.assertEqual(recent_adjacencies[0].to_year, 2017)
 
 
     def test_panoramarow_sets_status(self, *args):
