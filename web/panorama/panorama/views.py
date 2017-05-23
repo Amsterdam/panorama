@@ -64,7 +64,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
         return Response(pano)
 
     def _get_filter_and_queryset(self, coords, request):
-        queryset = self.pano_object.done.extra(
+        queryset = self.queryset.extra(
             select={
                 'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "},
             select_params=[coords[0], coords[1]])
