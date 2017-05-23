@@ -72,7 +72,7 @@ class ThumbnailViewSet(PanoramaViewSet):
 
         lon, lat = coords
 
-        queryset = Panorama.objects.raw(f"""
+        queryset = Panorama.done.raw(f"""
 SELECT *
 FROM (
     SELECT
@@ -88,6 +88,7 @@ FROM (
         path,
         geolocation,
         _geolocation_2d,
+        _geolocation_2d_rd,
         roll,
         pitch,
         heading
