@@ -60,8 +60,9 @@ class AbstractPanorama(StatusModel):
             self._derive_calculated_fields()
 
     def _derive_calculated_fields(self):
-        self._geolocation_2d = Point(self.geolocation[0], self.geolocation[1], srid=4326)
-        self._geolocation_2d_rd = self._geolocation_2d.transform(28992, clone=True)
+        point = Point(self.geolocation[0], self.geolocation[1], srid=4326)
+        self._geolocation_2d = point
+        self._geolocation_2d_rd = point.transform(28992, clone=True)
 
     def save(self, *args, **kwargs):
         self._derive_calculated_fields()

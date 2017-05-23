@@ -27,6 +27,7 @@ class PanoramaApiTest(APITestCase):
             filename=factory.fuzzy.FuzzyText(length=30),
             path=factory.fuzzy.FuzzyText(length=30),
             geolocation=Point(4.94444897029152, 52.3510468066549, 10),
+            _geolocation_2d=Point(4.94444897029152, 52.3510468066549, 10),
             roll=factory.fuzzy.FuzzyFloat(-10, 10),
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
