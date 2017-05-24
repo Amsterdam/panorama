@@ -1,5 +1,6 @@
 # Packages
 from rest_framework.response import Response
+from django.contrib.gis.geos import Point
 
 # Project
 
@@ -54,25 +55,32 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             coords, request)
 
         try:
-            pano = self.serializer_detail_class(
-                queryset[0], filter_dict=adjacent_filter,
-                context={'request': request}).data
+            candidate_pano = queryset[0]
+            max_range = get_int_value(request, 'radius', 20)
+            if candidate_pano.distance_meters <= max_range:
+                pano = self.serializer_detail_class(
+                    candidate_pano, filter_dict=adjacent_filter,
+                    context={'request': request}).data
+                return Response(pano)
         except IndexError:
-            # No results were found
-            return Response([], status=404)
+            pass
 
-        return Response(pano)
+        # No results were found
+        return Response([], status=404)
+
 
     def _get_filter_and_queryset(self, coords, request):
         queryset = self.queryset.extra(
             select={
-                'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "},
+                'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "
+            },
             select_params=[coords[0], coords[1]])
-        max_range = get_int_value(request, 'radius', 20)
         queryset = queryset.extra(
-            where=[""" ST_DWithin(ST_GeogFromText('SRID=4326;POINT(%s %s)'),
-                   geography(_geolocation_2d), %s) """],
-            params=[coords[0], coords[1], max_range])
+            select={
+                'distance_meters': "ST_Distance(geography(_geolocation_2d), "
+                                   "ST_GeogFromText('SRID=4326;POINT(%s %s)')) "
+            },
+            select_params=[coords[0], coords[1]])
         adjacent_filter = {}
         start_date = convert_to_date(request, 'vanaf')
         if start_date is not None:

@@ -60,46 +60,6 @@ class ThumbnailViewSet(PanoramaViewSet):
     renderer_classes = (
         renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
 
-    def get_close_thumbnail_fast(self, coords, request):
-        """
-        return 1 single pano closest to given coordinatates.
-
-        this method/sql also returns FAST if there is NO thumbnail
-        within range.
-        """
-
-        max_range = get_int_value(request, 'radius', 20)
-
-        lon, lat = coords
-
-        queryset = Panorama.done.raw(f"""
-SELECT *
-FROM (
-    SELECT
-        ST_Distance(geography(_geolocation_2d), ST_GeogFromText(
-            'SRID=4326;POINT({lon} {lat})'))               AS distance_meters,
-        _geolocation_2d <-> 'SRID=4326;POINT({lon} {lat})' AS distance,
-        status,
-        status_changed,
-        id,
-        pano_id,
-        timestamp,
-        filename,
-        path,
-        geolocation,
-        _geolocation_2d,
-        _geolocation_2d_rd,
-        roll,
-        pitch,
-        heading
-    FROM panoramas_panorama
-    ORDER BY distance ASC
-    LIMIT 1) AS selectie
-WHERE distance_meters < {max_range};
-        """)
-
-        return queryset
-
     def list(self, request, **kwargs):
         """
         Overloading the list view to enable in finding
@@ -111,11 +71,14 @@ WHERE distance_meters < {max_range};
         if not coords:
             return Response({'error': 'pano_id'})
 
-        queryset = self.get_close_thumbnail_fast(coords, request)
+        _, queryset = self._get_filter_and_queryset(coords, request)
 
         try:
             pano = queryset[0]
-        except (IndexError, TypeError):
+            max_range = get_int_value(request, 'radius', 20)
+            if pano.distance_meters > max_range:
+                return Response([], status=404)
+        except (IndexError):
             # No results were found
             return Response([], status=404)
 
