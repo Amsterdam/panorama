@@ -1,19 +1,15 @@
 # Packages
 from rest_framework.response import Response
-from django.contrib.gis.geos import Point
 
 # Project
-
 from datasets.panoramas.models import Panorama
 from datasets.panoramas import serializers
-
 from datapunt_api import datapunt_rest
 
 from .queryparam_utils import get_request_coord, convert_to_date, get_int_value
 
 
 class PanoramaViewSet(datapunt_rest.AtlasViewSet):
-
     """
     View to retrieve panoramas
 
@@ -68,19 +64,11 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
         # No results were found
         return Response([], status=404)
 
+    def get_queryset(self, *args, **kwargs):
+        _, queryset =  self._get_filter_and_queryset_by_date(self.queryset, self.request)
+        return queryset
 
-    def _get_filter_and_queryset(self, coords, request):
-        queryset = self.queryset.extra(
-            select={
-                'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "
-            },
-            select_params=[coords[0], coords[1]])
-        queryset = queryset.extra(
-            select={
-                'distance_meters': "ST_Distance(geography(_geolocation_2d), "
-                                   "ST_GeogFromText('SRID=4326;POINT(%s %s)')) "
-            },
-            select_params=[coords[0], coords[1]])
+    def _get_filter_and_queryset_by_date(self, queryset, request):
         adjacent_filter = {}
         start_date = convert_to_date(request, 'vanaf')
         if start_date is not None:
@@ -90,5 +78,22 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
         if end_date is not None:
             adjacent_filter['tot'] = end_date
             queryset = queryset.filter(timestamp__lt=end_date)
+        return adjacent_filter, queryset
+
+    def _get_filter_and_queryset(self, coords, request):
+        adjacent_filter, queryset = self._get_filter_and_queryset_by_date(self.queryset, request)
+
+        queryset = queryset.extra(
+            select={
+                'distance_meters': "ST_Distance(geography(_geolocation_2d), "
+                                   "ST_GeogFromText('SRID=4326;POINT(%s %s)')) "
+            },
+            select_params=[coords[0], coords[1]])
+        queryset = queryset.extra(
+            select={
+                'distance': " _geolocation_2d <-> 'SRID=4326;POINT(%s %s)' "
+            },
+            select_params=[coords[0], coords[1]])
         queryset = queryset.extra(order_by=['distance'])
+
         return adjacent_filter, queryset
