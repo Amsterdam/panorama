@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from django.conf import settings
 
 import logging
 
@@ -7,11 +8,10 @@ from geo_views import migrate
 
 log = logging.getLogger(__name__)
 
-PREPARED_YEARS = range(2016, 2021)
 materialized_views_per_year = []
 mv_indices_per_year = []
 
-for year in PREPARED_YEARS:
+for year in settings.PREPARED_YEARS:
     materialized_views_per_year.append(
         migrate.ManageMaterializedView(
             view_name=f"panoramas_recent_ids_{year}",

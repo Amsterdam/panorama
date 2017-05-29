@@ -1,5 +1,6 @@
-from datasets.panoramas.derived_models import RecentPanorama
-from datasets.panoramas.derived_serializers import RecentPanoSerializer, FilteredRecentPanoSerializer
+from datasets.panoramas.derived_models import *
+from datasets.panoramas.derived_serializers import *
+from django.conf import settings
 
 from . views import PanoramaViewSet
 
@@ -9,5 +10,11 @@ class RecentPanoramaViewSet(PanoramaViewSet):
     serializer_detail_class = FilteredRecentPanoSerializer
     serializer_class = RecentPanoSerializer
 
-    def get_object(self):
-        return super().get_object()
+
+for year in settings.PREPARED_YEARS:
+    exec(f"""
+class RecentPanorama{year}ViewSet(PanoramaViewSet):
+    queryset = RecentPanorama{year}.done.all()
+    serializer_detail_class = FilteredRecentPano{year}Serializer
+    serializer_class = RecentPano{year}Serializer
+    """)

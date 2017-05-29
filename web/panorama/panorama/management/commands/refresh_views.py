@@ -2,15 +2,14 @@ import logging
 
 from django.core.management import BaseCommand
 from django.db import connection
+from django.conf import settings
 
 log = logging.getLogger(__name__)
-
-PREPARED_YEARS = range(2016, 2021)
 
 
 class Command(BaseCommand):
     views = ['panoramas_adjacencies', 'panoramas_recent_ids_all']
-    for year in PREPARED_YEARS:
+    for year in settings.PREPARED_YEARS:
         views.append(f"panoramas_recent_ids_{year}")
 
     def handle(self, *args, **options):
