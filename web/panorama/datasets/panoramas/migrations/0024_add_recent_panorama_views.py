@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from django.conf import settings
 from geo_views import migrate
 
+PREPARED_YEARS = range(2016, 2021)
 panorama_views_per_year = []
 
-for year in settings.PREPARED_YEARS:
+for year in PREPARED_YEARS:
     panorama_views_per_year.append(
         migrate.ManageView(
             view_name=f"panoramas_recent_{year}",

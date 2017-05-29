@@ -11,7 +11,7 @@ from rest_framework_swagger.renderers import SwaggerUIRenderer
 
 from .view_imgs import ThumbnailViewSet
 from .views import PanoramaViewSet
-from .derived_views import *
+from .derived_views import RecentPanoramaViewSet
 
 
 class PanoramaView(routers.APIRootView):
@@ -35,9 +35,7 @@ class PanoramaRouter(routers.DefaultRouter):
 
 panorama = PanoramaRouter()
 panorama.register(r'opnamelocatie', PanoramaViewSet, base_name='panorama')
-panorama.register(r'recente_opnames/alle', RecentPanoramaViewSet, base_name='recentpanorama')
-for year in settings.PREPARED_YEARS:
-    exec(f"panorama.register(r'recente_opnames/{year}', RecentPanorama{year}ViewSet, base_name='recentpanorama{year}')")
+panorama.register(r'recente_opnames', RecentPanoramaViewSet, base_name='recentpanorama')
 panorama.register(r'thumbnail', ThumbnailViewSet, base_name='thumbnail')
 
 APIS = [

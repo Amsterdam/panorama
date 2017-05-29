@@ -10,7 +10,7 @@ from scipy import misc
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.serializers import ThumbnailSerializer
 from panorama.transform.thumbnail import Thumbnail
-from panorama.derived_views import RecentPanoramaViewSet
+from panorama.views import PanoramaViewSet
 from .queryparam_utils import get_float_value, get_int_value, get_request_coord
 
 
@@ -22,7 +22,7 @@ class ImgRenderer(renderers.BaseRenderer):
     format = 'jpg'
 
 
-class ThumbnailViewSet(RecentPanoramaViewSet):
+class ThumbnailViewSet(PanoramaViewSet):
 
     """
     View to retrieve thumbs of a panorama
