@@ -1,77 +1,7 @@
-# Python
-import datetime
-# Packages
-from django.contrib.gis.geos import Point
-from django.utils.timezone import utc as UTC_TZ
-import factory
-import factory.fuzzy
-from rest_framework.test import APITestCase
 # Project
-from datasets.panoramas.tests import factories
-from panorama.management.commands import refresh_views
-from datasets.panoramas.models import Panorama
+from . test_api_base import PanoramaApiTest
 
-
-class PanoramaApiTest(APITestCase):
-
-    @classmethod
-    def setUpClass(cls):
-
-        super().setUpClass()
-        # Adding locations
-        factories.PanoramaFactory.create(
-            pano_id='PANO_1_2014',
-            status=Panorama.STATUS.done,
-            timestamp=factory.fuzzy.FuzzyDateTime(
-                datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
-            filename=factory.fuzzy.FuzzyText(length=30),
-            path=factory.fuzzy.FuzzyText(length=30),
-            geolocation=Point(4.94444897029152, 52.3510468066549, 10),
-            _geolocation_2d=Point(4.94444897029152, 52.3510468066549, 10),
-            roll=factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
-            heading=factory.fuzzy.FuzzyFloat(-10, 10),
-        )
-        factories.PanoramaFactory.create(
-            pano_id='PANO_2_2014_CLOSE',
-            status=Panorama.STATUS.done,
-            timestamp=factory.fuzzy.FuzzyDateTime(
-                datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
-            filename=factory.fuzzy.FuzzyText(length=30),
-            path=factory.fuzzy.FuzzyText(length=30),
-            geolocation=Point(4.94439711277457, 52.3510810574283, 12),
-            roll=factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
-            heading=factory.fuzzy.FuzzyFloat(-10, 10),
-        )
-        factories.PanoramaFactory.create(
-            pano_id='PANO_3_2015_CLOSE',
-            status=Panorama.STATUS.done,
-            timestamp=factory.fuzzy.FuzzyDateTime(
-                datetime.datetime(2015, 1, 1, tzinfo=UTC_TZ), force_year=2015),
-            filename=factory.fuzzy.FuzzyText(length=30),
-            path=factory.fuzzy.FuzzyText(length=30),
-            geolocation=Point(4.94439711277457, 52.3510810574283, 10),
-            roll=factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
-            heading=factory.fuzzy.FuzzyFloat(-10, 10),
-        )
-        factories.PanoramaFactory.create(
-            pano_id='PANO_5_2014_CLOSE_BUT_NO_CIGAR',
-            status=Panorama.STATUS.detected_2,
-            timestamp=factory.fuzzy.FuzzyDateTime(
-                datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
-            filename=factory.fuzzy.FuzzyText(length=30),
-            path=factory.fuzzy.FuzzyText(length=30),
-            geolocation=Point(4.94439711277457, 52.3510810574283, 12),
-            roll=factory.fuzzy.FuzzyFloat(-10, 10),
-            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
-            heading=factory.fuzzy.FuzzyFloat(-10, 10),
-        )
-        refresh_views.Command().refresh_views()
-
-    # Tests
-    # =============
+class AdjacentPanoramaApiTest(PanoramaApiTest):
 
     def test_get_base_panorama(self):
         response = self.client.get('/panorama/opnamelocatie/PANO_1_2014/')
@@ -102,3 +32,36 @@ class PanoramaApiTest(APITestCase):
         self.assertEqual(response.data['pano_id'], 'PANO_3_2015_CLOSE')
         self.assertIn('adjacent', response.data)
         self.assertFalse(response.data['adjacent'])
+
+    def test_get_recent_panorama(self):
+        response = self.client.get('/panorama/recente_opnames/alle/PANO_3_2015_CLOSE/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pano_id', response.data)
+        self.assertEqual(response.data['pano_id'], 'PANO_3_2015_CLOSE')
+        self.assertIn('adjacent', response.data)
+        self.assertEqual(0, len(response.data['adjacent']))
+
+    def test_get_recent_panorama_with_adjacency(self):
+        response = self.client.get('/panorama/recente_opnames/alle/PANO_8_2017_CLOSE/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pano_id', response.data)
+        self.assertEqual(response.data['pano_id'], 'PANO_8_2017_CLOSE')
+        self.assertIn('adjacent', response.data)
+        self.assertEqual(2, len(response.data['adjacent']))
+
+    def test_get_recent2016_panorama(self):
+        response = self.client.get('/panorama/recente_opnames/2016/PANO_6_2016_CLOSE/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pano_id', response.data)
+        self.assertEqual(response.data['pano_id'], 'PANO_6_2016_CLOSE')
+        self.assertIn('adjacent', response.data)
+        self.assertEqual(1, len(response.data['adjacent']))
+
+    def test_get_recent2017_panorama(self):
+        response = self.client.get('/panorama/recente_opnames/2017/PANO_8_2017_CLOSE/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pano_id', response.data)
+        self.assertEqual(response.data['pano_id'], 'PANO_8_2017_CLOSE')
+        self.assertIn('adjacent', response.data)
+        self.assertEqual(1, len(response.data['adjacent']))
+
