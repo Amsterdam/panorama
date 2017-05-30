@@ -36,6 +36,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('geo_views', '0002_update_urls'),
+        ('panoramas', '0024_add_recent_panorama_views')
     ]
 
     operations = [
