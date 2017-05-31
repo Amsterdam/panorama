@@ -8,9 +8,9 @@ log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    views = ['panoramas_adjacencies', 'panoramas_recent_ids_all']
+    views = ['panoramas_adjacencies', 'panoramas_recent_all', 'panoramas_adjacencies_recent_all']
     for year in settings.PREPARED_YEARS:
-        views.append(f"panoramas_recent_ids_{year}")
+        views.extend([f"panoramas_recent_{year}", f"panoramas_adjacencies_recent_{year}"])
 
     def handle(self, *args, **options):
         self.refresh_views()
