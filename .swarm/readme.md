@@ -9,7 +9,7 @@ cd /home/user/panorama
 git pull
 ```
 
-als sudo su - 
+als sudo su -
 
 ```
 export OBJECTSTORE_PASSWORD=<OBJECT_STORE_PASSWORD>

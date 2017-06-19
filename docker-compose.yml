@@ -21,7 +21,7 @@ web:
     SECRET_KEY: hoi
     DB_NAME: panorama
     DB_PASSWORD: insecure
-    PANORAMA_IMAGE_URL: https://acc.atlas.amsterdam.nl/panorama
+    PANORAMA_IMAGE_URL: https://acc.data.amsterdam.nl/panorama
     OBJECTSTORE_PASSWORD:
     UWSGI_HTTP: ":8000"
     UWSGI_MODULE: "panorama.wsgi:application"

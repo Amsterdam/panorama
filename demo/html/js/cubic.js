@@ -23,11 +23,11 @@ var demo_panos = [
 	// "/img/pano_0004_000087",
 	// "/img/pano_0011_000463",
 
-	"https://acc.atlas.amsterdam.nl/panorama/2016/03/21/TMX7315120208-000021/pano_0000_000329/cubic",
-	"https://acc.atlas.amsterdam.nl/panorama/2016/03/21/TMX7315120208-000021/pano_0000_000330/cubic",
-	"https://acc.atlas.amsterdam.nl/panorama/2016/03/24/TMX7315120208-000022/pano_0001_000529/cubic",
-	"https://acc.atlas.amsterdam.nl/panorama/2016/04/18/TMX7315120208-000030/pano_0000_000853/cubic",
-	"https://acc.atlas.amsterdam.nl/panorama/2016/04/18/TMX7315120208-000030/pano_0000_001797/cubic"
+	"https://acc.data.amsterdam.nl/panorama/2016/03/21/TMX7315120208-000021/pano_0000_000329/cubic",
+	"https://acc.data.amsterdam.nl/panorama/2016/03/21/TMX7315120208-000021/pano_0000_000330/cubic",
+	"https://acc.data.amsterdam.nl/panorama/2016/03/24/TMX7315120208-000022/pano_0001_000529/cubic",
+	"https://acc.data.amsterdam.nl/panorama/2016/04/18/TMX7315120208-000030/pano_0000_000853/cubic",
+	"https://acc.data.amsterdam.nl/panorama/2016/04/18/TMX7315120208-000030/pano_0000_001797/cubic"
 ];
 
 // Choose random panorama to show
