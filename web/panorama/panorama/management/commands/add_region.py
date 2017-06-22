@@ -1,5 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
-from datasets.panoramas.models import Panorama, Region
+from django.core.management.base import BaseCommand
+from django.db import connection
+from datasets.panoramas.models import Region
 
 
 class Command(BaseCommand):
@@ -11,7 +12,7 @@ class Command(BaseCommand):
 
     Example
 
-        ./manage.py add_region --pano-id TMX7316060226-000030_pano_0008_000650 --type G --coords 1250,1990,1280,2010
+        ./manage.py add_region --pano_id TMX7316060226-000030_pano_0008_000650 --type G --coords 1250,1990,1280,2010
     """
 
     def add_arguments(self, parser):
@@ -21,7 +22,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         coords = options['coords'].split(',')
+
+        cursor = connection.cursor()
+        cursor.execute("select nextval('panoramas_region_id_seq')")
+
         region = Region(
+            id=cursor.fetchone()[0],
             pano_id=options['pano_id'],
             region_type=options['type'],
             detected_by='manual',
