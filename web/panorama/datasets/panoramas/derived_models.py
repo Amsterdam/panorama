@@ -3,36 +3,38 @@ from . models import AbstractPanorama, AbstractAdjacency
 from django.conf import settings
 
 
-class RecentPanorama(AbstractPanorama):
-    class Meta(AbstractPanorama.Meta):
-        abstract = False
-        managed = False
-        db_table = "panoramas_recent_all"
+def _find_set(path):
+    recent_db_table_suffix = ['all']
+    recent_db_table_suffix.extend(settings.PREPARED_YEARS)
+
+    for set in recent_db_table_suffix:
+        if f'recente_opnames/{set}' in path:
+            return set
 
 
-class RecentAdjacency(AbstractAdjacency):
-    from_pano = models.ForeignKey(RecentPanorama, related_name='to_adjacency')
-    to_pano = models.ForeignKey(RecentPanorama, related_name='from_adjacency')
+def getRecentPanoModel(path):
+    set = _find_set(path)
+    db_table_name = f"panoramas_recent_{set}"
 
-    class Meta(AbstractAdjacency.Meta):
-        abstract = False
-        db_table = "panoramas_adjacencies_recent_all"
+    class RecentPanorama(AbstractPanorama):
+        class Meta(AbstractPanorama.Meta):
+            abstract = False
+            managed = False
+            db_table = db_table_name
 
-
-for year in settings.PREPARED_YEARS:
-    exec(f"""
-class RecentPanorama{year}(AbstractPanorama):
-    class Meta(AbstractPanorama.Meta):
-        abstract = False
-        managed = False
-        db_table = "panoramas_recent_{year}"
+    return RecentPanorama
 
 
-class RecentAdjacency{year}(AbstractAdjacency):
-    from_pano = models.ForeignKey(RecentPanorama{year}, related_name='to_adjacency')
-    to_pano = models.ForeignKey(RecentPanorama{year}, related_name='from_adjacency')
+def getRecentAdjacencyModel(recent_pano_model, path):
+    set = _find_set(path)
+    db_table_name = f"panoramas_adjacencies_recent_{set}"
 
-    class Meta(AbstractAdjacency.Meta):
-        abstract = False
-        db_table = "panoramas_adjacencies_recent_{year}"
-    """)
+    class RecentAdjacency(AbstractAdjacency):
+        from_pano = models.ForeignKey(recent_pano_model, related_name='to_adjacency')
+        to_pano = models.ForeignKey(recent_pano_model, related_name='from_adjacency')
+
+        class Meta(AbstractAdjacency.Meta):
+            abstract = False
+            db_table = db_table_name
+
+    return RecentAdjacency

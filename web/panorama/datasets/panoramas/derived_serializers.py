@@ -1,51 +1,52 @@
 import logging
-from django.conf import settings
+from collections import OrderedDict
+
 from datasets.panoramas import derived_models as models
-from . serializers import AdjacencySerializer, PanoSerializer, FilteredPanoSerializer
+from . serializers import AdjacencySerializer, PanoSerializer, FilteredPanoSerializer, PanoLinksField
 
 log = logging.getLogger(__name__)
 
 
-class RecentPanoSerializer(PanoSerializer):
-    class Meta(PanoSerializer.Meta):
-        model = models.RecentPanorama
+def getRecentPanoSerializer(recent_pano_model, path):
+    class RecentPanoSerializer(PanoSerializer):
+        serializer_url_field = getPanoLinksField(path)
+        class Meta(PanoSerializer.Meta):
+            model = recent_pano_model
+
+    return RecentPanoSerializer
 
 
-class RecentAdjacencySerializer(AdjacencySerializer):
-    class Meta(AdjacencySerializer.Meta):
-        model = models.RecentAdjacency
+def getRecentAdjacencySerializer(recent_pano_model):
+    class RecentAdjacencySerializer(AdjacencySerializer):
+        class Meta(AdjacencySerializer.Meta):
+            model = recent_pano_model
+
+    return RecentAdjacencySerializer
 
 
-class FilteredRecentPanoSerializer(FilteredPanoSerializer):
-    class Meta(PanoSerializer.Meta):
-        model = models.RecentPanorama
+def getFilteredRecentPanoSerializer(recent_pano_model, path):
+    class FilteredRecentPanoSerializer(FilteredPanoSerializer):
+        serializer_url_field = getPanoLinksField(path)
+        class Meta(PanoSerializer.Meta):
+            model = recent_pano_model
 
-    class Models(FilteredPanoSerializer.Models):
-        adjacency_model = models.RecentAdjacency
-        panorama_model = models.RecentPanorama
-        adjacency_serializer = RecentAdjacencySerializer
+        class Models(FilteredPanoSerializer.Models):
+            adjacency_model = models.getRecentAdjacencyModel(recent_pano_model, path)
+            adjacency_serializer = getRecentAdjacencySerializer(recent_pano_model)
 
-
-for year in settings.PREPARED_YEARS:
-    exec(f"""
-class RecentPano{year}Serializer(PanoSerializer):
-    class Meta(PanoSerializer.Meta):
-        model = models.RecentPanorama{year}
+    return FilteredRecentPanoSerializer
 
 
-class RecentAdjacency{year}Serializer(AdjacencySerializer):
-    class Meta(AdjacencySerializer.Meta):
-        model = models.RecentAdjacency{year}
+def getPanoLinksField(path):
+    index_of_set = path.index('recente_opnames/') + len('recente_opnames/')
+    set = path[index_of_set:index_of_set+4]
 
+    class RecentPanoLinksField(PanoLinksField):
+        def to_representation(self, value):
+            request = self.context.get('request')
+            modified_view_name = self.view_name.replace('recentpanorama', f"recentpanorama-{set}")
+            return OrderedDict([
+                ('self', dict(href=self.get_url(value, modified_view_name, request, None))),
+            ])
 
-class FilteredRecentPano{year}Serializer(FilteredPanoSerializer):
-    class Meta(PanoSerializer.Meta):
-        model = models.RecentPanorama{year}
-
-    class Models(FilteredPanoSerializer.Models):
-        adjacency_model = models.RecentAdjacency{year}
-        panorama_model = models.RecentPanorama{year}
-        adjacency_serializer = RecentAdjacency{year}Serializer
-    """)
-
-
+    return RecentPanoLinksField
