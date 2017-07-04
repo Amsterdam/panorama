@@ -1,43 +1,45 @@
-database:
-  build: ./database
-  ports:
-    - "5433:5432"
-  environment:
-    POSTGRES_PASSWORD: insecure
-    POSTGRES_USER: panorama
+version: "3"
+services:
+  database:
+    build: ./database
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_USER: panorama
 
-queue:
-  image: rabbitmq:3-management
-  hostname: my-rabbit
-  ports:
-    - "8080:15672"
-    - "5672:5672"
+  queue:
+    image: rabbitmq:3-management
+    hostname: my-rabbit
+    ports:
+      - "8080:15672"
+      - "5672:5672"
 
-scheduler:
-  build: ../web
-  links:
-    - queue:queue
-    - database:database
-  environment:
-    DATABASE_NAME: panorama
-    DATABASE_USER: panorama
-    DATABASE_PASSWORD: insecure
-    OBJECTSTORE_PASSWORD:
-  command: >
-    bash -c "/app/scheduler-wait.sh \
-                        && python manage.py schedule"
+  scheduler:
+    build: ../web
+    links:
+      - queue:queue
+      - database:database
+    environment:
+      DATABASE_NAME: panorama
+      DATABASE_USER: panorama
+      DATABASE_PASSWORD: insecure
+      OBJECTSTORE_PASSWORD:
+    command: >
+      bash -c "/app/scheduler-wait.sh \
+                          && python manage.py schedule"
 
-local_worker:
-  build: ../web
-  links:
-    - queue:queue
-    - database:database
-  environment:
-    DATABASE_NAME: panorama
-    DATABASE_USER: panorama
-    DATABASE_PASSWORD: insecure
-    OBJECTSTORE_PASSWORD:
-  command: >
-    bash -c "/app/scheduler-wait.sh \
-                        && python manage.py work"
+  local_worker:
+    build: ../web
+    links:
+      - queue:queue
+      - database:database
+    environment:
+      DATABASE_NAME: panorama
+      DATABASE_USER: panorama
+      DATABASE_PASSWORD: insecure
+      OBJECTSTORE_PASSWORD:
+    command: >
+      bash -c "/app/scheduler-wait.sh \
+                          && python manage.py work"
 
