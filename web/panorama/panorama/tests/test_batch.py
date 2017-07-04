@@ -3,11 +3,9 @@ import logging
 import os
 from django.test import TransactionTestCase
 from unittest import mock, skipIf
-import time
 
 from datasets.panoramas.models import Panorama, Traject, Adjacency, Mission
-from datasets.panoramas.derived_models import RecentPanorama, RecentAdjacency
-from django.db import transaction, connection
+import datasets.panoramas.derived_models as models
 from panorama.batch import ImportPanoramaJob
 from panorama.management.commands.refresh_views import Command as RefreshCommand
 
@@ -88,10 +86,12 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'W')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'L')
 
-        recent = RecentPanorama.objects.all()
+        recent_pano_model = models.getRecentPanoModel("recente_opnames/alle")
+        recent = recent_pano_model.objects.all()
         self.assertEqual(recent.count(), 14)
 
-        recent_adjacencies = RecentAdjacency.objects.all()
+        recent_adjacencie_model = models.getRecentAdjacencyModel(recent_pano_model, "recente_opnames/alle")
+        recent_adjacencies = recent_adjacencie_model.objects.all()
         self.assertEqual(recent_adjacencies.count(), 2)
         self.assertEqual(recent_adjacencies[0].to_year, 2017)
 

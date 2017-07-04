@@ -1,20 +1,27 @@
-from datasets.panoramas.derived_models import *
-from datasets.panoramas.derived_serializers import *
-from django.conf import settings
-
+import datasets.panoramas.derived_models as models
+import datasets.panoramas.derived_serializers as serializers
 from . views import PanoramaViewSet
 
 
 class RecentPanoramaViewSet(PanoramaViewSet):
-    queryset = RecentPanorama.done.all()
-    serializer_detail_class = FilteredRecentPanoSerializer
-    serializer_class = RecentPanoSerializer
+    def list(self, request, *args, **kwargs):
+        self._set_queryset_and_serializer(request)
+        return super().list(request, *args, **kwargs)
 
+    def retrieve(self, request, *args, **kwargs):
+         self._set_queryset_and_detail_serializer(request)
+         return super().retrieve(request, *args, **kwargs)
 
-for year in settings.PREPARED_YEARS:
-    exec(f"""
-class RecentPanorama{year}ViewSet(PanoramaViewSet):
-    queryset = RecentPanorama{year}.done.all()
-    serializer_detail_class = FilteredRecentPano{year}Serializer
-    serializer_class = RecentPano{year}Serializer
-    """)
+    def _set_queryset_and_serializer(self, request):
+        self.recent_pano_model_class = models.getRecentPanoModel(request.path)
+        self.queryset = self.recent_pano_model_class.done.all()
+        self.serializer_class = serializers.getRecentPanoSerializer(
+            self.recent_pano_model_class, request.path
+        )
+
+    def _set_queryset_and_detail_serializer(self, request):
+        self._set_queryset_and_serializer(request)
+        self.serializer_detail_class = serializers.getFilteredRecentPanoSerializer(
+            self.recent_pano_model_class, request.path
+        )
+
