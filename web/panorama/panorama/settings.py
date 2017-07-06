@@ -105,8 +105,8 @@ DATABASES = {
     }
 }
 
-AMPQ_HOST = os.getenv('AMPQ_HOST', 'queue')
-AMPQ_CONNECTSTRING = 'amqp://guest:guest@{}:5672/%2F'.format(AMPQ_HOST)
+# AMPQ_HOST = os.getenv('AMPQ_HOST', 'queue')
+# AMPQ_CONNECTSTRING = 'amqp://guest:guest@{}:5672/%2F'.format(AMPQ_HOST)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

@@ -1,11 +1,9 @@
-from threading import Thread
-
 from django.core.management import BaseCommand
-
-from panorama.tasks import workers
+from panorama.tasks.workers.worker import Worker
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        for worker in workers.workers:
-            Thread(target=worker().listen_for).start()
+        Worker().do_work()
+        # for worker in workers.workers:
+        #     Thread(target=worker().listen_for).start()
