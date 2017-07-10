@@ -9,3 +9,5 @@ do
 	echo "Waiting for postgres..."
 	sleep 2
 done
+
+python manage.py work
