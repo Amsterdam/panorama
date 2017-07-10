@@ -16,7 +16,7 @@ services:
 
   worker:
     build: ../web
-    image: 127.0.0.1:5000/stackworker
+    image: master.swarm.datapunt.amsterdam.nl:5000/stackworker
     links:
       - database:database
     networks:
