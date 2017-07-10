@@ -1,0 +1,31 @@
+version: "3"
+services:
+  database:
+    image: 127.0.0.1:5000/stackdb
+    build: ./database
+    networks:
+      - default
+    deploy:
+      mode: global
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_USER: panorama
+
+  worker:
+    build: ../web
+    image: 127.0.0.1:5000/stackworker
+    links:
+      - database:database
+    networks:
+      - default
+    environment:
+      DATABASE_PORT_5432_TCP_ADDR: database
+      DATABASE_PORT_5432_TCP_PORT: 5432
+      DATABASE_NAME: panorama
+      DATABASE_USER: panorama
+      DATABASE_PASSWORD: insecure
+      OBJECTSTORE_PASSWORD:
+    deploy:
+      replicas: 2
+    command: >
+      bash -c "/app/worker-start.sh"
