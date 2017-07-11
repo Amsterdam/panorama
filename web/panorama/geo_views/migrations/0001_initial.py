@@ -23,7 +23,7 @@ SELECT
     pp.heading,
     pp.timestamp,
     pp.geolocation AS geometrie,
-    'https://acc.atlas.amsterdam.nl/panorama' || pp.path || '/' ||
+    'https://acc.data.amsterdam.nl/panorama' || pp.path || '/' ||
     pp.filename AS url, 
     '{settings.DATAPUNT_API_URL}' || 'panoramas/opnamelocatie/' || pp.pano_id || '/' AS uri
 FROM
