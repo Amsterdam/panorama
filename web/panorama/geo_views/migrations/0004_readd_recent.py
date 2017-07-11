@@ -20,7 +20,7 @@ SELECT
     pp.timestamp,
     '{year}' as year,
     pp._geolocation_2d AS geometrie,
-    'https://atlas.amsterdam.nl/panorama/' || pp.path || trim(trailing '.jpg' from pp.filename)
+    'https://data.amsterdam.nl/panorama/' || pp.path || trim(trailing '.jpg' from pp.filename)
     || '/equirectangular/panorama_8000.jpg' AS url,
     '{settings.DATAPUNT_API_URL}' || 'panorama/recente_opnames/{year}/' || pp.pano_id || '/' AS uri
 FROM
@@ -51,7 +51,7 @@ SELECT
     pp.timestamp,
     extract(year from pp.timestamp) as year,
     pp._geolocation_2d AS geometrie,
-    'https://atlas.amsterdam.nl/panorama/' || pp.path || trim(trailing '.jpg' from pp.filename)
+    'https://data.amsterdam.nl/panorama/' || pp.path || trim(trailing '.jpg' from pp.filename)
     || '/equirectangular/panorama_8000.jpg' AS url,
     '{settings.DATAPUNT_API_URL}' || 'panorama/recente_opnames/alle/' || pp.pano_id || '/' AS uri
 FROM

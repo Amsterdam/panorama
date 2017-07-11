@@ -24,7 +24,7 @@ SELECT
     pp.heading,
     pp.timestamp,
     pp.geolocation AS geometrie,
-    'https://atlas.amsterdam.nl/panorama/' || pp.path || trim(trailing '.jpg' from pp.filename)
+    'https://data.amsterdam.nl/panorama/' || pp.path || trim(trailing '.jpg' from pp.filename)
     || '/equirectangular/panorama_8000.jpg' AS url,
     '{settings.DATAPUNT_API_URL}' || 'panorama/opnamelocatie/' || pp.pano_id || '/' AS uri
 FROM
