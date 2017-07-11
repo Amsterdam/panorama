@@ -1,11 +1,7 @@
 from django.core.management import BaseCommand
-
-from panorama.tasks.render_batch import RenderBatch
+from datasets.panoramas.models import Panorama
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        self.clear_rendering()
-
-    def clear_rendering(self):
-        RenderBatch().clear_rendering()
+        Panorama.rendering.update(status=Panorama.STATUS.to_be_rendered)

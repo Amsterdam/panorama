@@ -1,28 +1,25 @@
-import json
 import logging
 
-from panorama.tasks.queue import BaseWorker
+from datasets.panoramas.models import Panorama, Region
 from panorama.regions import blur
 from panorama.transform import utils_img_file_set as ImgSet
+from .pano_processor import PanoProcessor
 
 log = logging.getLogger(__name__)
 
 
-class BlurRegions(BaseWorker):
-    _route = 'blur_task'
-    _route_out = 'blur_done'
+class RegionBlurrer(PanoProcessor):
+    status_queryset = Panorama.detected_3
+    status_in_progress = Panorama.STATUS.blurring
+    status_done = Panorama.STATUS.done
 
-    def do_work_with_results(self, messagebody):
-        message_dict = json.loads(messagebody.decode('utf-8'))
-        panorama_path = message_dict['panorama_path']
+    def process_one(self, panorama: Panorama):
+        region_blurrer = blur.RegionBlurrer(panorama.get_intermediate_url())
+        regions = []
+        for region in Region.objects.filter(pano_id=panorama.pano_id).all():
+            regions.append(blur.dict_from(region))
 
-        region_blurrer = blur.RegionBlurrer(panorama_path)
-
-        regions = message_dict['regions']
         if len(regions) > 0:
-            ImgSet.save_image_set(panorama_path, region_blurrer.get_blurred_image(regions))
+            ImgSet.save_image_set(panorama.get_intermediate_url(), region_blurrer.get_blurred_image(regions))
         else:
-            ImgSet.save_image_set(panorama_path, region_blurrer.get_unblurred_image())
-
-        log.warning("done blurring")
-        return [{'pano_id': message_dict['pano_id']}]
+            ImgSet.save_image_set(panorama.get_intermediate_url(), region_blurrer.get_unblurred_image())

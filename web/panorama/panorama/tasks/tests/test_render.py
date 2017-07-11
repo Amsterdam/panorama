@@ -12,7 +12,7 @@ from django.utils.timezone import utc as UTC_TZ
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.tests import factories
 from panorama.transform.tests.test_img_file import mock_get_raw_pano
-from .. import render_task
+from .. workers.render_pano import PanoRenderer
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class TestRender(TestCase):
         to_render = Panorama.to_be_rendered.all()[0]
         self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
-        render_task.RenderPanorama().process()
+        PanoRenderer().process_all()
         self.assertEquals(0, len(Panorama.to_be_rendered.all()))
         self.assertTrue(mock_read_raw.called, msg='Read Raw was not called')
         self.assertTrue(mock_write_transformed.called, msg='Write transformed was not called')

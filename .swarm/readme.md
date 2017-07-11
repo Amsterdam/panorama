@@ -20,10 +20,12 @@ en in dezelfde sudo sessie:
 ```
 cd /home/panorama
 cd .swarm
-docker-compose build # requires OBJECTSTORE_PASSWORD to be set
+docker-compose build --pull # requires OBJECTSTORE_PASSWORD to be set
 docker-compose push
 docker stack deploy --compose-file docker-compose.yml panoswarm
 ```
+
+Let op! De naam van het cluster is belangrijk (wordt gebruikt in `save-db.sh`)
 
 En als het cluster succesvol is opgestart - uitgaande van 5cpu's, en > 16GB memory per node:
 
@@ -47,7 +49,7 @@ Lokaal
 ======
 
 Bijvoorbeeld voor ontwikkelen kun je de stack ook lokaal opstarten
- (zie [https://docs.docker.com/engine/swarm/stack-deploy/]( https://docs.docker.com/engine/swarm/stack-deploy/) ):
+ (zie [https://docs.docker.com/engine/swarm/stack-deploy/](https://docs.docker.com/engine/swarm/stack-deploy/) ):
 
 ```bash
 docker swarm init
@@ -59,8 +61,8 @@ Ga dan naar het panorama project en voer de volgende commando's uit:
 ```bash
 cd .swarm
 export OBJECTSTORE_PASSWORD=<OBJECT_STORE_PASSWORD>
-docker-compose build
-docker-compose push
+docker-compose -f docker-compose-local.yml build --pull
+docker-compose -f docker-compose-local.yml push
 docker stack deploy --compose-file docker-compose-local.yml panoslocal
 ```
 
