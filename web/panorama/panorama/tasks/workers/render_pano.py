@@ -1,24 +1,16 @@
-import json
 import logging
 
-from panorama.tasks.queue import BaseWorker
+from datasets.panoramas.models import Panorama
 from job import render
+from .pano_processor import PanoProcessor
 
 log = logging.getLogger(__name__)
 
 
-class RenderPano(BaseWorker):
-    _route = 'render_task'
-    _route_out = 'rendering_done'
+class PanoRenderer(PanoProcessor):
+    status_queryset = Panorama.to_be_rendered
+    status_in_progress = Panorama.STATUS.rendering
+    status_done = Panorama.STATUS.rendered
 
-    def do_work_with_results(self, messagebody):
-        message_dict = json.loads(messagebody.decode('utf-8'))
-        panorama_path = message_dict['panorama_path']
-        panorama_heading = message_dict['panorama_heading']
-        panorama_pitch = message_dict['panorama_pitch']
-        panorama_roll = message_dict['panorama_roll']
-
-        render(panorama_path, panorama_heading, panorama_pitch, panorama_roll)
-
-        log.warning("done rendering")
-        return [{'pano_id': message_dict['pano_id']}]
+    def process_one(self, panorama: Panorama):
+        render(panorama.path + panorama.filename, panorama.heading, panorama.pitch, panorama.roll)

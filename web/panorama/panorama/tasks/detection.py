@@ -40,8 +40,8 @@ def region_writer(panorama: Panorama, lp=False, dlib=False, google=False):
     object_store.put_into_datapunt_store(csv_name, output.getvalue(), 'text/csv')
 
 
-def save_regions(message_dict, panorama: Panorama, region_type='G'):
-    for region in message_dict['regions']:
+def save_regions(regions, panorama: Panorama, region_type='G'):
+    for region in regions:
         rg = Region()
 
         rg.pano_id = panorama.pano_id
