@@ -24,4 +24,4 @@ ARG OBJECTSTORE_PASSWORD
 ENV OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD
 
 USER datapunt
-ENTRYPOINT ["python3", "manage.py", "work"]
+CMD /app/worker-start.sh
