@@ -13,6 +13,8 @@ services:
 
   worker:
     build: ../web
+      context: ../web
+      dockerfile: WorkerDockerfile
     image: 127.0.0.1:5000/stackworker
     links:
       - database:database
@@ -24,7 +26,6 @@ services:
       DATABASE_NAME: panorama
       DATABASE_USER: panorama
       DATABASE_PASSWORD: insecure
-      OBJECTSTORE_PASSWORD:
     deploy:
       replicas: 2
     command: >

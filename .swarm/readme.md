@@ -20,7 +20,8 @@ en in dezelfde sudo sessie:
 ```
 cd /home/panorama
 cd .swarm
-docker-compose build --pull # requires OBJECTSTORE_PASSWORD to be set
+docker-compose build --pull --build-arg OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD worker
+docker-compose build --pull database
 docker-compose push
 docker stack deploy --compose-file docker-compose.yml panoswarm
 ```
@@ -61,7 +62,8 @@ Ga dan naar het panorama project en voer de volgende commando's uit:
 ```bash
 cd .swarm
 export OBJECTSTORE_PASSWORD=<OBJECT_STORE_PASSWORD>
-docker-compose -f docker-compose-local.yml build --pull
+docker-compose -f docker-compose-local.yml build --pull --build-arg OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD worker
+docker-compose -f docker-compose-local.yml build --pull database
 docker-compose -f docker-compose-local.yml push
 docker stack deploy --compose-file docker-compose-local.yml panoslocal
 ```
