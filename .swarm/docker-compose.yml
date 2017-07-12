@@ -34,5 +34,3 @@ services:
       placement:
         constraints:
           - node.hostname != master.swarm.datapunt.amsterdam.nl
-    command: >
-      bash -c "/app/worker-start.sh"

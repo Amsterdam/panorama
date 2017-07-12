@@ -28,5 +28,3 @@ services:
       DATABASE_PASSWORD: insecure
     deploy:
       replicas: 2
-    command: >
-      bash -c "/app/worker-start.sh"
