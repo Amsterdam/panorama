@@ -13,6 +13,7 @@ services:
     environment:
       POSTGRES_PASSWORD: insecure
       POSTGRES_USER: panorama
+      OBJECTSTORE_PASSWORD:
 
   worker:
     build: ../web
