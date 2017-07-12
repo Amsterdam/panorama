@@ -15,7 +15,7 @@ services:
       POSTGRES_USER: panorama
 
   worker:
-    build: ../web
+    build:
       context: ../web
       dockerfile: WorkerDockerfile
     image: master.swarm.datapunt.amsterdam.nl:5000/stackworker
