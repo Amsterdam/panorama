@@ -30,7 +30,7 @@ services:
       DATABASE_USER: panorama
       DATABASE_PASSWORD: insecure
     deploy:
-      replicas: 2
+      replicas: 32
       placement:
         constraints:
           - node.hostname != master.swarm.datapunt.amsterdam.nl
