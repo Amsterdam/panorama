@@ -166,46 +166,40 @@ class TestWrapAround(TestCase):
         self.assertEqual(len(actual[0]), 4)
         self.assertEqual(len(actual[1]), 4)
 
+    def test_wrap_around_problem1(self):
+        actual = wrap_around([((8002, 2409), (8097, 2444), (8093, 2474), (7998, 2438), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 3)
+        self.assertEqual(len(actual[1]), 5)
+
+    def test_wrap_around_problem2(self):
+        actual = wrap_around([((7600, 2448), (8108, 2492), (7999, 2524), (7500, 2477), '')])
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(len(actual[0]), 5)
+        self.assertEqual(len(actual[1]), 3)
+
+
 
 class TestGetRectangle(TestCase):
-    def test_get_rectangle(self):
-        fixture = get_random_region()
-
-        expected_left = fixture['left_top_x'] if fixture['left_top_x'] < fixture['right_top_x'] \
-            else fixture['right_top_x']
-        expected_top = fixture['left_top_y'] if fixture['left_top_y'] < fixture['right_top_y'] \
-            else fixture['right_top_y']
-        expected_right = fixture['left_bottom_x'] if fixture['left_bottom_x'] > fixture['right_bottom_x'] \
-            else fixture['right_bottom_x']
-        expected_bottom = fixture['left_bottom_y'] if fixture['left_bottom_y'] > fixture['right_bottom_y'] \
-            else fixture['right_bottom_y']
-
-        self.assertEqual(((expected_top, expected_left), (expected_bottom, expected_right)),
-                         get_rectangle(fixture))
-
     def test_get_x_y_shift(self):
         self.assertEqual(((120, 100), (520, 500)),
-                         get_rectangle({
-                             'left_top_x': 100,
-                             'left_top_y': 120,
-                             'right_top_x': 400,
-                             'right_top_y': 420,
-                             'right_bottom_x': 500,
-                             'right_bottom_y': 520,
-                             'left_bottom_x': 200,
-                             'left_bottom_y': 220,
-                         }))
+                         get_rectangle([(100, 120),
+                                        (400, 420),
+                                        (500, 520),
+                                        (200, 220),
+                                        ]))
         self.assertEqual(((80, 50), (420, 400)),
-                         get_rectangle({
-                             'left_top_x': 100,
-                             'left_top_y': 120,
-                             'right_top_x': 400,
-                             'right_top_y': 80,
-                             'right_bottom_x': 350,
-                             'right_bottom_y': 380,
-                             'left_bottom_x': 50,
-                             'left_bottom_y': 420,
-                         }))
+                         get_rectangle([(100, 120),
+                                        (400, 80),
+                                        (350, 380),
+                                        (50, 420),
+                                        ]))
+
+    def test_get_x_y_irregular(self):
+        self.assertEqual(((2448, 7500), (2524, 8000)),
+                         get_rectangle([(7600, 2448), (8000, 2482), (8000, 2524), (7999, 2524), (7500, 2477)]))
+        self.assertEqual(((2482, 0), (2524, 108)),
+                         get_rectangle([(0, 2482), (108, 2492), (0, 2524)]))
 
 
 class TestMessages(TestCase):

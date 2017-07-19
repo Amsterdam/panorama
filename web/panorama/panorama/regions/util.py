@@ -83,34 +83,25 @@ def do_split_regions(region_dicts):
     split_regions = []
     for region_dict in region_dicts:
         for split_region in wrap_around([((region_dict['left_top_x'], region_dict['left_top_y']),
-                                         (region_dict['right_top_x'], region_dict['right_top_y']),
-                                         (region_dict['right_bottom_x'], region_dict['right_bottom_y']),
-                                         (region_dict['left_bottom_x'], region_dict['left_bottom_y']), '')]):
-            split_regions.append({
-                'left_top_x': split_region[LEFT_TOP][X],
-                'left_top_y': split_region[LEFT_TOP][Y],
-                'right_top_x': split_region[RIGHT_TOP][X],
-                'right_top_y': split_region[RIGHT_TOP][Y],
-                'right_bottom_x': split_region[RIGHT_BOTTOM][X],
-                'right_bottom_y': split_region[RIGHT_BOTTOM][Y],
-                'left_bottom_x': split_region[LEFT_BOTTOM][X],
-                'left_bottom_y': split_region[LEFT_BOTTOM][Y]
-            })
+                                          (region_dict['right_top_x'], region_dict['right_top_y']),
+                                          (region_dict['right_bottom_x'], region_dict['right_bottom_y']),
+                                          (region_dict['left_bottom_x'], region_dict['left_bottom_y']), '')]):
+            split_regions.append(split_region)
 
     return split_regions
 
 
-def get_rectangle(region_dict):
+def get_rectangle(coordinates_list):
     """
-    Utility method to create rectangles that encompass the freeform described by 4 points.
+    Utility method to create rectangles that encompass the freeform described 3 or more points.
 
-    :param region_dict: a dictionary with coordinates
+    :param region_dict: a list of tuples with coordinates
     :return: two coordinate sets, top-left, bottom-right
     """
-    top = min(region_dict['left_top_y'], region_dict['right_top_y'])
-    left = min(region_dict['left_top_x'], region_dict['left_bottom_x'])
-    bottom = max(region_dict['left_bottom_y'], region_dict['right_bottom_y'])
-    right = max(region_dict['right_top_x'], region_dict['right_bottom_x'])
+    top = min([value[Y] for value in coordinates_list])
+    left = min([value[X] for value in coordinates_list])
+    bottom = max([value[Y] for value in coordinates_list])
+    right = max([value[X] for value in coordinates_list])
 
     return (top, left), (bottom, right)
 
