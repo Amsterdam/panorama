@@ -67,7 +67,7 @@ MIDDLEWARE_CLASSES = (
 
 if DEBUG:
     INSTALLED_APPS += ('debug_toolbar',)
-    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
+    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES  # noqa
     DEBUG_TOOLBAR_PATCH_SETTINGS = False
     DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False, }
 
@@ -102,6 +102,7 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD', 'insecure'),
         'HOST': os.getenv('DATABASE_PORT_5432_TCP_ADDR', get_docker_host()),
         'PORT': os.getenv('DATABASE_PORT_5432_TCP_PORT', '5454'),
+        'CONN_MAX_AGE': 15,
     }
 }
 
