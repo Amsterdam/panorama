@@ -1,5 +1,6 @@
 # Python
 import logging
+import time
 
 from panorama.tasks.mixins import PanoramaTableAware
 from panorama.tasks.workers.render_pano import PanoRenderer
@@ -21,3 +22,6 @@ class Worker(PanoramaTableAware):
             DlibFaceDetector().process_all()
             GoogleFaceDetector().process_all()
             RegionBlurrer().process_all()
+
+        # back off of swarm
+        time.sleep(1200)

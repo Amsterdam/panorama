@@ -1,7 +1,6 @@
 from math import log
 
 from PIL import Image
-from PIL import Image
 
 from panorama.transform.cubic import CubicTransformer
 from panorama.transform import utils_img_file as Img
