@@ -57,8 +57,7 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
     """
 
     lookup_field = 'pano_id'
-    renderer_classes = (
-        renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
+    renderer_classes = (renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
 
     def list(self, request, **kwargs):
         """
@@ -66,6 +65,7 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
         the thumb looking at the given point
         :param **kwargs:
         """
+        self._set_queryset_and_serializers("recente_opnames/alle")
         coords = get_request_coord(request.query_params)
 
         if not coords:
@@ -120,6 +120,7 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
         return degrees(atan2(d_lon, d_phi)) % 360.0
 
     def retrieve(self, request, pano_id=None, heading=0):
+        self._set_queryset_and_serializers("recente_opnames/alle")
         target_heading = get_int_value(
             request, 'heading', default=heading, upper=360, strategy='modulo')
 
