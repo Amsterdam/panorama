@@ -38,7 +38,6 @@ INSTALLED_APPS = (
 
     'health',
 
-    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -58,8 +57,6 @@ MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -82,7 +79,6 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -158,18 +154,20 @@ INTERNAL_IPS = ['127.0.0.1']
 
 REST_FRAMEWORK = dict(
     PAGE_SIZE=25,
+
+    UNAUTHENTICATED_USER={},
+    UNAUTHENTICATED_TOKEN={},
+
     MAX_PAGINATE_BY=100,
-
-    DEFAULT_PAGINATION_CLASS='drf_hal_json.pagination.HalPageNumberPagination',
-    DEFAULT_PARSER_CLASSES=('drf_hal_json.parsers.JsonHalParser',),
-
     DEFAULT_AUTHENTICATION_CLASSES=(
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+    DEFAULT_PAGINATION_CLASS='drf_hal_json.pagination.HalPageNumberPagination',
+    DEFAULT_PARSER_CLASSES=('drf_hal_json.parsers.JsonHalParser',),
     DEFAULT_RENDERER_CLASSES=(
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer'
     ),
     COERCE_DECIMAL_TO_STRING=False,
 )
