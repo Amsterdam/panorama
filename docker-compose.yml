@@ -1,39 +1,41 @@
-database:
-  image: build.datapunt.amsterdam.nl:5000/atlas/postgres
-  ports:
-    - "5454:5432"
-  environment:
-    POSTGRES_PASSWORD: insecure
-    POSTGRES_DB: panorama
-    POSTGRES_USER: panorama
+version: "3"
+services:
+  database:
+    image: build.datapunt.amsterdam.nl:5000/atlas/postgres
+    ports:
+      - "5454:5432"
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_DB: panorama
+      POSTGRES_USER: panorama
 
 
-web:
-  build: ./web
-  ports:
-    - "8087:8000"
-  links:
-    - database:database
-  volumes:
-    - $PWD/web/panorama/panoramas_test:/app/panoramas_test
-    - $PWD/test_output:/app/test_output
-  environment:
-    SECRET_KEY: hoi
-    DB_NAME: panorama
-    DB_PASSWORD: insecure
-    PANORAMA_IMAGE_URL: https://acc.data.amsterdam.nl/panorama
-    OBJECTSTORE_PASSWORD:
-    UWSGI_HTTP: ":8000"
-    UWSGI_MODULE: "panorama.wsgi:application"
-    UWSGI_MASTER: 1
-    UWSGI_STATIC_MAP: "/static=/static"
-    UWSGI_DIE_ON_TERM: 1
+  web:
+    build: ./web
+    ports:
+      - "8087:8000"
+    links:
+      - database:database
+    volumes:
+      - $PWD/web/panorama/panoramas_test:/app/panoramas_test
+      - $PWD/test_output:/app/test_output
+    environment:
+      SECRET_KEY: hoi
+      DB_NAME: panorama
+      DB_PASSWORD: insecure
+      PANORAMA_IMAGE_URL: https://acc.data.amsterdam.nl/panorama
+      OBJECTSTORE_PASSWORD:
+      UWSGI_HTTP: ":8000"
+      UWSGI_MODULE: "panorama.wsgi:application"
+      UWSGI_MASTER: 1
+      UWSGI_STATIC_MAP: "/static=/static"
+      UWSGI_DIE_ON_TERM: 1
 
 
-demo:
-  build: ./demo
-  ports:
-    - "8088:80"
-  volumes:
-    - "./demo/html:/var/www/html/demo"
-    - "./test_output:/var/www/html/img"
+  demo:
+    build: ./demo
+    ports:
+      - "8088:80"
+    volumes:
+      - "./demo/html:/var/www/html/demo"
+      - "./test_output:/var/www/html/img"
