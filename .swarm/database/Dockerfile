@@ -4,3 +4,4 @@ MAINTAINER datapunt.ois@amsterdam.nl
 RUN echo 'max_connections = 200' >> "/usr/share/postgresql/$PG_MAJOR/postgresql.conf.sample"
 
 COPY z_import_panorama.sh /docker-entrypoint-initdb.d/z_import_panorama.sh
+COPY dl_and_import_for_swarm.sh /bin/dl_and_import_for_swarm.sh
