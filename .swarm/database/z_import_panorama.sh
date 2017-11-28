@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# use the packaged single-thread and single-transaction update script
-#   in the background as to not to mess with entrypoint script
+# use the packaged update scripts
+#   in the background as to not to mess with the other entrypoint scripts
 
-/bin/import-single.sh panorama &
+/bin/dl_and_import_for_swarm.sh &
 
-echo STARTED UPDATE SCRIPT
+echo STARTED DOWNLOAD AND IMPORT SCRIPT
