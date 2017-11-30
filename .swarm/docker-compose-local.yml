@@ -10,6 +10,8 @@ services:
     environment:
       POSTGRES_PASSWORD: insecure
       POSTGRES_USER: panorama
+    volumes:
+      - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
 
   worker:
     build:

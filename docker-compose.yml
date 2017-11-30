@@ -8,7 +8,8 @@ services:
       POSTGRES_PASSWORD: insecure
       POSTGRES_DB: panorama
       POSTGRES_USER: panorama
-
+    volumes:
+      - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
 
   web:
     build: ./web
