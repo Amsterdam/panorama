@@ -1,5 +1,5 @@
 FROM amsterdam/panorama_image_processing:full_image_processing
-MAINTAINER datapunt.ois@amsterdam.nl
+MAINTAINER datapunt@amsterdam.nl
 
 RUN apt-get update \
 	&& apt-get install -y \

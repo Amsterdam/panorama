@@ -1,5 +1,5 @@
 FROM nginx:latest
-MAINTAINER datapunt.ois@amsterdam.nl
+MAINTAINER datapunt@amsterdam.nl
 
 EXPOSE 80
 
