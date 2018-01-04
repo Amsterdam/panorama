@@ -64,7 +64,7 @@ class TestRender(TestCase):
         to_render = Panorama.to_be_rendered.all()[0]
         self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
-        PanoRenderer().process_all()
+        PanoRenderer().process()
         self.assertEquals(0, len(Panorama.to_be_rendered.all()))
         self.assertTrue(mock_read_raw.called, msg='Read Raw was not called')
         self.assertTrue(mock_write_transformed.called, msg='Write transformed was not called')

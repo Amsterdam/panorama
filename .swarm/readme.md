@@ -77,5 +77,5 @@ docker stack rm panoslocal
 en
 
 ```bash
-docker swarm leave
+docker swarm leave --force
 ```
