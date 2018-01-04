@@ -6,14 +6,14 @@ class PanoProcessor:
     status_in_progress = None
     status_done = None
 
-    def process_all(self):
-        while True:
-            pano_to_process = self._get_next_pano()
-            if not pano_to_process:
-                break
+    def process(self):
+        pano_to_process = self._get_next_pano()
+        if not pano_to_process:
+            return False
 
-            self.process_one(pano_to_process)
-            self._set_status_to(pano_to_process, self.status_done)
+        self.process_one(pano_to_process)
+        self._set_status_to(pano_to_process, self.status_done)
+        return True
 
     def process_one(self, panorama):
         pass
