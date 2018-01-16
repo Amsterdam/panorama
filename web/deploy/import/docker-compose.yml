@@ -1,55 +1,19 @@
-database:
-  image: amsterdam/postgres
-  environment:
-    POSTGRES_PASSWORD: insecure
-    POSTGRES_USER: panorama
+version: "3.0"
+services:
+  database:
+    image: amsterdam/postgres
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_USER: panorama
 
-tests:
-  build: ../web
-  links:
-    - database:database
-  mem_limit: 6G
-  volumes:
-    - ../web/panorama/panoramas_test:/app/panoramas_test
-    - ../test_output:/app/test_output
-  environment:
-    DATABASE_NAME: panorama
-    DATABASE_USER: panorama
-    DATABASE_PASSWORD: insecure
-    OBJECTSTORE_PASSWORD:
-  command: >
-    bash -c "/app/docker-wait.sh \
-            && python manage.py migrate \
-            && python manage.py test"
-
-importer:
-  build: ../web
-  links:
-    - database:database
-  environment:
-    DB_NAME: panorama
-    DB_USER: panorama
-    DB_PASSWORD: insecure
-    OBJECTSTORE_PASSWORD:
-  command: >
-    bash -c "/app/docker-wait.sh \
-            && python manage.py migrate \
-            && python manage.py run_import"
-
-db-backup:
-  image: amsterdam/postgres
-  links:
-    - database:db
-  volumes:
-    - ./backups:/tmp/backups
-  command: >
-    bash -c "echo db:5432:panorama:panorama:insecure > ~/.pgpass \
-            && chmod 600 ~/.pgpass \
-            && pg_dump --clean \
-                        -Fc \
-                        -t panoramas* \
-                        -T panoramas_region* \
-                        -t geo* \
-                        -U panorama \
-                        -h db -p 5432 \
-                        panorama > /tmp/backups/database.dump"
+  importer:
+    image: build.datapunt.amsterdam.nl:5000/datapunt/panorama:${ENVIRONMENT}
+    links:
+      - database:database
+    environment:
+      DB_NAME: panorama
+      DB_USER: panorama
+      DB_PASSWORD: insecure
+      OBJECTSTORE_PASSWORD:
+    command: >
+      bash -c "python manage.py run_import"

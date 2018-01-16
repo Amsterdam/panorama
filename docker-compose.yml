@@ -32,7 +32,6 @@ services:
       UWSGI_STATIC_MAP: "/static=/static"
       UWSGI_DIE_ON_TERM: 1
 
-
   demo:
     build: ./demo
     ports:
