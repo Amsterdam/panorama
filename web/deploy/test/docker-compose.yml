@@ -10,7 +10,12 @@ services:
     build: ../../
     links:
       - database:database
-    mem_limit: 6G
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+        reservations:
+          memory: 4G
     volumes:
       - ../../panorama/panoramas_test:/app/panoramas_test
       - ../../test_output:/app/test_output
