@@ -53,14 +53,3 @@ db-backup:
                         -U panorama \
                         -h db -p 5432 \
                         panorama > /tmp/backups/database.dump"
-
-render:
-  build: ../web
-  dockerfile: Dockerfile-render
-  links:
-    - database:database
-  environment:
-    DB_NAME: panorama
-    DB_USER: panorama
-    DB_PASSWORD: insecure
-    OBJECTSTORE_PASSWORD:
