@@ -1,4 +1,4 @@
-version: "3.0"
+version: "2.0"
 services:
   database:
     image: amsterdam/postgres
@@ -10,12 +10,7 @@ services:
     build: ../../
     links:
       - database:database
-    deploy:
-      resources:
-        limits:
-          memory: 6G
-        reservations:
-          memory: 4G
+    mem_limit: 6G
     volumes:
       - ../../panorama/panoramas_test:/app/panoramas_test
       - ../../test_output:/app/test_output
