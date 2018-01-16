@@ -9,17 +9,24 @@ dc() {
 	docker-compose -p panorama -f ${DIR}/docker-compose.yml $*
 }
 
-trap 'dc kill db-backup importer; dc rm -f db-backup importer' EXIT
-
-dc kill render database; dc rm -f render database
-
-echo "clean up old volumes";
-docker volume ls -qf dangling=true | xargs -r docker volume rm;
-echo "clean up volumes completed";
-
+echo "Removing any previous backups"
 rm -rf ${DIR}/backups
 mkdir -p ${DIR}/backups
 
+echo "Building dockers"
+dc down
+dc pull
 dc build
+
+echo "Starting and migrating db"
+dc up -d database
+dc run importer ./docker-wait.sh
+dc run importer ./docker-migrate.sh
+
+echo "Importing data"
 dc run --rm importer
-dc run --rm db-backup
+
+echo "Running backups"
+dc exec -T database backup-db.sh panorama
+
+echo "Done"

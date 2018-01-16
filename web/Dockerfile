@@ -18,5 +18,8 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 USER datapunt
+
 COPY panorama /app/
+COPY deploy /
+
 CMD /app/docker-entrypoint.sh
