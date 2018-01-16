@@ -1,0 +1,23 @@
+database:
+  image: amsterdam/postgres
+  environment:
+    POSTGRES_PASSWORD: insecure
+    POSTGRES_USER: panorama
+
+tests:
+  build: ../
+  links:
+    - database:database
+  mem_limit: 6G
+  volumes:
+    - ../web/panorama/panoramas_test:/app/panoramas_test
+    - ../test_output:/app/test_output
+  environment:
+    DATABASE_NAME: panorama
+    DATABASE_USER: panorama
+    DATABASE_PASSWORD: insecure
+    OBJECTSTORE_PASSWORD:
+  command: >
+    bash -c "/app/docker-wait.sh \
+            && python manage.py migrate \
+            && python manage.py test"
