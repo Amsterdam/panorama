@@ -91,30 +91,23 @@ DUMP_DIR = 'mks-dump'
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 REST_FRAMEWORK = dict(
-    # PAGE_SIZE=100,
-    # MAX_PAGINATE_BY=100,
+    PAGE_SIZE=25,
 
     UNAUTHENTICATED_USER={},
     UNAUTHENTICATED_TOKEN={},
 
-    DEFAULT_PAGINATION_CLASS=None,
-
+    MAX_PAGINATE_BY=100,
     DEFAULT_AUTHENTICATION_CLASSES=(
-        # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
-
+    DEFAULT_PAGINATION_CLASS='drf_hal_json.pagination.HalPageNumberPagination',
+    DEFAULT_PARSER_CLASSES=('drf_hal_json.parsers.JsonHalParser',),
     DEFAULT_RENDERER_CLASSES=(
-
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer'
     ),
-    DEFAULT_FILTER_BACKENDS=(
-        'rest_framework.filters.DjangoFilterBackend',
-        # 'rest_framework.filters.OrderingFilter',
-
-    ),
-    COERCE_DECIMAL_TO_STRING=True,
+    COERCE_DECIMAL_TO_STRING=False,
 )
 
 CORS_ORIGIN_ALLOW_ALL = True  # if True, the whitelist will not be used and all origins will be accepted
