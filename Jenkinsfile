@@ -27,13 +27,13 @@ node {
 
     stage('Test') {
         tryStep "test", {
-            sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
+            sh "docker-compose -p panorama -f web/deploy/test/docker-compose.yml down"
             withCredentials([[$class: 'StringBinding', credentialsId: 'DATAPUNT_OBJECTSTORE_PASSWORD', variable: 'OBJECTSTORE_PASSWORD']]) {
-                sh "docker-compose -p panorama -f .jenkins/docker-compose.yml build && " +
-                   "docker-compose -p panorama -f .jenkins/docker-compose.yml run -u root --rm tests"
+                sh "docker-compose -p panorama -f web/deploy/test/docker-compose.yml build && " +
+                   "docker-compose -p panorama -f web/deploy/test/docker-compose.yml run -u root --rm tests"
             }
         }, {
-            sh "docker-compose -p panorama -f .jenkins/docker-compose.yml down"
+            sh "docker-compose -p panorama -f web/deploy/test/docker-compose.yml down"
         }
     }
 
