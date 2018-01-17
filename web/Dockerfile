@@ -20,6 +20,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 USER datapunt
 
 COPY panorama /app/
-COPY deploy /
+COPY deploy /deploy/
 
-CMD /app/docker-entrypoint.sh
+USER datapunt
+
+RUN export DJANGO_SETTINGS_MODULE=panorama.settings
+RUN python manage.py collectstatic --noinput
+
+CMD uwsgi
