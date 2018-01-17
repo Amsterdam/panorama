@@ -1,0 +1,19 @@
+version: "3.0"
+services:
+  database:
+    image: amsterdam/postgres
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_USER: panorama
+
+  importer:
+    image: build.datapunt.amsterdam.nl:5000/datapunt/panorama:${ENVIRONMENT}
+    links:
+      - database:database
+    environment:
+      DB_NAME: panorama
+      DB_USER: panorama
+      DB_PASSWORD: insecure
+      OBJECTSTORE_PASSWORD:
+    command: >
+      bash -c "python manage.py run_import"
