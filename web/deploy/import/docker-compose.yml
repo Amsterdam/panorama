@@ -5,6 +5,8 @@ services:
     environment:
       POSTGRES_PASSWORD: insecure
       POSTGRES_USER: panorama
+    volumes:
+      - ./backups:/tmp/backups
 
   importer:
     image: build.datapunt.amsterdam.nl:5000/datapunt/panorama:${ENVIRONMENT}
