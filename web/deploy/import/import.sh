@@ -20,8 +20,8 @@ dc build
 
 echo "Starting and migrating db"
 dc up -d database
-dc run importer ./docker-wait.sh
-dc run importer ./docker-migrate.sh
+dc run importer /deploy/docker-wait.sh
+dc run importer /deploy/docker-migrate.sh
 
 echo "Importing data"
 dc run --rm importer
