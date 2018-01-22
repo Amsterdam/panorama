@@ -12,23 +12,21 @@ class PanoProcessor:
             return False
 
         self.process_one(pano_to_process)
-        self._set_status_to(pano_to_process, self.status_done)
+        pano_to_process.status = self.status_done
+        pano_to_process.save()
+
         return True
 
     def process_one(self, panorama):
         pass
 
-    @transaction.atomic
     def _get_next_pano(self):
         try:
-            next_pano = self.status_queryset.select_for_update()[0]
-            self._set_status_to(next_pano, self.status_in_progress)
+            with transaction.atomic():
+                next_pano = self.status_queryset.select_for_update()[0]
+                next_pano.status = self.status_in_progress
+                next_pano.save()
 
             return next_pano
         except IndexError:
             return None
-
-    @transaction.atomic
-    def _set_status_to(self, panorama, status):
-        panorama.status = status
-        panorama.save()
