@@ -14,6 +14,7 @@ RUN apt-get update \
 	&& pip install uwsgi
 
 WORKDIR /app
+
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -24,4 +25,5 @@ ARG OBJECTSTORE_PASSWORD
 ENV OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD
 
 USER datapunt
-CMD "python manage.py work"
+
+CMD ["python", "manage.py", "work"]
