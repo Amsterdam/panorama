@@ -2,7 +2,7 @@ import os
 
 # OBJECT_STORE SETTINGS
 
-OBJECTSTORE_USER = os.getenv('OBJECTSTORE_USER', 'datapunt')
+OBJECTSTORE_USER = os.getenv('OBJECTSTORE_USER', 'panorama')
 OBJECTSTORE_PASSWORD = os.getenv('OBJECTSTORE_PASSWORD', 'insecure')
 
 AUTH_VERSION = '2.0'

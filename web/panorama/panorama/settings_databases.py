@@ -1,6 +1,13 @@
 import os
 import re
 
+OVERRIDE_HOST_ENV_VAR = 'DATABASE_HOST_OVERRIDE'
+OVERRIDE_PORT_ENV_VAR = 'DATABASE_PORT_OVERRIDE'
+
+on_swarm = os.getenv('ON_SWARM', '0')
+if on_swarm == '1':
+    CONN_MAX_AGE = None
+
 
 def get_docker_host():
     """
@@ -31,13 +38,6 @@ def in_docker():
     except IOError:
         return False
 
-
-OVERRIDE_HOST_ENV_VAR = 'DATABASE_HOST_OVERRIDE'
-OVERRIDE_PORT_ENV_VAR = 'DATABASE_PORT_OVERRIDE'
-
-on_swarm = os.getenv('ON_SWARM', '0')
-if on_swarm == '1':
-    CONN_MAX_AGE=None
 
 class LocationKey:
     local = 'local'
