@@ -28,7 +28,7 @@ node {
     stage('Test') {
         tryStep "test", {
             sh "docker-compose -p panorama -f web/deploy/test/docker-compose.yml down"
-            withCredentials([[$class: 'StringBinding', credentialsId: 'PANORAMA_OBJECTSTORE_PASSWORD', variable: 'OBJECTSTORE_PASSWORD']]) {
+            withCredentials([[$class: 'StringBinding', credentialsId: 'Panorama_objectstore_key', variable: 'OBJECTSTORE_PASSWORD']]) {
                 sh "docker-compose -p panorama -f web/deploy/test/docker-compose.yml build && " +
                    "docker-compose -p panorama -f web/deploy/test/docker-compose.yml run -u root --rm tests"
             }
