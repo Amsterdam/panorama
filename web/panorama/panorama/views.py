@@ -62,7 +62,7 @@ class PanoramaViewSet(datapunt_rest.AtlasViewSet):
             pass
 
         # No results were found
-        return Response([], status=404)
+        return Response([], status=200)
 
     def get_queryset(self, *args, **kwargs):
         _, queryset =  self._get_filter_and_queryset_by_date(self.queryset, self.request)

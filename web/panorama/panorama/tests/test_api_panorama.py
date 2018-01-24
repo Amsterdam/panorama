@@ -16,17 +16,17 @@ class OpnameLocatieApiTest(PanoramaApiTest):
 
     def test_get_nearest_from_afar_no_radius(self):
         response = self.client.get('/panorama/opnamelocatie/?lat=50&lon=4')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
         self.assertNotIn('pano_id', response.data)
 
     def test_get_nearest_from_afar_radius(self):
         response = self.client.get('/panorama/opnamelocatie/?lat=50&lon=4&radius=10000')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
         self.assertNotIn('pano_id', response.data)
 
     def test_get_nearest_from_afar_no_radius_year(self):
         response = self.client.get('/panorama/opnamelocatie/?lat=50&lon=4&vanaf=2015')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
         self.assertNotIn('pano_id', response.data)
 
     def test_fieldset_to_spec(self):
@@ -46,7 +46,7 @@ class OpnameLocatieApiTest(PanoramaApiTest):
 
     def test_get_nearest_close_no_radius_but_too_far(self):
         response = self.client.get('/panorama/opnamelocatie/?lat=52.377&lon=4.8970')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
         self.assertNotIn('pano_id', response.data)
 
     def test_get_nearest_close_radius(self):

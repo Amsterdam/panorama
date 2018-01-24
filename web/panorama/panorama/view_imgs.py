@@ -77,10 +77,10 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
             pano = queryset[0]
             max_range = get_int_value(request, 'radius', 20)
             if pano.distance_meters > max_range:
-                return Response([], status=404)
+                return Response([], status=200)
         except (IndexError):
             # No results were found
-            return Response([], status=404)
+            return Response([], status=200)
 
         heading = round(self._get_heading(pano.geolocation, coords))
         url = self._get_thumb_url(pano.pano_id, heading, request)
