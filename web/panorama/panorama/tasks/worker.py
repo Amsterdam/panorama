@@ -4,10 +4,7 @@ import time
 
 from panorama.tasks.mixins import PanoramaTableAware
 from panorama.tasks.workers.blur_regions import RegionBlurrer
-from panorama.tasks.workers.detect_faces import OpenCVFaceDetector
-from panorama.tasks.workers.detect_faces_dlib import DlibFaceDetector
-from panorama.tasks.workers.detect_faces_google import GoogleFaceDetector
-from panorama.tasks.workers.detect_lps import LicensePlateDetector
+from panorama.tasks.workers.detect_all import AllRegionDetector
 from panorama.tasks.workers.render_pano import PanoRenderer
 
 log = logging.getLogger(__name__)
@@ -31,10 +28,7 @@ class Worker(PanoramaTableAware):
         """
         still_working = \
             RegionBlurrer().process() == True \
-            or GoogleFaceDetector().process() == True \
-            or DlibFaceDetector().process() == True \
-            or OpenCVFaceDetector().process() == True \
-            or LicensePlateDetector().process() == True \
+            or AllRegionDetector().process() == True \
             or PanoRenderer().process() == True
 
         return still_working

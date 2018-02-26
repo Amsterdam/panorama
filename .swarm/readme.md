@@ -28,6 +28,8 @@ docker stack deploy --compose-file docker-compose.yml panoswarm
 
 Let op! De naam van het cluster is belangrijk (wordt gebruikt in `save-db.sh`)
 
+Op het cluster 
+
 En als het cluster succesvol is opgestart - uitgaande van 5cpu's, en > 16GB memory per node:
 
 ```
@@ -68,7 +70,22 @@ docker-compose -f docker-compose-local.yml push
 docker stack deploy --compose-file docker-compose-local.yml panoslocal
 ```
 
-en stoppen met:
+Om de swarm op te starten, lokaal.
+
+Wil je gebruik maken van de volledige database gebruik dan onderstaande - uit `dl_and_load_data.sh` gekopieerde commando's om de database op te halen
+
+```bash
+_db_docker=`docker ps -q -f "name=panoslocal_database"`
+
+docker exec $_db_docker /bin/download-db.sh panorama <username>
+docker exec $_db_docker /bin/update-table.sh panorama panoramas_region public panorama
+docker exec $_db_docker psql -U panorama -c 'create sequence panoramas_region_id_seq'
+docker exec $_db_docker psql -U panorama -c "alter table panoramas_region alter id set default nextval('panoramas_region_id_seq')"
+docker exec $_db_docker /bin/update-table.sh panorama panoramas_panorama public panorama
+```
+
+
+Lokaal stoppen kan met:
 
 ```bash
 docker stack rm panoslocal
