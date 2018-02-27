@@ -41,6 +41,7 @@ def region_writer(panorama: Panorama, lp=False, dlib=False, google=False):
 
 
 def save_regions(regions, panorama: Panorama, region_type='G'):
+    models = []
     for region in regions:
         rg = Region()
 
@@ -59,4 +60,6 @@ def save_regions(regions, panorama: Panorama, region_type='G'):
         rg.left_bottom_x = left_bottom[0]
         rg.left_bottom_y = left_bottom[1]
 
-        rg.save()
+        models.append(rg)
+
+    Region.objects.bulk_create(models, 1000)
