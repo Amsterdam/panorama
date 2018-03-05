@@ -28,9 +28,7 @@ MISSION_TYPE_CHOICES = (
 
 class AbstractPanorama(StatusModel):
     STATUS = Choices(
-        'to_be_rendered', 'rendering', 'rendered', 'detecting_lp',
-        'detected_lp', 'detecting1', 'detected_1', 'detecting2',
-        'detected_2', 'detecting3', 'detected_3', 'blurring', 'done')
+        'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
 
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True, db_index=True)
