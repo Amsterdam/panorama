@@ -9,7 +9,10 @@ cd /home/user/panorama
 git pull
 ```
 
-als sudo su -
+In de map `web/panorama` moet een valide `google-application-credentials.json` worden geplaatst
+zodat het cluster na bouwen gebruik kan maken van de Google Vision API
+
+Om te bouwen/installeren. Run als sudo su -
 
 ```
 export OBJECTSTORE_PASSWORD=<OBJECT_STORE_PASSWORD>
@@ -28,21 +31,35 @@ docker stack deploy --compose-file docker-compose.yml panoswarm
 
 Let op! De naam van het cluster is belangrijk (wordt gebruikt in `save-db.sh`)
 
-Op het cluster 
-
-En als het cluster succesvol is opgestart - uitgaande van 5cpu's, en > 16GB memory per node:
+En als het cluster succesvol is opgestart - uitgaande van 6cpu's, en > 16GB memory per node:
 
 ```
+docker service scale panoswarm_worker=192
+```
+
+Het beste kun je stapsgewijs opschalen:
+
+```
+docker service scale panoswarm_worker=32
+# wacht een minuutje
+docker service scale panoswarm_worker=64
+# wacht een minuutje
+docker service scale panoswarm_worker=96
+# wacht een minuutje
+docker service scale panoswarm_worker=128
+# wacht een minuutje
 docker service scale panoswarm_worker=160
+# wacht een minuutje
+docker service scale panoswarm_worker=196
 ```
 
-Stel de gegevens in de database veilig, wannneer de swarm klaar is:
+Stel de gegevens - de resultaten van detectie - in de database veilig, wannneer de swarm klaar is:
 
 ```
 ./save-db.sh
 ```
 
-Stop swarm - zorg ervoor dat de gegevens uit de database zijn veiliggesteld! zie stap hierboven - met het volgende commando:
+Stop swarm - *zorg ervoor dat de gegevens uit de database zijn veiliggesteld!* zie stap hierboven - met het volgende commando:
 
 ```
 docker stack rm panoswarm

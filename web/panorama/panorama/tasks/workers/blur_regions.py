@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class RegionBlurrer(PanoProcessor):
-    status_queryset = Panorama.detected_3
+    status_queryset = Panorama.detected
     status_in_progress = Panorama.STATUS.blurring
     status_done = Panorama.STATUS.done
 

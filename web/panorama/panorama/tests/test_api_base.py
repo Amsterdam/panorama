@@ -56,7 +56,7 @@ class PanoramaApiTest(APITestCase):
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_5_2014_CLOSE_BUT_NO_CIGAR',
-            status=Panorama.STATUS.detected_2,
+            status=Panorama.STATUS.detected,
             timestamp=factory.fuzzy.FuzzyDateTime(
                 datetime.datetime(2014, 1, 1, tzinfo=UTC_TZ), force_year=2014),
             filename=factory.fuzzy.FuzzyText(length=30),

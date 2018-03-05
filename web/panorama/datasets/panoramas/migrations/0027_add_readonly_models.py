@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RecentPanorama',
             fields=[
-                ('status', model_utils.fields.StatusField(choices=[('to_be_rendered', 'to_be_rendered'), ('rendering', 'rendering'), ('rendered', 'rendered'), ('detecting_lp', 'detecting_lp'), ('detected_lp', 'detected_lp'), ('detecting1', 'detecting1'), ('detected_1', 'detected_1'), ('detecting2', 'detecting2'), ('detected_2', 'detected_2'), ('detecting3', 'detecting3'), ('detected_3', 'detected_3'), ('blurring', 'blurring'), ('done', 'done')], default='to_be_rendered', max_length=100, no_check_for_status=True, verbose_name='status')),
+                ('status', model_utils.fields.StatusField(choices=[('to_be_rendered', 'to_be_rendered'), ('rendering', 'rendering'), ('rendered', 'rendered'), ('detecting_regions', 'detecting_regions'), ('detected', 'detected'), ('blurring', 'blurring'), ('done', 'done')], default='to_be_rendered', max_length=100, no_check_for_status=True, verbose_name='status')),
                 ('status_changed', model_utils.fields.MonitorField(default=django.utils.timezone.now, monitor='status', verbose_name='status changed')),
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('pano_id', models.CharField(db_index=True, max_length=37, unique=True)),
