@@ -31,7 +31,7 @@ services:
       DATABASE_PASSWORD: insecure
       ON_SWARM: 1
     deploy:
-      replicas: 32
+      replicas: 1
       placement:
         constraints:
           - node.hostname != master.swarm.datapunt.amsterdam.nl
