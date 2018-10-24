@@ -5,7 +5,7 @@ from rest_framework.fields import empty
 from rest_framework_gis import fields
 # Project
 from datasets.panoramas import models
-from datapunt_api.datapunt_rest import LinksField, HALSerializer
+from datapunt_api.rest import LinksField, HALSerializer
 
 log = logging.getLogger(__name__)
 
@@ -96,4 +96,3 @@ class FilteredPanoSerializer(PanoSerializer):
 
         serializer = self.Models.adjacency_serializer(instance=qs, many=True)
         return serializer.data
-
