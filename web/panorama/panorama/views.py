@@ -4,12 +4,12 @@ from rest_framework.response import Response
 # Project
 from datasets.panoramas.models import Panorama
 from datasets.panoramas import serializers
-from datapunt_api import datapunt_rest
+from datapunt_api import rest
 
 from .queryparam_utils import get_request_coord, convert_to_date, get_int_value
 
 
-class PanoramaViewSet(datapunt_rest.AtlasViewSet):
+class PanoramaViewSet(rest.DatapuntViewSet):
     """
     View to retrieve panoramas
 

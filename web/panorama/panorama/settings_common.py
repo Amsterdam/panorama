@@ -35,9 +35,11 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     'django_extensions',
-
+    'django_filters',
+    'datapunt_api',
     'django.contrib.gis',
     'rest_framework',
+
     'rest_framework_gis',
     'rest_framework_swagger',
 ]
@@ -108,6 +110,9 @@ REST_FRAMEWORK = dict(
         'rest_framework.renderers.BrowsableAPIRenderer'
     ),
     COERCE_DECIMAL_TO_STRING=False,
+
+    DEFAULT_FILTER_BACKENDS=('django_filters.rest_framework.DjangoFilterBackend',),
+
 )
 
 CORS_ORIGIN_ALLOW_ALL = True  # if True, the whitelist will not be used and all origins will be accepted
