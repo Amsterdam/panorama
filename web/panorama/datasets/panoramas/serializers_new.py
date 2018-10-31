@@ -3,6 +3,7 @@ import logging
 from rest_framework import serializers
 from rest_framework.fields import empty
 from rest_framework_gis import fields
+
 # Project
 from datasets.panoramas.models_new import PanoramaNew, AdjacencyNew
 from datapunt_api.rest import LinksField, HALSerializer
@@ -11,26 +12,8 @@ log = logging.getLogger(__name__)
 
 MAX_ADJACENCY = 21
 
-
-class AdjacencySerializerNew(serializers.ModelSerializer):
-    pano_id = serializers.CharField(max_length=37, source='to_pano_id')
-
-    direction = serializers.DecimalField(max_digits=20, decimal_places=2)
-    angle = serializers.DecimalField(max_digits=20, decimal_places=2)
-    pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
-    distance = serializers.DecimalField(max_digits=20, decimal_places=2)
-
-    year = serializers.IntegerField(source='to_year')
-
-    # TODO: choose better name!
-    current = serializers.SerializerMethodField()
-
-    class Meta:
-        model = AdjacencyNew
-        fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch', 'distance', 'year', 'current')
-
-    def get_current(self, obj):
-        return obj.from_pano_id == obj.to_pano_id
+class PanoLinksFieldNew(LinksField):
+    lookup_field = 'pano_id'
 
 
 class ImageLinksSerializerNew(serializers.ModelSerializer):
@@ -55,14 +38,10 @@ class ThumbnailSerializerNew(serializers.ModelSerializer):
         fields = ('url', 'heading', 'pano_id')
 
 
-class PanoLinksFieldNew(LinksField):
-    lookup_field = 'pano_id'
-
-
 class PanoSerializerNew(HALSerializer):
     serializer_url_field = PanoLinksFieldNew
-    image_sets = serializers.SerializerMethodField(source='get_image_sets')
-    geometrie = fields.GeometryField(source='geolocation')
+    image_sets = serializers.SerializerMethodField()
+    geometry = fields.GeometryField(source='geolocation')
     roll = serializers.DecimalField(max_digits=20, decimal_places=2)
     pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
     heading = serializers.DecimalField(max_digits=20, decimal_places=2)
@@ -85,3 +64,20 @@ class FilteredPanoSerializerNew(PanoSerializerNew):
     def __init__(self, instance=None, data=empty, filter_dict={}, **kwargs):
         self.filter = filter_dict
         super().__init__(instance, data, **kwargs)
+
+
+class AdjacencyDataSerializer(serializers.Serializer):
+    distance = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_distance')
+    angle = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_angle')
+    direction = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_direction')
+    heading = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_heading')
+
+class AdjacentPanoSerializer(PanoSerializerNew):
+
+    adjacency = serializers.SerializerMethodField()
+
+    def get_adjacency(self, obj):
+        if obj.from_pano_id != obj.pano_id:
+            return AdjacencyDataSerializer(obj).data
+
+        return
