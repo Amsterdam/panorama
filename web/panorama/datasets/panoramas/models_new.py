@@ -111,30 +111,21 @@ class PanoramaNew(AbstractPanoramaNew):
         db_table = 'panoramas_panorama'
 
 
-class AbstractAdjacencyNew(models.Model):
-    to_pano_id = models.CharField(max_length=37)
+class AdjacencyNew(AbstractPanoramaNew):
     from_pano_id = models.CharField(max_length=37)
 
-    to_year = models.IntegerField()
+    relative_distance = models.FloatField()
+    relative_direction = models.FloatField()
+    relative_angle = models.FloatField()
+    relative_heading = models.FloatField()
 
-    heading = models.DecimalField(max_digits=20, decimal_places=2)
-    distance = models.DecimalField(max_digits=20, decimal_places=2)
-    direction = models.DecimalField(max_digits=20, decimal_places=2)
-    angle = models.DecimalField(max_digits=20, decimal_places=2)
-    pitch = models.DecimalField(max_digits=20, decimal_places=2)
-
-    class Meta:
-        abstract = True
+    class Meta(AbstractPanoramaNew.Meta):
+        abstract = False
         managed = False
+        db_table = "adjacencies_new"
 
     def __str__(self):
-        return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.to_pano_id)
-
-
-class AdjacencyNew(AbstractAdjacencyNew):
-    class Meta(AbstractAdjacencyNew.Meta):
-        abstract = False
-        db_table = "adjacencies_new"
+        return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.pano_id)
 
 
 class RegionNew(models.Model):
