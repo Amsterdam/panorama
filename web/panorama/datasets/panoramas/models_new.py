@@ -115,6 +115,8 @@ class PanoramaNew(AbstractPanoramaNew):
 class AdjacencyNew(AbstractPanoramaNew):
     from_pano_id = models.CharField(max_length=37)
 
+    from_geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True)
+
     relative_distance = models.FloatField()
     relative_direction = models.FloatField()
     relative_angle = models.FloatField()
