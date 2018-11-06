@@ -3,6 +3,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import serializers as rest_serializers
 
+from django.db.models import Q, Exists, OuterRef, Func, F, Expression, Value
+
+from django.db import models
+from django.contrib.gis.db.models import GeometryField
+from django.contrib.gis.geos import Polygon
+
 from django_filters.rest_framework.filterset import FilterSet
 from django_filters.rest_framework import filters
 from django_filters import widgets, fields
@@ -20,6 +26,18 @@ MISSION_TYPE_CHOICES = (
     ('woz', 'woz')
 )
 
+# https://stackoverflow.com/questions/47094982/django-subquery-and-annotations-with-outerref
+class RawCol(Expression):
+
+    def __init__(self, model, field_name, output_field=None):
+        field = model._meta.get_field(field_name)
+        self.table = model._meta.db_table
+        self.column = field.column
+        super().__init__(output_field=output_field)
+
+    def as_sql(self, compiler, connection):
+        sql = f'"{self.table}"."{self.column}"'
+        return sql, []
 
 class PanoramaFilter(FilterSet):
     """
@@ -29,7 +47,7 @@ class PanoramaFilter(FilterSet):
     MAX_RADIUS = 250 # meters
 
     radius = filters.NumberFilter(method='radius_filter', label='Radius')
-    newest_in_radius = filters.BooleanFilter(method='newest_in_radius_filter', label='Only return newest in radius')
+    newest_in_range = filters.BooleanFilter(method='newest_in_range_filter', label='Only return newest in range')
 
     timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
 
@@ -44,7 +62,7 @@ class PanoramaFilter(FilterSet):
 
         fields = (
             'timestamp',
-            'newest_in_radius',
+            'newest_in_range',
             'radius',
             'bbox',
             'mission_type'
@@ -64,10 +82,14 @@ class PanoramaFilter(FilterSet):
         except ValueError:
             raise rest_serializers.ValidationError('x and y parameters must be numbers')
 
-        return (
-            "ST_DWithin(ST_SetSRID(ST_MakePoint(%s, %s), 28992), _geolocation_2d_rd, %s)",
-            [x, y, value]
-        )
+        point = Func(Value(x), Value(y), function='ST_MakePoint', output_field=GeometryField())
+        srid_point = Func(point, 28992, function='ST_SetSRID', output_field=GeometryField())
+
+        return queryset \
+            .annotate(within=Func(srid_point, F('_geolocation_2d_rd'), \
+                Value(value), function='ST_DWithin', output_field=models.BooleanField())) \
+            .filter(within=True)
+
 
     def get_bbox_query(self, queryset, value):
         coordinates = value.split(',')
@@ -80,10 +102,12 @@ class PanoramaFilter(FilterSet):
         except ValueError:
             raise rest_serializers.ValidationError('bbox coordinates must be numbers')
 
-        return (
-            "_geolocation_2d_rd && ST_MakeEnvelope(%s, %s, %s, %s)",
-            coordinates
-        )
+        bbox = Func(Value(coordinates[0]), Value(coordinates[1]), \
+            Value(coordinates[2]), Value(coordinates[3]), 28992, \
+            function='ST_MakeEnvelope', output_field=GeometryField())
+
+        return queryset \
+            .filter(_geolocation_2d_rd__bboverlaps=(bbox))
 
 
     def is_filter_enabled(self, filter):
@@ -94,21 +118,15 @@ class PanoramaFilter(FilterSet):
             raise rest_serializers.ValidationError('radius and bbox filters are mutually exclusive')
 
         if value > self.MAX_RADIUS:
-            raise rest_serializers.ValidationError('radius can be at most %s meters' % MAX_RADIUS)
+            raise rest_serializers.ValidationError('radius can be at most %s meters' % self.MAX_RADIUS)
 
-        (radius_where, radius_params) = self.get_radius_query(queryset, value)
-
-        queryset = queryset.extra(
-            where=[
-                radius_where
-            ],
-            params=radius_params
-        )
-
-        return queryset
+        return self.get_radius_query(queryset, value)
 
 
-    def newest_in_radius_filter(self, queryset, name, value):
+    def get_skip_not_exists(self):
+        return None
+
+    def newest_in_range_filter(self, queryset, name, value):
         if not (self.is_filter_enabled('bbox') or self.is_filter_enabled('radius')):
             raise rest_serializers.ValidationError('bbox or radius filter must be enabled to use newest in radius')
 
@@ -116,66 +134,64 @@ class PanoramaFilter(FilterSet):
         # area = compute_area()
 
         # TODO: get radius from mission type
-        newest_in_radius_radius = 5
+        newest_in_range_radius = 5
+
+        exists = queryset.model.objects \
+            .values('id') \
+            .filter(timestamp__gt=OuterRef('timestamp')) \
+            .annotate(within=Func(RawCol(queryset.model, '_geolocation_2d_rd'), F('_geolocation_2d_rd'), \
+                Value(newest_in_range_radius), function='ST_DWithin', output_field=models.BooleanField())) \
+            .filter(within=True)
 
         # TODO: explain
         if self.is_filter_enabled('radius'):
-            (extra_geom_where, extra_geom_params) = self.get_radius_query(queryset, self.data['radius'])
+            # TODO: add padding radius with newest_in_range radius
+            exists = self.get_radius_query(exists, self.data['radius'])
         elif self.is_filter_enabled('bbox'):
-            (extra_geom_where, extra_geom_params) = self.get_bbox_query(queryset, self.data['bbox'])
-        else:
-            extra_geom_where = 'true'
-            extra_geom_params = []
+            exists = self.get_bbox_query(exists, self.data['bbox'])
 
+        not_exists_filter = Q(not_exists=True)
 
-        return queryset.extra(
-            where=[
-                """NOT EXISTS (
-                    SELECT *
-                    FROM panoramas_panorama newer
-                    WHERE
-                        newer.timestamp > timestamp AND
-                        ST_DWithin(newer._geolocation_2d_rd, _geolocation_2d_rd, %s) AND
-                        {0}
-                )""".format(extra_geom_where)
-            ],
-            params=([newest_in_radius_radius] + extra_geom_params)
-        )
+        if self.get_skip_not_exists():
+            not_exists_filter = self.get_skip_not_exists() | not_exists_filter
+
+        return queryset.annotate(
+            not_exists=~Exists(exists, output_field=models.BooleanField())
+        ).filter(not_exists_filter)
 
 
     def bbox_filter(self, queryset, name, value):
         if self.is_filter_enabled('radius'):
             raise rest_serializers.ValidationError('radius and bbox filters are mutually exclusive')
 
-        (bbox_where, bbox_params) = self.get_bbox_query(queryset, value)
-
-        queryset = queryset.extra(
-            where=[
-                bbox_where
-            ],
-            params=bbox_params
-        )
-
-        return queryset
+        return self.get_bbox_query(queryset, value)
 
 
 class PanoramaFilterAdjacent(PanoramaFilter):
 
     DEFAULT_ADJACENT_RADIUS = 20
 
-    def __init__(self, data=None, queryset=None, request=None, prefix=None):
+    def __init__(self, data=None, queryset=None, request=None, prefix=None, pano_id=None):
+        self.pano_id = pano_id
+
         if not ('radius' in data and data['radius']):
             data = request.GET.copy()
             data['radius'] = self.DEFAULT_ADJACENT_RADIUS
 
         super().__init__(data=data, queryset=queryset, request=request, prefix=prefix)
 
+    def get_skip_not_exists(self):
+        if self.pano_id:
+            return Q(pano_id=self.pano_id)
+
+        return super().get_skip_not_exists()
+
 
     def get_radius_query(self, queryset, value):
-        return (
-            "ST_DWithin(from_geolocation_2d_rd, _geolocation_2d_rd, %s)",
-            [value]
-        )
+        return queryset \
+            .annotate(within=Func(F('from_geolocation_2d_rd'), F('_geolocation_2d_rd'), \
+                Value(value), function='ST_DWithin', output_field=models.BooleanField())) \
+            .filter(within=True)
 
 
 class PanoramaViewSetNew(rest.DatapuntViewSet):
@@ -210,7 +226,7 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
     def adjacent(self, request, pano_id):
         queryset = AdjacencyNew.objects.filter(from_pano_id=pano_id)
 
-        filter = PanoramaFilterAdjacent(request=request, queryset=queryset, data=request.query_params)
+        filter = PanoramaFilterAdjacent(request=request, queryset=queryset, data=request.query_params, pano_id=pano_id)
 
         if filter.is_filter_enabled('bbox'):
             raise rest_serializers.ValidationError('bbox filter not allowed for adjacent panoramas')
