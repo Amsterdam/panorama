@@ -1,6 +1,7 @@
 from math import atan2, degrees, cos, sin, radians
 
 from django.contrib.gis.db import models as geo
+from django.db.models import Manager
 from django.contrib.gis.geos import Point
 from django.db import models
 from django.conf import settings
@@ -46,7 +47,7 @@ class AbstractPanorama(StatusModel):
     mission_type = models.CharField(
         max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
 
-    objects = geo.GeoManager()
+    objects = Manager()
 
     class Meta:
         ordering = ('id',)
@@ -111,8 +112,8 @@ class Panorama(AbstractPanorama):
 
 
 class AbstractAdjacency(models.Model):
-    from_pano = models.ForeignKey(Panorama, related_name='to_adjacency')
-    to_pano = models.ForeignKey(Panorama, related_name='from_adjacency')
+    from_pano = models.ForeignKey(Panorama, on_delete=models.CASCADE, related_name='to_adjacency')
+    to_pano = models.ForeignKey(Panorama, on_delete=models.CASCADE, related_name='from_adjacency')
     heading = models.DecimalField(max_digits=20, decimal_places=2)
     to_year = models.IntegerField()
     distance = models.FloatField()
@@ -189,7 +190,7 @@ class Traject(models.Model):
     pitch_rms = models.FloatField(null=True, blank=True)
     heading_rms = models.FloatField(null=True, blank=True)
 
-    objects = geo.GeoManager()
+    objects = Manager()
 
     def __str__(self):
         return '<Traject %d>' % self.pk
