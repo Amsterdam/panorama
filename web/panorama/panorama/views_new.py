@@ -1,4 +1,5 @@
 # Packages
+import math
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import serializers as rest_serializers
@@ -44,17 +45,24 @@ class PanoramaFilter(FilterSet):
     TODO: add documentation
     """
 
-    MAX_RADIUS = 250 # meters
+    MAX_RADIUS = 1000 # meters
 
+    # the size of a map tile on https://data.amsterdam.nl/ on zoom
+    # level 11 is approximately 500 square meters.
+    # Panorama photos are displayed on zoom level 11 and up.
+    MAX_NEWEST_IN_RANGE_RADIUS = 250 # meters
+
+    # TODO: for now, both filters only accept RD:28992 coordinates
+    bbox = filters.CharFilter(method='bbox_filter', label='Bounding box')
     radius = filters.NumberFilter(method='radius_filter', label='Radius')
+
     newest_in_range = filters.BooleanFilter(method='newest_in_range_filter', label='Only return newest in range')
 
     timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
 
-    # TODO: should be add a year filter?
+    # TODO: should we add a year filter, for convenience?
     # year = filters.NumberFilter(method='year_filter', label='Year')
 
-    bbox = filters.CharFilter(method='bbox_filter', label='Bounding box')
     mission_type = filters.ChoiceFilter(choices=MISSION_TYPE_CHOICES)
 
     class Meta(object):
@@ -90,24 +98,34 @@ class PanoramaFilter(FilterSet):
                 Value(value), function='ST_DWithin', output_field=models.BooleanField())) \
             .filter(within=True)
 
-
-    def get_bbox_query(self, queryset, value):
-        coordinates = value.split(',')
+    def bbox_from_string(self, value):
+        try:
+            coordinates = list(map(lambda coordinate: float(coordinate), value.split(',')))
+        except ValueError:
+            raise ValueError('bbox coordinates must be numbers')
 
         if len(coordinates) != 4:
-            raise rest_serializers.ValidationError('a bbox consists of 4 numbers')
+            raise ValueError('a bbox consists of 4 numbers')
 
+        return {
+            'x1': coordinates[0],
+            'y1': coordinates[1],
+            'x2': coordinates[2],
+            'y2': coordinates[3]
+        }
+
+    def get_bbox_query(self, queryset, value):
         try:
-            coordinates = list(map(lambda coordinate: float(coordinate), coordinates))
-        except ValueError:
-            raise rest_serializers.ValidationError('bbox coordinates must be numbers')
+            bbox = self.bbox_from_string(value)
+        except ValueError as e:
+            rest_serializers.ValidationError(str(e))
 
-        bbox = Func(Value(coordinates[0]), Value(coordinates[1]), \
-            Value(coordinates[2]), Value(coordinates[3]), 28992, \
+        bbox_sql = Func(Value(bbox['x1']), Value(bbox['y1']), \
+            Value(bbox['x2']), Value(bbox['y2']), 28992, \
             function='ST_MakeEnvelope', output_field=GeometryField())
 
         return queryset \
-            .filter(_geolocation_2d_rd__bboverlaps=(bbox))
+            .filter(_geolocation_2d_rd__bboverlaps=(bbox_sql))
 
 
     def is_filter_enabled(self, filter):
@@ -130,9 +148,6 @@ class PanoramaFilter(FilterSet):
         if not (self.is_filter_enabled('bbox') or self.is_filter_enabled('radius')):
             raise rest_serializers.ValidationError('bbox or radius filter must be enabled to use newest in radius')
 
-        # TODO: check area < MAXIMUM_AREA
-        # area = compute_area()
-
         # TODO: get radius from mission type
         newest_in_range_radius = 5
 
@@ -143,12 +158,38 @@ class PanoramaFilter(FilterSet):
                 Value(newest_in_range_radius), function='ST_DWithin', output_field=models.BooleanField())) \
             .filter(within=True)
 
-        # TODO: explain
+        # The exists subquery which selects panoramas only if they are the newest
+        # within a range of meters performs much faster if we include the radius or
+        # bounding box filter from the outer query:
         if self.is_filter_enabled('radius'):
+            try:
+                radius = float(self.data['radius'])
+            except ValueError:
+                raise rest_serializers.ValidationError('radius parameter must be a number')
+
+            if radius > self.MAX_NEWEST_IN_RANGE_RADIUS:
+                raise rest_serializers.ValidationError('radius for newest_in_range filter can be at most %s meters' % self.MAX_NEWEST_IN_RANGE_RADIUS)
+
             # TODO: add padding radius with newest_in_range radius
-            exists = self.get_radius_query(exists, self.data['radius'])
+            exists = self.get_radius_query(exists, radius)
         elif self.is_filter_enabled('bbox'):
-            exists = self.get_bbox_query(exists, self.data['bbox'])
+            # Square that fits circle with radius = MAX_NEWEST_IN_RANGE_RADIUS
+            # has area of:
+            max_area = math.pow(self.MAX_NEWEST_IN_RANGE_RADIUS * 2, 2)
+
+            bbox_string = self.data['bbox']
+
+            try:
+                bbox = self.bbox_from_string(bbox_string)
+            except ValueError as e:
+                rest_serializers.ValidationError(str(e))
+
+            area = abs(bbox['x2'] - bbox['x1']) * abs(bbox['y2'] - bbox['y1'])
+
+            if area > max_area:
+                raise rest_serializers.ValidationError('area for newest_in_range filter can be at most %s square meters' % max_area)
+
+            exists = self.get_bbox_query(exists, bbox_string)
 
         not_exists_filter = Q(not_exists=True)
 
