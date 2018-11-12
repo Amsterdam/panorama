@@ -106,12 +106,13 @@ class ImportPanoramaJob(object):
                 log.error(f"Mission {path.split('/')[-2]} does not exist, creating automatically")
                 mission = Mission(
                     name=path.split('/')[-2],
-                    type='L',
+                    surface_type='L',
+                    mission_type='bi',
                     date="2015-1-1",
                     neighbourhood='AUTOMATICALLY CREATED'
                 )
                 mission.save()
-            mission_type = mission.type
+            mission_type = mission.surface_type
         else:
             mission_type = None
 
@@ -200,12 +201,15 @@ class ImportPanoramaJob(object):
             return None
 
         date_format = '%d-%m-%Y'
-        # Missienaam	water/land	week	datum	Gebied	Naar ftp
+
+        # Missienaam	water/land	week	datum	Gebied	Naar ftp	rijafstand	missietype	woz-jaargang
         return Mission(
-            name=(row['Missienaam']),
-            type=(row['water/land'])[:1].upper(),
-            date=datetime.strptime((row['datum']), date_format).date(),
-            neighbourhood=(row['Gebied'])
+            name=row['Missienaam'],
+            surface_type=row['water/land'][:1].upper(),
+            mission_type=row['missietype'],
+            mission_year=row['woz-jaargang'],
+            date=datetime.strptime(row['datum'], date_format).date(),
+            neighbourhood=row['Gebied']
         )
 
     def _convert_gps_time(self, gps_time):
