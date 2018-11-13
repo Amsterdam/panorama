@@ -44,8 +44,9 @@ class AbstractPanorama(StatusModel):
     heading = models.FloatField()
     adjacent_panos = models.ManyToManyField(
         'self', through='Adjacency', symmetrical=False)
-    mission_type = models.CharField(
-        max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
+    surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
+    mission_type = models.TextField(max_length=16, default='bi')
+    mission_year = models.TextField(max_length=4, null=True)
 
     objects = Manager()
 
