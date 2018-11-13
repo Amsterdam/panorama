@@ -54,7 +54,7 @@ ORDER BY pa.id
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0031_readd_recent_views')
+        ('panoramas', '0032_readd_recent_views')
     ]
 
     operations = adjacency_views + adjacency_idxs
