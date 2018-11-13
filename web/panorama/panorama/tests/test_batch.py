@@ -92,9 +92,18 @@ class ImportPanoTest(TransactionTestCase):
         adjecencies = Adjacency.objects.all()
         self.assertEqual(adjecencies.count(), 12)
 
-        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_type, 'L')
-        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'W')
-        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'L')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].surface_type, 'L')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].surface_type, 'W')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].surface_type, 'L')
+
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_type, 'bi')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'bi')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'woz')
+
+        self.assertIsNone(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_year)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, '2016')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].mission_year, '2017')
+
 
         recent_pano_model = models.getRecentPanoModel("recente_opnames/alle")
         recent = recent_pano_model.objects.all()
@@ -107,6 +116,7 @@ class ImportPanoTest(TransactionTestCase):
 
 
     def test_panoramarow_sets_status(self, *args):
+        mission = Mission()
         job = ImportPanoramaJob()
         basic_row_fields = {
             'gps_seconds[s]': 2000,
@@ -125,11 +135,11 @@ class ImportPanoTest(TransactionTestCase):
                                   'container/path/row_done.jpg']
         job.files_in_blurdir = ['container/path/row_done/equirectangular/panorama_8000.jpg']
 
-        actual = job.process_panorama_row(row_to_be_rendered, 'container', 'path/', 'L')
+        actual = job.process_panorama_row(row_to_be_rendered, 'container', 'path/', mission)
         self.assertEqual(actual.status, Panorama.STATUS.to_be_rendered)
 
-        actual = job.process_panorama_row(row_rendered, 'container', 'path/', 'L')
+        actual = job.process_panorama_row(row_rendered, 'container', 'path/', mission)
         self.assertEqual(actual.status, Panorama.STATUS.rendered)
 
-        actual = job.process_panorama_row(row_done, 'container', 'path/', 'L')
+        actual = job.process_panorama_row(row_done, 'container', 'path/', mission)
         self.assertEqual(actual.status, Panorama.STATUS.done)
