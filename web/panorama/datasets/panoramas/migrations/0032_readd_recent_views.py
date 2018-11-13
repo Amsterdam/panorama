@@ -13,15 +13,9 @@ views_recent_pano = [
         view_name="panoramas_recent_ids_all",
         sql="""
 SELECT pano_id FROM panoramas_panorama p
-WHERE p.status = 'done' AND p.surface_type = 'L' AND NOT EXISTS (
-    SELECT * FROM panoramas_panorama n WHERE n.status = 'done' AND n.surface_type = 'L'
-    AND n.timestamp > p.timestamp AND ST_DWithin(n._geolocation_2d_rd, p._geolocation_2d_rd, 4.3)
-)
-UNION
-SELECT pano_id FROM panoramas_panorama p
-WHERE p.status = 'done' AND p.surface_type = 'W' AND NOT EXISTS (
-    SELECT * FROM panoramas_panorama n WHERE n.status = 'done' AND n.surface_type = 'W'
-    AND n.timestamp > p.timestamp AND ST_DWithin(n._geolocation_2d_rd, p._geolocation_2d_rd, 9.3)
+WHERE p.status = 'done' AND NOT EXISTS (
+    SELECT * FROM panoramas_panorama n WHERE n.status = 'done' AND n.mission_distance = p.mission_distance
+    AND n.timestamp > p.timestamp AND ST_DWithin(n._geolocation_2d_rd, p._geolocation_2d_rd, n.mission_distance - 0.7)
 )
 ORDER BY 1
 """
@@ -117,7 +111,7 @@ ORDER BY pp.id
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0030_add_missiontype_pano')
+        ('panoramas', '0031_add_distance')
     ]
 
     operations = views_recent_pano + mvs_recent_pano + ids_mvs_recent_pano

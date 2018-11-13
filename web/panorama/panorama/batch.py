@@ -108,6 +108,7 @@ class ImportPanoramaJob(object):
                     name=path.split('/')[-2],
                     surface_type='L',
                     mission_type='bi',
+                    mission_distance=5,
                     date="2015-1-1",
                     neighbourhood='AUTOMATICALLY CREATED'
                 )
@@ -166,6 +167,7 @@ class ImportPanoramaJob(object):
             mission_type=mission.mission_type,
             surface_type=mission.surface_type,
             mission_year=mission.mission_year,
+            mission_distance=mission.mission_distance,
             geolocation=Point(
                 float(row['longitude[deg]']),
                 float(row['latitude[deg]']),
@@ -211,6 +213,7 @@ class ImportPanoramaJob(object):
         return Mission(
             name=row['Missienaam'],
             surface_type=row['water/land'][:1].upper(),
+            mission_distance=row['rijafstand'],
             mission_type=row['missietype'],
             mission_year=row['woz-jaargang'],
             date=datetime.strptime(row['datum'], date_format).date(),

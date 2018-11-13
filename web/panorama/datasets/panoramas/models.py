@@ -42,9 +42,9 @@ class AbstractPanorama(StatusModel):
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
-    adjacent_panos = models.ManyToManyField(
-        'self', through='Adjacency', symmetrical=False)
+    adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
     surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
+    mission_distance = models.IntegerField()
     mission_type = models.TextField(max_length=16, default='bi')
     mission_year = models.TextField(max_length=4, null=True)
 
@@ -206,4 +206,5 @@ class Mission(models.Model):
     surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
     mission_type = models.TextField(max_length=16, default='bi')
     mission_year = models.TextField(max_length=4, null=True)
+    mission_distance = models.IntegerField()
     date = models.DateField(null=True)

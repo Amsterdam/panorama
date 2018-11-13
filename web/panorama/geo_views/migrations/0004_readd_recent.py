@@ -35,7 +35,7 @@ WHERE
 class Migration(migrations.Migration):
     dependencies = [
         ('geo_views', '0003_add_recent'),
-        ('panoramas', '0032_readd_recent_adjacencies')
+        ('panoramas', '0033_readd_recent_adjacencies')
     ]
 
     operations = [

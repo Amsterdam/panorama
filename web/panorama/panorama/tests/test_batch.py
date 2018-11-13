@@ -75,6 +75,9 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Mission.objects.filter(surface_type='L').count(), 7)
         self.assertEqual(Mission.objects.filter(surface_type='W').count(), 4)
 
+        self.assertEqual(Mission.objects.filter(mission_distance=5).count(), 7)
+        self.assertEqual(Mission.objects.filter(mission_distance=10).count(), 4)
+
         self.assertEqual(Mission.objects.filter(mission_type='bi').count(), 8)
         self.assertEqual(Mission.objects.filter(mission_type='woz').count(), 3)
         self.assertEqual(Mission.objects.filter(mission_year='2016').count(), 2)
@@ -95,6 +98,10 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].surface_type, 'L')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].surface_type, 'W')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].surface_type, 'L')
+
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_distance, 5)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_distance, 10)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_distance, 5)
 
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_type, 'bi')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'bi')
