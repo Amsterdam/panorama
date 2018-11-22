@@ -71,7 +71,7 @@ class ImportPanoramaJob(object):
             self.files_in_blurdir = [file['name'] for file in file_entries_in_target_dir]
 
             Panorama.objects.bulk_create(
-                self.process_csv(csv_file, self.process_panorama_row, with_mision=True),
+                self.process_csv(csv_file, self.process_panorama_row, with_mission=True),
                 batch_size=BATCH_SIZE
             )
 
@@ -82,7 +82,7 @@ class ImportPanoramaJob(object):
                 batch_size=BATCH_SIZE
             )
 
-    def process_csv(self, csv_file, process_row_callback, with_mision=False, *args):
+    def process_csv(self, csv_file, process_row_callback, *args, **kwargs):
         """
         Process a single csv file
         """
@@ -98,7 +98,7 @@ class ImportPanoramaJob(object):
         headers = next(rows)
         path = csv_file['name'].replace(csv_file['name'].split('/')[-1], '')
 
-        if with_mision:
+        if 'with_mission' in kwargs and kwargs['with_mission'] is True:
             # get mission
             try:
                 mission = Mission.objects.filter(name=path.split('/')[-2])[0]
@@ -106,29 +106,34 @@ class ImportPanoramaJob(object):
                 log.error(f"Mission {path.split('/')[-2]} does not exist, creating automatically")
                 mission = Mission(
                     name=path.split('/')[-2],
-                    type='L',
+                    surface_type='L',
+                    mission_type='bi',
+                    mission_distance=5,
                     date="2015-1-1",
                     neighbourhood='AUTOMATICALLY CREATED'
                 )
                 mission.save()
-            mission_type = mission.type
         else:
-            mission_type = None
+            mission = None
 
         for row in rows:
             model_data = dict(zip(headers, row))
-            model = process_row_callback(model_data, csv_file['container'], path, mission_type)
+            model = process_row_callback(model_data, csv_file['container'], path, mission)
             if model:
                 models.append(model)
         return models
 
-    def process_panorama_row(self, row, container, path, mission_type):
+    def process_panorama_row(self, row, container, path, mission):
         """
         Process a single row in the panorama photos metadata csv
         """
         try:
             base_filename = row['panorama_file_name']
         except KeyError:
+            return None
+
+        if mission is None:
+            log.error(f'MISSING mission for file: {base_filename}')
             return None
 
         # check if pano file exists
@@ -159,7 +164,10 @@ class ImportPanoramaJob(object):
             timestamp=self._convert_gps_time(row['gps_seconds[s]']),
             filename=pano_image,
             path=container+'/'+path,
-            mission_type=mission_type,
+            mission_type=mission.mission_type,
+            surface_type=mission.surface_type,
+            mission_year=mission.mission_year,
+            mission_distance=mission.mission_distance,
             geolocation=Point(
                 float(row['longitude[deg]']),
                 float(row['latitude[deg]']),
@@ -200,12 +208,20 @@ class ImportPanoramaJob(object):
             return None
 
         date_format = '%d-%m-%Y'
-        # Missienaam	water/land	week	datum	Gebied	Naar ftp
+        mission_date = datetime.strptime(row['datum'], date_format).date()
+        mission_year = row['woz-jaargang']
+        if mission_year is None or mission_year is "":
+            mission_year = mission_date.year
+
+        # Missienaam	water/land	week	datum	Gebied	Naar ftp	rijafstand	missietype	woz-jaargang
         return Mission(
-            name=(row['Missienaam']),
-            type=(row['water/land'])[:1].upper(),
-            date=datetime.strptime((row['datum']), date_format).date(),
-            neighbourhood=(row['Gebied'])
+            name=row['Missienaam'],
+            surface_type=row['water/land'][:1].upper(),
+            mission_distance=row['rijafstand'],
+            mission_type=row['missietype'],
+            mission_year=mission_year,
+            date=mission_date,
+            neighbourhood=row['Gebied']
         )
 
     def _convert_gps_time(self, gps_time):

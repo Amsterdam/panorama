@@ -58,11 +58,13 @@ class PanoSerializer(HALSerializer):
     roll = serializers.DecimalField(max_digits=20, decimal_places=2)
     pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
     heading = serializers.DecimalField(max_digits=20, decimal_places=2)
+    mission_type = serializers.CharField(source='surface_type')
 
     class Meta:
         model = models.Panorama
         exclude = ('path', 'geolocation', 'adjacent_panos', '_geolocation_2d',
-                   '_geolocation_2d_rd', 'status', 'status_changed')
+                   '_geolocation_2d_rd', 'status', 'status_changed', 'mission_year',
+                   'mission_distance', 'surface_type')
 
     def to_representation(self, instance):
         return super().to_representation(instance)

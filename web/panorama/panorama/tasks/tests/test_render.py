@@ -55,6 +55,8 @@ class TestRender(TestCase):
                 roll=-5.48553832377717,
                 pitch=-6.76660799409535,
                 heading=219.760795827427,
+                mission_distance=5.0,
+                mission_year="2016"
             )
 
     @mock.patch('panorama.transform.utils_img_file.object_store.put_into_panorama_store')
