@@ -21,7 +21,7 @@ FULL_IMAGE_NAME = 'panorama_8000.jpg'
 MARZIPANO_URL_PATTERN = '{z}/{f}/{y}/{x}.jpg'
 PREVIEW_IMAGE = 'preview.jpg'
 
-MISSION_TYPE_CHOICES = (
+SURFACE_TYPE_CHOICES = (
     ('L', 'land'),
     ('W', 'water'),
 )
@@ -42,10 +42,11 @@ class AbstractPanorama(StatusModel):
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
-    adjacent_panos = models.ManyToManyField(
-        'self', through='Adjacency', symmetrical=False)
-    mission_type = models.CharField(
-        max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
+    adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
+    surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
+    mission_distance = models.IntegerField()
+    mission_type = models.TextField(max_length=16, default='bi')
+    mission_year = models.TextField(max_length=4, null=True)
 
     objects = Manager()
 
@@ -201,6 +202,9 @@ class Mission(models.Model):
         return f"<Mission {self.name} {self.type} - {self.neighbourhood}>"
 
     name = models.TextField(max_length=24, unique=True)
-    type = models.CharField(max_length=1, choices=MISSION_TYPE_CHOICES)
-    date = models.DateField()
-    neighbourhood = models.TextField(max_length=50)
+    neighbourhood = models.TextField(max_length=50,null=True)
+    surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
+    mission_type = models.TextField(max_length=16, default='bi')
+    mission_year = models.TextField(max_length=4, null=True)
+    mission_distance = models.IntegerField()
+    date = models.DateField(null=True)

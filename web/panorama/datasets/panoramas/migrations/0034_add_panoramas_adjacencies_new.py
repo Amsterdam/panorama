@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0030_readd_recent_adjacencies')
+        ('panoramas', '0033_readd_recent_adjacencies')
     ]
 
     operations = [
