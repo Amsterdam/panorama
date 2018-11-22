@@ -1,83 +1,75 @@
 import logging
+
 # Packages
 from rest_framework import serializers
-from rest_framework.fields import empty
 from rest_framework_gis import fields
 
 # Project
-from datasets.panoramas.models_new import PanoramaNew, AdjacencyNew
-from datapunt_api.rest import LinksField, HALSerializer
+from datasets.panoramas.hal_serializer import HALSerializer, HyperLinksField, IdentityLinksField, HALListSerializer
+from datasets.panoramas.models_new import Panoramas
 
 log = logging.getLogger(__name__)
 
 MAX_ADJACENCY = 21
 
-class PanoLinksFieldNew(LinksField):
+
+class PanoLinksFieldNew(IdentityLinksField):
     lookup_field = 'pano_id'
 
 
-class ImageLinksSerializerNew(serializers.ModelSerializer):
-    equirectangular = serializers.ReadOnlyField(source='equirectangular_img_urls')
-    cubic = serializers.ReadOnlyField(source='cubic_img_urls')
-    thumbnail = serializers.HyperlinkedIdentityField(view_name='thumbnail-detail',
-                                                     lookup_field='pano_id',
-                                                     format='html')
-
-    class Meta:
-        model = PanoramaNew
-        fields = ('equirectangular', 'thumbnail', 'cubic')
-
-
-class ThumbnailSerializerNew(serializers.ModelSerializer):
-    heading = serializers.DecimalField(max_digits=20, decimal_places=2)
-    pano_id = serializers.ReadOnlyField()
-    url = serializers.ReadOnlyField()
-
-    class Meta:
-        model = PanoramaNew
-        fields = ('url', 'heading', 'pano_id')
-
-
 class PanoSerializerNew(HALSerializer):
+
+    # Content for _links in HAL-json:
     serializer_url_field = PanoLinksFieldNew
-    image_sets = serializers.SerializerMethodField()
+    equirectangular_full = HyperLinksField()
+    equirectangular_medium = HyperLinksField()
+    equirectangular_small = HyperLinksField()
+    cubic_img_preview = HyperLinksField()
+    thumbnail = IdentityLinksField(view_name='thumbnail-detail',
+                                   lookup_field='pano_id',
+                                   format='html', read_only=True)
+    adjacencies = IdentityLinksField(view_name='panoramas-adjacencies',
+                                     lookup_field='pano_id',
+                                     format='html', read_only=True)
+
+    # Additional regular attributes:
+    cubic_img_baseurl = serializers.ReadOnlyField()
+    cubic_img_pattern = serializers.ReadOnlyField()
     geometry = fields.GeometryField(source='geolocation')
-    roll = serializers.DecimalField(max_digits=20, decimal_places=2)
-    pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
-    heading = serializers.DecimalField(max_digits=20, decimal_places=2)
 
-    class Meta:
-        model = PanoramaNew
-        exclude = ('path', 'geolocation', '_geolocation_2d',
-                   '_geolocation_2d_rd', 'status', 'status_changed')
-
-    def to_representation(self, instance):
-        return super().to_representation(instance)
-
-    def get_image_sets(self, instance):
-        serializer = ImageLinksSerializerNew(instance=instance, context={'request': self.context['request']})
-        return serializer.data
+    class Meta(HALSerializer.Meta):
+        model = Panoramas
+        listresults_field = 'panoramas'
+        list_serializer_class = HALListSerializer
+        exclude = ('path', 'geolocation', '_geolocation_2d', '_geolocation_2d_rd',
+                   'status', 'status_changed')
 
 
-class FilteredPanoSerializerNew(PanoSerializerNew):
+class AdjecentLink(PanoLinksFieldNew):
+    """For sake of HAL-compliancy the self link of an adjacency is constructed,
+        allthough there is no endpoint listening in (therefore Django couldn't construct it for us.)
+    """
+    def to_representation(self, value):
+        request = self.context.get('request')
+        href = f"{request.build_absolute_uri()}{value.from_pano_id}/"
+        return dict(href=href)
 
-    def __init__(self, instance=None, data=empty, filter_dict={}, **kwargs):
-        self.filter = filter_dict
-        super().__init__(instance, data, **kwargs)
-
-
-class AdjacencyDataSerializer(serializers.Serializer):
-    distance = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_distance')
-    angle = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_angle')
-    direction = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_direction')
-    heading = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_heading')
 
 class AdjacentPanoSerializer(PanoSerializerNew):
+    # Content for _links:
+    serializer_url_field = AdjecentLink
+    adjacencies = None
+    adjacent = IdentityLinksField(view_name='panoramas-detail',
+                                  lookup_field='pano_id',
+                                  format='html', read_only=True)
+    transitive_adjacencies = IdentityLinksField(view_name='panoramas-adjacencies',
+                                                lookup_field='pano_id',
+                                                format='html', read_only=True)
 
-    adjacency = serializers.SerializerMethodField()
+    # Additional regular attributes:
+    distance = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_distance')
+    direction = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_heading')
+    angle = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_pitch')
 
-    def get_adjacency(self, obj):
-        if obj.from_pano_id != obj.pano_id:
-            return AdjacencyDataSerializer(obj).data
-
-        return
+    class Meta(PanoSerializerNew.Meta):
+        listresults_field = 'adjacencies'

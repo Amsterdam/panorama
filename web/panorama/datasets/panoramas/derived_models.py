@@ -30,8 +30,8 @@ def getRecentAdjacencyModel(recent_pano_model, path):
     db_table_name = f"panoramas_adjacencies_recent_{set}"
 
     class RecentAdjacency(AbstractAdjacency):
-        from_pano = models.ForeignKey(recent_pano_model, related_name='to_adjacency')
-        to_pano = models.ForeignKey(recent_pano_model, related_name='from_adjacency')
+        from_pano = models.ForeignKey(recent_pano_model, related_name='to_adjacency', on_delete=models.CASCADE)
+        to_pano = models.ForeignKey(recent_pano_model, related_name='from_adjacency', on_delete=models.CASCADE)
 
         class Meta(AbstractAdjacency.Meta):
             abstract = False

@@ -1,5 +1,6 @@
 # Packages
 import math
+
 from datapunt_api import rest
 from django.contrib.gis.db.models import GeometryField
 from django.db import models
@@ -13,8 +14,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 # Project
-from datasets.panoramas.models_new import PanoramaNew, AdjacencyNew
-from datasets.panoramas.serializers_new import PanoSerializerNew, FilteredPanoSerializerNew, AdjacentPanoSerializer
+from datasets.panoramas.hal_serializer import HALPaginationEmbedded, simple_hal_embed
+from datasets.panoramas.models_new import Panoramas, AdjacencyNew
+from datasets.panoramas.serializers_new import PanoSerializerNew, AdjacentPanoSerializer
 
 MISSION_TYPE_CHOICES = (
     ('bi', 'bi'),
@@ -41,12 +43,12 @@ class PanoramaFilter(FilterSet):
     TODO: add documentation
     """
 
-    MAX_RADIUS = 1000 # meters
+    MAX_RADIUS = 1000  # meters
 
     # the size of a map tile on https://data.amsterdam.nl/ on zoom
     # level 11 is approximately 500 square meters.
     # Panorama photos are displayed on zoom level 11 and up.
-    MAX_NEWEST_IN_RANGE_RADIUS = 250 # meters
+    MAX_NEWEST_IN_RANGE_RADIUS = 250  # meters
 
     # TODO: for now, both filters only accept RD:28992 coordinates
     bbox = filters.CharFilter(method='bbox_filter', label='Bounding box')
@@ -62,7 +64,7 @@ class PanoramaFilter(FilterSet):
     mission_type = filters.ChoiceFilter(choices=MISSION_TYPE_CHOICES)
 
     class Meta(object):
-        model = PanoramaNew
+        model = Panoramas
 
         fields = (
             'timestamp',
@@ -117,12 +119,10 @@ class PanoramaFilter(FilterSet):
             rest_serializers.ValidationError(str(e))
 
         bbox_sql = Func(Value(bbox['x1']), Value(bbox['y1']),
-                Value(bbox['x2']), Value(bbox['y2']), 28992,
-                function='ST_MakeEnvelope', output_field=GeometryField())
+                        Value(bbox['x2']), Value(bbox['y2']), 28992,
+                        function='ST_MakeEnvelope', output_field=GeometryField())
 
         return queryset.filter(_geolocation_2d_rd__bboverlaps=(bbox_sql))
-
-        return queryset.filter(_geolocation_2d_rd__bboverlaps=bbox)
 
     def _is_filter_enabled(self, name):
         return name in self.data and self.data[name]
@@ -164,7 +164,8 @@ class PanoramaFilter(FilterSet):
                 raise rest_serializers.ValidationError('radius parameter must be a number')
 
             if radius > self.MAX_NEWEST_IN_RANGE_RADIUS:
-                raise rest_serializers.ValidationError('radius for newest_in_range filter can be at most %s meters' % self.MAX_NEWEST_IN_RANGE_RADIUS)
+                raise rest_serializers.ValidationError(
+                    'radius for newest_in_range filter can be at most %s meters' % self.MAX_NEWEST_IN_RANGE_RADIUS)
 
             # TODO: add padding radius with newest_in_range radius
             exists = self._get_radius_query(exists, radius)
@@ -183,7 +184,8 @@ class PanoramaFilter(FilterSet):
             area = abs(bbox['x2'] - bbox['x1']) * abs(bbox['y2'] - bbox['y1'])
 
             if area > max_area:
-                raise rest_serializers.ValidationError('area for newest_in_range filter can be at most %s square meters' % max_area)
+                raise rest_serializers.ValidationError(
+                    'area for newest_in_range filter can be at most %s square meters' % max_area)
 
             exists = self._get_bbox_query(exists, bbox_string)
 
@@ -223,8 +225,8 @@ class PanoramaFilterAdjacent(PanoramaFilter):
 
     def _get_radius_query(self, queryset, value):
         return queryset.annotate(within=Func(F('from_geolocation_2d_rd'), F('_geolocation_2d_rd'),
-                    Value(value), function='ST_DWithin', output_field=models.BooleanField())
-                ).filter(within=True)
+                                             Value(value), function='ST_DWithin', output_field=models.BooleanField())
+                                 ).filter(within=True)
 
 
 class PanoramaViewSetNew(rest.DatapuntViewSet):
@@ -248,25 +250,25 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
     """
 
     lookup_field = 'pano_id'
-    queryset = PanoramaNew.done.all()
-    serializer_detail_class = FilteredPanoSerializerNew
+    queryset = Panoramas.done.all()
+    serializer_detail_class = PanoSerializerNew
     serializer_class = PanoSerializerNew
+    pagination_class = HALPaginationEmbedded
 
     filter_backends = (DjangoFilterBackend,)
     filter_class = PanoramaFilter
 
     @action(detail=True)
-    def adjacent(self, request, pano_id):
+    def adjacencies(self, request, pano_id):
         queryset = AdjacencyNew.objects.filter(from_pano_id=pano_id)
+        adjacency_filter = PanoramaFilterAdjacent(request=request, queryset=queryset, data=request.query_params,
+                                                  pano_id=pano_id)
 
-        filter = PanoramaFilterAdjacent(request=request, queryset=queryset, data=request.query_params, pano_id=pano_id)
-
-        if filter._is_filter_enabled('bbox'):
+        if adjacency_filter._is_filter_enabled('bbox'):
             raise rest_serializers.ValidationError('bbox filter not allowed for adjacent panoramas')
 
-        queryset = filter.qs
-
-        queryset = queryset.extra(order_by=['relative_distance'])
+        queryset = adjacency_filter.qs.extra(order_by=['relative_distance'])
 
         serializer = AdjacentPanoSerializer(instance=queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+
+        return Response(simple_hal_embed(serializer.data, self.request))

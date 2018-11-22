@@ -39,7 +39,7 @@ panorama.register('thumbnail', ThumbnailViewSet, base_name='thumbnail')
 for set in settings.RECENT_PANOS:
     panorama.register(f'recente_opnames/{set}', RecentPanoramaViewSet, base_name=f'recentpanorama-{set}')
 
-panorama.register('opnamelocatie-new', PanoramaViewSetNew, base_name='panoramanew')
+panorama.register('panoramas', PanoramaViewSetNew, base_name='panoramas')
 
 
 APIS = [
