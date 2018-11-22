@@ -14,7 +14,6 @@ PANO_IMAGE_URL = os.getenv('PANORAMA_IMAGE_URL', 'https://acc.data.amsterdam.nl/
 
 INSTALLED_APPS += [
     'geo_views',
-    'datapunt_api',
     'datasets.panoramas',
     'panorama',
     'health',

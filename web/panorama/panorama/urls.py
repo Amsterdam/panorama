@@ -11,6 +11,7 @@ from rest_framework_swagger.renderers import SwaggerUIRenderer
 
 from .view_imgs import ThumbnailViewSet
 from .views import PanoramaViewSet
+from .views_new import PanoramaViewSetNew
 from .derived_views import RecentPanoramaViewSet
 
 
@@ -37,6 +38,9 @@ panorama.register('opnamelocatie', PanoramaViewSet, base_name='panorama')
 panorama.register('thumbnail', ThumbnailViewSet, base_name='thumbnail')
 for set in settings.RECENT_PANOS:
     panorama.register(f'recente_opnames/{set}', RecentPanoramaViewSet, base_name=f'recentpanorama-{set}')
+
+panorama.register('panoramas', PanoramaViewSetNew, base_name='panoramas')
+
 
 APIS = [
     url(r'^panorama/', include(panorama.urls))
