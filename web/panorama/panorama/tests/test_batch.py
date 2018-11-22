@@ -80,8 +80,10 @@ class ImportPanoTest(TransactionTestCase):
 
         self.assertEqual(Mission.objects.filter(mission_type='bi').count(), 8)
         self.assertEqual(Mission.objects.filter(mission_type='woz').count(), 3)
-        self.assertEqual(Mission.objects.filter(mission_year='2016').count(), 2)
+        self.assertEqual(Mission.objects.filter(mission_year='2016').count(), 8)
+        self.assertEqual(Mission.objects.filter(mission_year='2016', mission_type='woz').count(), 2)
         self.assertEqual(Mission.objects.filter(mission_year='2017').count(), 1)
+        self.assertEqual(Mission.objects.filter(mission_year='2017', mission_type='bi').count(), 0)
 
         panos = Panorama.done.all()
         self.assertEqual(panos.count(), 16)
