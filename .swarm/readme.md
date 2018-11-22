@@ -94,11 +94,12 @@ Wil je gebruik maken van de volledige database gebruik dan onderstaande - uit `d
 ```bash
 _db_docker=`docker ps -q -f "name=panoslocal_database"`
 
-docker exec $_db_docker /bin/download-db.sh panorama <username>
+docker exec -it $_db_docker /bin/download-db.sh panorama <username>
 docker exec $_db_docker /bin/update-table.sh panorama panoramas_region public panorama
 docker exec $_db_docker psql -U panorama -c 'create sequence panoramas_region_id_seq'
 docker exec $_db_docker psql -U panorama -c "alter table panoramas_region alter id set default nextval('panoramas_region_id_seq')"
 docker exec $_db_docker /bin/update-table.sh panorama panoramas_panorama public panorama
+docker exec $_db_docker psql -U panorama -c "delete from panoramas_panorama where status='done'"
 ```
 
 
