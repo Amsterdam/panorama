@@ -208,6 +208,10 @@ class ImportPanoramaJob(object):
             return None
 
         date_format = '%d-%m-%Y'
+        mission_date = datetime.strptime(row['datum'], date_format).date()
+        mission_year = row['woz-jaargang']
+        if mission_year is None or mission_year is "":
+            mission_year = mission_date.year
 
         # Missienaam	water/land	week	datum	Gebied	Naar ftp	rijafstand	missietype	woz-jaargang
         return Mission(
@@ -215,8 +219,8 @@ class ImportPanoramaJob(object):
             surface_type=row['water/land'][:1].upper(),
             mission_distance=row['rijafstand'],
             mission_type=row['missietype'],
-            mission_year=row['woz-jaargang'],
-            date=datetime.strptime(row['datum'], date_format).date(),
+            mission_year=mission_year,
+            date=mission_date,
             neighbourhood=row['Gebied']
         )
 
