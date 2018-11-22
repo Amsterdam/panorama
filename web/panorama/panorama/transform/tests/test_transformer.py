@@ -32,6 +32,8 @@ class TestTransformer(TestCase):
                 roll=-5.48553832377717,
                 pitch=-6.76660799409535,
                 heading=219.760795827427,
+                mission_distance=5.0,
+                mission_year="2016"
             )
 
         try:
@@ -49,6 +51,8 @@ class TestTransformer(TestCase):
                 roll=-7.25543305609142,
                 pitch=0.281594736873711,
                 heading=295.567147056641,
+                mission_distance=5.0,
+                mission_year="2016"
             )
 
         cls.images = [
