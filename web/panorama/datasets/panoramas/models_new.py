@@ -5,6 +5,7 @@ from django.db.models import Manager
 from django.contrib.gis.geos import Point
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 
 from model_utils.models import StatusModel
 from model_utils import Choices
@@ -39,9 +40,6 @@ class AbstractPanoramaNew(StatusModel):
     geolocation = geo.PointField(dim=3, srid=4326, spatial_index=True)
     _geolocation_2d = geo.PointField(dim=2, srid=4326, spatial_index=True, null=True)
     _geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True, null=True)
-    roll = models.FloatField()
-    pitch = models.FloatField()
-    heading = models.FloatField()
 
     mission_type = models.CharField(
         max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
@@ -79,33 +77,47 @@ class AbstractPanoramaNew(StatusModel):
         return f"{objectstore_id['container']}/{objectstore_id['name']}"
 
     @property
-    def cubic_img_urls(self):
-
-        baseurl = '{}/{}{}'.format(
-            settings.PANO_IMAGE_URL, self.path,
-            self.filename[:-4] + CUBIC_SUBPATH)
-
-        return {'baseurl': baseurl,
-                'pattern': baseurl + MARZIPANO_URL_PATTERN,
-                'preview': baseurl + PREVIEW_IMAGE}
-
-    @property
     def detection_result_dir(self):
         return 'results/{}{}'.format(self.path, self.filename[:-4])
 
     @property
-    def equirectangular_img_urls(self):
-        baseurl = '{}/{}{}'.format(
-            settings.PANO_IMAGE_URL,
-            self.path,
-            self.filename[:-4] + EQUIRECTANGULAR_SUBPATH)
+    def thumbnail(self):
+        return reverse('thumbnail-detail', args=(self.pano_id,))
 
-        return {'full': baseurl + FULL_IMAGE_NAME,
-                'medium': baseurl + MEDIUM_IMAGE_NAME,
-                'small': baseurl + SMALL_IMAGE_NAME}
+    @property
+    def adjacencies(self):
+        return reverse('panoramas-adjacencies', args=(self.pano_id,))
+
+    @property
+    def img_baseurl(self):
+        return f"{settings.PANO_IMAGE_URL}/{self.path}{self.filename[:-4]}"
+
+    @property
+    def cubic_img_baseurl(self):
+        return self.img_baseurl + CUBIC_SUBPATH
+
+    @property
+    def cubic_img_pattern(self):
+        return self.cubic_img_baseurl + MARZIPANO_URL_PATTERN
+
+    @property
+    def cubic_img_preview(self):
+        return self.cubic_img_baseurl + PREVIEW_IMAGE
+
+    @property
+    def equirectangular_full(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
+
+    @property
+    def equirectangular_medium(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + MEDIUM_IMAGE_NAME
+
+    @property
+    def equirectangular_small(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + SMALL_IMAGE_NAME
 
 
-class PanoramaNew(AbstractPanoramaNew):
+class Panoramas(AbstractPanoramaNew):
     class Meta(AbstractPanoramaNew.Meta):
         abstract = False
         managed = False
@@ -114,18 +126,16 @@ class PanoramaNew(AbstractPanoramaNew):
 
 class AdjacencyNew(AbstractPanoramaNew):
     from_pano_id = models.CharField(max_length=37)
-
     from_geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True)
 
     relative_distance = models.FloatField()
-    relative_direction = models.FloatField()
-    relative_angle = models.FloatField()
+    relative_pitch = models.FloatField()
     relative_heading = models.FloatField()
 
     class Meta(AbstractPanoramaNew.Meta):
         abstract = False
         managed = False
-        db_table = "adjacencies_new"
+        db_table = "panoramas_adjacencies_new"
 
     def __str__(self):
         return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.pano_id)
