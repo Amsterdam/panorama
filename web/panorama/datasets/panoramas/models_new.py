@@ -5,6 +5,7 @@ from django.db.models import Manager
 from django.contrib.gis.geos import Point
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 
 from model_utils.models import StatusModel
 from model_utils import Choices
@@ -27,23 +28,19 @@ MISSION_TYPE_CHOICES = (
 )
 
 
-class AbstractPanorama(StatusModel):
+class AbstractPanoramaNew(StatusModel):
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
 
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True, db_index=True)
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(db_index=True)
     filename = models.CharField(max_length=255)
     path = models.CharField(max_length=400)
     geolocation = geo.PointField(dim=3, srid=4326, spatial_index=True)
     _geolocation_2d = geo.PointField(dim=2, srid=4326, spatial_index=True, null=True)
     _geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True, null=True)
-    roll = models.FloatField()
-    pitch = models.FloatField()
-    heading = models.FloatField()
-    adjacent_panos = models.ManyToManyField(
-        'self', through='Adjacency', symmetrical=False)
+
     mission_type = models.CharField(
         max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
 
@@ -80,77 +77,71 @@ class AbstractPanorama(StatusModel):
         return f"{objectstore_id['container']}/{objectstore_id['name']}"
 
     @property
-    def cubic_img_urls(self):
-
-        baseurl = '{}/{}{}'.format(
-            settings.PANO_IMAGE_URL, self.path,
-            self.filename[:-4] + CUBIC_SUBPATH)
-
-        return {'baseurl': baseurl,
-                'pattern': baseurl + MARZIPANO_URL_PATTERN,
-                'preview': baseurl + PREVIEW_IMAGE}
-
-    @property
     def detection_result_dir(self):
         return 'results/{}{}'.format(self.path, self.filename[:-4])
 
     @property
-    def equirectangular_img_urls(self):
-        baseurl = '{}/{}{}'.format(
-            settings.PANO_IMAGE_URL,
-            self.path,
-            self.filename[:-4] + EQUIRECTANGULAR_SUBPATH)
+    def thumbnail(self):
+        return reverse('thumbnail-detail', args=(self.pano_id,))
 
-        return {'full': baseurl + FULL_IMAGE_NAME,
-                'medium': baseurl + MEDIUM_IMAGE_NAME,
-                'small': baseurl + SMALL_IMAGE_NAME}
+    @property
+    def adjacencies(self):
+        return reverse('panoramas-adjacencies', args=(self.pano_id,))
+
+    @property
+    def img_baseurl(self):
+        return f"{settings.PANO_IMAGE_URL}/{self.path}{self.filename[:-4]}"
+
+    @property
+    def cubic_img_baseurl(self):
+        return self.img_baseurl + CUBIC_SUBPATH
+
+    @property
+    def cubic_img_pattern(self):
+        return self.cubic_img_baseurl + MARZIPANO_URL_PATTERN
+
+    @property
+    def cubic_img_preview(self):
+        return self.cubic_img_baseurl + PREVIEW_IMAGE
+
+    @property
+    def equirectangular_full(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
+
+    @property
+    def equirectangular_medium(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + MEDIUM_IMAGE_NAME
+
+    @property
+    def equirectangular_small(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + SMALL_IMAGE_NAME
 
 
-class Panorama(AbstractPanorama):
-    class Meta(AbstractPanorama.Meta):
+class Panoramas(AbstractPanoramaNew):
+    class Meta(AbstractPanoramaNew.Meta):
         abstract = False
-
-
-class AbstractAdjacency(models.Model):
-    from_pano = models.ForeignKey(Panorama, on_delete=models.CASCADE, related_name='to_adjacency')
-    to_pano = models.ForeignKey(Panorama, on_delete=models.CASCADE, related_name='from_adjacency')
-    heading = models.DecimalField(max_digits=20, decimal_places=2)
-    to_year = models.IntegerField()
-    distance = models.FloatField()
-    elevation = models.FloatField()
-
-    class Meta:
-        abstract = True
-        index_together = [['from_pano', 'distance']]
         managed = False
+        db_table = 'panoramas_panorama'
+
+
+class AdjacencyNew(AbstractPanoramaNew):
+    from_pano_id = models.CharField(max_length=37)
+    from_geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True)
+
+    relative_distance = models.FloatField()
+    relative_pitch = models.FloatField()
+    relative_heading = models.FloatField()
+
+    class Meta(AbstractPanoramaNew.Meta):
+        abstract = False
+        managed = False
+        db_table = "panoramas_adjacencies_new"
 
     def __str__(self):
-        return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.to_pano_id)
-
-    @property
-    def direction(self):
-        return (self.heading - self.from_pano.heading) % 360
-
-    @property
-    def angle(self):
-        cam_angle = self.from_pano.pitch*cos(radians(self.direction)) \
-                    - self.from_pano.roll*sin(radians(self.direction))
-        return self.pitch - cam_angle
-
-    @property
-    def pitch(self):
-        if not self.elevation or self.distance <= 0.0:
-            return 0.0
-        return degrees(atan2(self.elevation, self.distance))
+        return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.pano_id)
 
 
-class Adjacency(AbstractAdjacency):
-    class Meta(AbstractAdjacency.Meta):
-        abstract = False
-        db_table = "panoramas_adjacencies"
-
-
-class Region(models.Model):
+class RegionNew(models.Model):
     REGION_TYPES = (
         ('N', 'Nummerbord'),
         ('G', 'Gezicht')
@@ -177,7 +168,7 @@ class Region(models.Model):
         return f"<Region {self.id} of Panorama {self.panorama.pano_id}>"
 
 
-class Traject(models.Model):
+class TrajectNew(models.Model):
     timestamp = models.DateTimeField()
     geolocation = geo.PointField(dim=3, spatial_index=True)
     north_rms = models.DecimalField(
@@ -196,7 +187,7 @@ class Traject(models.Model):
         return '<Traject %d>' % self.pk
 
 
-class Mission(models.Model):
+class MissionNew(models.Model):
     def __str__(self):
         return f"<Mission {self.name} {self.type} - {self.neighbourhood}>"
 

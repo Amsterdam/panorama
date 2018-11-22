@@ -1,57 +1,49 @@
-Datapunt panorama API
-======================
+## Datapunt Panorama-API
 
 Project om beelden gemaakt in equirectangulaire projectie te importeren, en te ontsluiten via een API.
 
 De API-laag bestaat uit twee componenten:
 
-* Een OGC (WMS/WFS)-server die de opnamelocatieas en de metadata serveert,
-* Een REST-API die aanvullende functionaliteiten biedt.
+- Een OGC (WMS/WFS)-server die de opnamelocaties en de metadata serveert,
+- Een REST-API die aanvullende functionaliteiten biedt.
 
+## Vereisten
 
-Vereisten
----------
+- Docker en Docker Compose
 
-* docker en docker-compose (required)
-
-
-Ontwikkelen
------------
+## Ontwikkelen
 
 Gebruik `docker-compose` om een lokale versie op te starten
-(Wanneer je gebruik maakt van Google Vision API is een bestand 
-`google-application-credentials.json` nodig in de web/panorama map 
-met daarin geldige credentials voor Google Vision API)
+(Wanneer je gebruik maakt van Google Vision API is een bestand
+`google-application-credentials.json` nodig in de web/panorama map
+met daarin geldige credentials voor Google Vision API):
 
-	(sudo) docker-compose start
+    (sudo) docker-compose start
 
-of
+Of:
 
-	docker-compose up -d
-	
+    docker-compose up -d
+
 Je kunt ook het project lokaal op poort 8000 draaien, maar dat vereist op zijn minst de database-container:
 
-	docker-compose up -d database
-	
+    docker-compose up -d database
+
 Importeer de meest recente database van acceptatie:
 
-	docker-compose exec database update-db.sh panorama <your_username>
-	
-Unit tests lokaal draaien
--------------------------
+    docker-compose exec database update-db.sh panorama <your_username>
 
-Roep de django app expliciet aan, en zorg dat OBJECTSTORE_PASSWORD als omgevingsvariabele is gezet:
+## Unit tests lokaal draaien
 
-	export OBJECTSTORE_PASSWORD=XXXXXX
+Roep de Django-applicatie expliciet aan, en zorg dat OBJECTSTORE_PASSWORD als omgevingsvariabele is gezet:
+
+    export OBJECTSTORE_PASSWORD=XXXXXX
     web/panorama/manage.py test datapunt_api
 
-Panorama demo lokaal
---------------------
+## Panorama demo lokaal
 
 Op [http://localhost:8088/demo](http://localhost:8088/demo) draaien de equidistante panorama's in Marzipano viewer.
 Op [http://localhost:8088/demo/cubic.html](http://localhost:8088/demo/cubic.html) draaien de kubische projecties van de panorama's in Marzipano viewer.
 
-Gedistribueerd beeldbewerking en beeldherkenning
-------------------------------------------------
+## Gedistribueerd beeldbewerking en beeldherkenning
 
-Zie `.swarm/readme.md` in dit project voor meer informatie 
+Zie `.swarm/readme.md` in dit project voor meer informatie
