@@ -91,8 +91,8 @@ class ImportPanoTest(TransactionTestCase):
         self.assertIsNotNone(panos[0]._geolocation_2d_rd)
         self.assertAlmostEqual(panos[0]._geolocation_2d_rd, panos[0]._geolocation_2d.transform(28992, clone=True))
 
-        trajecten = Traject.objects.all()
-        self.assertEqual(trajecten.count(), 16)
+        # trajecten = Traject.objects.all()
+        # self.assertEqual(trajecten.count(), 16)
 
         adjecencies = Adjacency.objects.all()
         self.assertEqual(adjecencies.count(), 12)

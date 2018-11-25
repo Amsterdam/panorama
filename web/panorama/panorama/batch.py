@@ -74,13 +74,13 @@ class ImportPanoramaJob(object):
                 self.process_csv(csv_file, self.process_panorama_row, with_mission=True),
                 batch_size=BATCH_SIZE
             )
-
-        for csv_file in self.object_store.get_csvs('trajectory'):
-            log.info('READING trajectory: %s', csv_file['name'])
-            Traject.objects.bulk_create(
-                self.process_csv(csv_file, self.process_traject_row),
-                batch_size=BATCH_SIZE
-            )
+        #
+        # for csv_file in self.object_store.get_csvs('trajectory'):
+        #     log.info('READING trajectory: %s', csv_file['name'])
+        #     Traject.objects.bulk_create(
+        #         self.process_csv(csv_file, self.process_traject_row),
+        #         batch_size=BATCH_SIZE
+        #     )
 
     def process_csv(self, csv_file, process_row_callback, *args, **kwargs):
         """
