@@ -15,7 +15,7 @@ from rest_framework.response import Response
 
 # Project
 from datasets.panoramas.hal_serializer import HALPaginationEmbedded, simple_hal_embed
-from datasets.panoramas.models_new import Panoramas, AdjacencyNew
+from datasets.panoramas.models_new import Panoramas, Adjacencies
 from datasets.panoramas.serializers_new import PanoSerializerNew, AdjacentPanoSerializer
 
 MISSION_TYPE_CHOICES = (
@@ -260,7 +260,7 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
 
     @action(detail=True)
     def adjacencies(self, request, pano_id):
-        queryset = AdjacencyNew.objects.filter(from_pano_id=pano_id)
+        queryset = Adjacencies.objects.filter(from_pano_id=pano_id)
         adjacency_filter = PanoramaFilterAdjacent(request=request, queryset=queryset, data=request.query_params,
                                                   pano_id=pano_id)
 

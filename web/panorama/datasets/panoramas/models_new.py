@@ -1,5 +1,3 @@
-from math import atan2, degrees, cos, sin, radians
-
 from django.contrib.gis.db import models as geo
 from django.db.models import Manager
 from django.contrib.gis.geos import Point
@@ -22,13 +20,14 @@ FULL_IMAGE_NAME = 'panorama_8000.jpg'
 MARZIPANO_URL_PATTERN = '{z}/{f}/{y}/{x}.jpg'
 PREVIEW_IMAGE = 'preview.jpg'
 
-MISSION_TYPE_CHOICES = (
+SURFACE_TYPE_CHOICES = (
     ('L', 'land'),
     ('W', 'water'),
 )
 
 
-class AbstractPanoramaNew(StatusModel):
+class Panoramas(StatusModel):
+
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
 
@@ -41,14 +40,17 @@ class AbstractPanoramaNew(StatusModel):
     _geolocation_2d = geo.PointField(dim=2, srid=4326, spatial_index=True, null=True)
     _geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True, null=True)
 
-    mission_type = models.CharField(
-        max_length=1, choices=MISSION_TYPE_CHOICES, default='L')
+    surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
+    mission_distance = models.IntegerField()
+    mission_type = models.TextField(max_length=16, default='bi')
+    mission_year = models.TextField(max_length=4, null=True)
 
     objects = Manager()
 
     class Meta:
+        managed = False
+        db_table = 'panoramas_panorama'
         ordering = ('id',)
-        abstract = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -117,14 +119,7 @@ class AbstractPanoramaNew(StatusModel):
         return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + SMALL_IMAGE_NAME
 
 
-class Panoramas(AbstractPanoramaNew):
-    class Meta(AbstractPanoramaNew.Meta):
-        abstract = False
-        managed = False
-        db_table = 'panoramas_panorama'
-
-
-class AdjacencyNew(AbstractPanoramaNew):
+class Adjacencies(Panoramas):
     from_pano_id = models.CharField(max_length=37)
     from_geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True)
 
@@ -132,66 +127,8 @@ class AdjacencyNew(AbstractPanoramaNew):
     relative_pitch = models.FloatField()
     relative_heading = models.FloatField()
 
-    class Meta(AbstractPanoramaNew.Meta):
-        abstract = False
-        managed = False
+    class Meta(Panoramas.Meta):
         db_table = "panoramas_adjacencies_new"
 
     def __str__(self):
         return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.pano_id)
-
-
-class RegionNew(models.Model):
-    REGION_TYPES = (
-        ('N', 'Nummerbord'),
-        ('G', 'Gezicht')
-    )
-    id = models.AutoField(primary_key=True)
-    pano_id = models.CharField(max_length=37, default='', db_index=True)
-    region_type = models.CharField(max_length=1, choices=REGION_TYPES)
-    detected_by = models.CharField(max_length=255)
-
-    # coordinates from left top, clockwise
-    left_top_x = models.IntegerField()
-    left_top_y = models.IntegerField()
-    right_top_x = models.IntegerField()
-    right_top_y = models.IntegerField()
-    right_bottom_x = models.IntegerField()
-    right_bottom_y = models.IntegerField()
-    left_bottom_x = models.IntegerField()
-    left_bottom_y = models.IntegerField()
-
-    class Meta:
-        ordering = ('id',)
-
-    def __str__(self):
-        return f"<Region {self.id} of Panorama {self.panorama.pano_id}>"
-
-
-class TrajectNew(models.Model):
-    timestamp = models.DateTimeField()
-    geolocation = geo.PointField(dim=3, spatial_index=True)
-    north_rms = models.DecimalField(
-        max_digits=20, decimal_places=14)
-    east_rms = models.DecimalField(
-        null=True, blank=True, max_digits=20, decimal_places=14)
-    down_rms = models.DecimalField(
-        null=True, blank=True, max_digits=20, decimal_places=14)
-    roll_rms = models.FloatField(null=True, blank=True)
-    pitch_rms = models.FloatField(null=True, blank=True)
-    heading_rms = models.FloatField(null=True, blank=True)
-
-    objects = Manager()
-
-    def __str__(self):
-        return '<Traject %d>' % self.pk
-
-
-class MissionNew(models.Model):
-    def __str__(self):
-        return f"<Mission {self.name} {self.type} - {self.neighbourhood}>"
-
-    name = models.TextField(max_length=24, unique=True)
-    type = models.CharField(max_length=1, choices=MISSION_TYPE_CHOICES)
-    date = models.DateField()
-    neighbourhood = models.TextField(max_length=50)
