@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('panoramas', '0034_add_panoramas_adjacencies_new'),
+        ('panoramas', '0033_readd_recent_adjacencies'),
     ]
 
     operations = [
