@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='mission',
             name='mission_year',
-            field=models.TextField(max_length=4, null=True),
+            field=models.IntegerField(max_length=4, null=True),
         ),
         migrations.AddField(
             model_name='mission',
