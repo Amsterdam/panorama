@@ -3,6 +3,7 @@ import math
 
 from datapunt_api import rest
 from django.contrib.gis.db.models import GeometryField
+from django.contrib.gis.geos import GEOSGeometry, Polygon
 from django.db import models
 from django.db.models import Q, Exists, OuterRef, Func, F, Expression, Value
 from django_filters import widgets
@@ -23,10 +24,14 @@ MISSION_TYPE_CHOICES = (
     ('woz', 'woz')
 )
 
+SRID_CHOICES = (
+    ('4326', '4326'),
+    ('28992', '28992')
+)
+
 
 # https://stackoverflow.com/questions/47094982/django-subquery-and-annotations-with-outerref
 class RawCol(Expression):
-
     def __init__(self, model, field_name, output_field=None):
         field = model._meta.get_field(field_name)
         self.table = model._meta.db_table
@@ -39,71 +44,75 @@ class RawCol(Expression):
 
 
 class PanoramaFilter(FilterSet):
-    """
-    TODO: add documentation
-    """
-
     MAX_RADIUS = 1000  # meters
+
+    DEFAULT_SRID = 4326
 
     # the size of a map tile on https://data.amsterdam.nl/ on zoom
     # level 11 is approximately 500 square meters.
     # Panorama photos are displayed on zoom level 11 and up.
     MAX_NEWEST_IN_RANGE_RADIUS = 250  # meters
 
-    # TODO: for now, both filters only accept RD:28992 coordinates
-    bbox = filters.CharFilter(method='bbox_filter', label='Bounding box')
+    timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
+
+    near = filters.CharFilter(method='near_filter', label='Near point')
     radius = filters.NumberFilter(method='radius_filter', label='Radius')
+    bbox = filters.CharFilter(method='bbox_filter', label='Bounding box')
+    srid = filters.ChoiceFilter(method='srid_filter', choices=SRID_CHOICES, label='Projection (SRID)')
 
     newest_in_range = filters.BooleanFilter(method='newest_in_range_filter', label='Only return newest in range')
 
-    timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
-
-    # TODO: should we add a year filter, for convenience?
-    # year = filters.NumberFilter(method='year_filter', label='Year')
-
-    mission_type = filters.ChoiceFilter(choices=MISSION_TYPE_CHOICES)
+    mission_type = filters.ChoiceFilter(choices=MISSION_TYPE_CHOICES, label='Mission type')
+    mission_year = filters.NumberFilter(label='Mission year')
 
     class Meta(object):
         model = Panoramas
 
         fields = (
             'timestamp',
-            'newest_in_range',
+            'near',
             'radius',
             'bbox',
-            'mission_type'
-
-            # TODO: add lat, lon
-            # TODO: add x, y
+            'srid',
+            'newest_in_range',
+            'mission_type',
+            'mission_year'
         )
 
     def _get_radius_query(self, queryset, radius):
-        if not self._is_filter_enabled('x') or not self._is_filter_enabled('y'):
-            raise rest_serializers.ValidationError('x and y parameters must be set to use the radius filter')
+        if not self._is_filter_enabled('near'):
+            raise rest_serializers.ValidationError('near parameter must be set to use radius filter')
+
+        near = self._get_filter_string('near')
 
         try:
-            # TODO: use NumberFilters!
-            x = float(self.data['x'])
-            y = float(self.data['y'])
-        except ValueError:
-            raise rest_serializers.ValidationError('x and y parameters must be numbers')
+            srid = self._get_srid_parameter()
+            point = self._coordinates_from_string('near', near, 2)
+        except ValueError as e:
+            rest_serializers.ValidationError(str(e))
 
-        point = Func(Value(x), Value(y), function='ST_MakePoint', output_field=GeometryField())
-        srid_point = Func(point, 28992, function='ST_SetSRID', output_field=GeometryField())
+        postgis_point = Func(Value(point[0]), Value(point[1]),
+                    function='ST_MakePoint', output_field=GeometryField())
+        srid_point = Func(postgis_point, srid, function='ST_SetSRID', output_field=GeometryField())
+        transformed_point = Func(srid_point, 28992,
+                                function='ST_Transform', output_field=GeometryField())
 
-        return queryset \
-            .annotate(within=Func(srid_point, F('_geolocation_2d_rd'),
-                                  Value(radius), function='ST_DWithin', output_field=models.BooleanField())) \
-            .filter(within=True)
+        return queryset .annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
+                        Value(radius), function='ST_DWithin', output_field=models.BooleanField())).filter(within=True)
 
-    def _bbox_from_string(self, value):
+    def _coordinates_from_string(self, name, value, expected_coordinates):
         try:
             coordinates = list(map(lambda coordinate: float(coordinate), value.split(',')))
         except ValueError:
-            raise ValueError('bbox coordinates must be numbers')
+            raise ValueError('%s coordinates must be numbers, separated by commas' % name)
 
-        if len(coordinates) != 4:
-            raise ValueError('a bbox consists of 4 numbers')
+        if len(coordinates) != expected_coordinates:
+            raise ValueError('%s coordinates must consist of %s numbers' % (name, expected_coordinates))
+
+        return coordinates
+
+    def _bbox_from_string(self, value):
+        coordinates = self._coordinates_from_string('bbox', value, 4)
 
         return {
             'x1': coordinates[0],
@@ -112,27 +121,40 @@ class PanoramaFilter(FilterSet):
             'y2': coordinates[3]
         }
 
+    def _get_srid_parameter(self):
+        if self._is_filter_enabled('srid'):
+            try:
+                srid = int(self._get_filter_string('srid'))
+            except ValueError:
+                raise ValueError('srid must be a number')
+            return srid
+        else:
+            return self.DEFAULT_SRID
+
     def _get_bbox_query(self, queryset, value):
         try:
             bbox = self._bbox_from_string(value)
+            srid = self._get_srid_parameter()
         except ValueError as e:
             rest_serializers.ValidationError(str(e))
 
-        bbox_sql = Func(Value(bbox['x1']), Value(bbox['y1']),
-                        Value(bbox['x2']), Value(bbox['y2']), 28992,
+        envelope = Func(Value(bbox['x1']), Value(bbox['y1']),
+                        Value(bbox['x2']), Value(bbox['y2']), srid,
                         function='ST_MakeEnvelope', output_field=GeometryField())
+        transformed_envelope = Func(envelope, 28992,
+                                    function='ST_Transform', output_field=GeometryField())
+        return queryset.filter(_geolocation_2d_rd__bboverlaps=(transformed_envelope))
 
-        return queryset.filter(_geolocation_2d_rd__bboverlaps=(bbox_sql))
+    def _get_filter_string(self, name):
+        return name in self.data and self.data[name]
 
     def _is_filter_enabled(self, name):
-        return name in self.data and self.data[name]
+        filter = self._get_filter_string(name)
+        return filter and len(filter)
 
     def radius_filter(self, queryset, name, value):
         if self._is_filter_enabled('bbox'):
-            raise rest_serializers.ValidationError('radius and bbox filters cannot be used at the same time')
-
-        if value > self.MAX_RADIUS:
-            raise rest_serializers.ValidationError('radius can be at most %s meters' % self.MAX_RADIUS)
+            raise rest_serializers.ValidationError('near/radius and bbox filters cannot be used at the same time')
 
         return self._get_radius_query(queryset, value)
 
@@ -141,16 +163,13 @@ class PanoramaFilter(FilterSet):
 
     def newest_in_range_filter(self, queryset, name, value):
         if not (self._is_filter_enabled('bbox') or self._is_filter_enabled('radius')):
-            raise rest_serializers.ValidationError('bbox or radius filter must be enabled to use newest in radius')
-
-        # TODO: get radius from mission type
-        newest_in_range_radius = 5
+            raise rest_serializers.ValidationError('bbox or near/radius filter must be enabled to use newest in radius')
 
         exists = queryset.model.objects \
             .values('id') \
             .filter(timestamp__gt=OuterRef('timestamp')) \
             .annotate(within=Func(RawCol(queryset.model, '_geolocation_2d_rd'), F('_geolocation_2d_rd'), \
-                                  Value(newest_in_range_radius), function='ST_DWithin',
+                                  RawCol(queryset.model, 'mission_distance'), function='ST_DWithin',
                                   output_field=models.BooleanField())) \
             .filter(within=True)
 
@@ -167,7 +186,7 @@ class PanoramaFilter(FilterSet):
                 raise rest_serializers.ValidationError(
                     'radius for newest_in_range filter can be at most %s meters' % self.MAX_NEWEST_IN_RANGE_RADIUS)
 
-            # TODO: add padding radius with newest_in_range radius
+            # TODO: add padding to radius with newest_in_range radius
             exists = self._get_radius_query(exists, radius)
         elif self._is_filter_enabled('bbox'):
             # Square that fits circle with radius = MAX_NEWEST_IN_RANGE_RADIUS
@@ -181,12 +200,19 @@ class PanoramaFilter(FilterSet):
             except ValueError as e:
                 rest_serializers.ValidationError(str(e))
 
-            area = abs(bbox['x2'] - bbox['x1']) * abs(bbox['y2'] - bbox['y1'])
+            try:
+                srid = self._get_srid_parameter()
+            except ValueError as e:
+                rest_serializers.ValidationError(str(e))
 
-            if area > max_area:
+            polygon = Polygon.from_bbox((bbox['x1'], bbox['y1'], bbox['x2'], bbox['y2']))
+            geometry = GEOSGeometry(polygon, srid=srid).transform(28992, clone=True)
+
+            if geometry.area > max_area:
                 raise rest_serializers.ValidationError(
                     'area for newest_in_range filter can be at most %s square meters' % max_area)
 
+            # TODO: add padding to bbox with newest_in_range radius
             exists = self._get_bbox_query(exists, bbox_string)
 
         not_exists_filter = Q(not_exists=True)
@@ -197,6 +223,19 @@ class PanoramaFilter(FilterSet):
         return queryset.annotate(
             not_exists=~Exists(exists, output_field=models.BooleanField())
         ).filter(not_exists_filter)
+
+    def srid_filter(self, queryset, name, value):
+        # Don't do anything, SRID parameter is used
+        # in bbox and radius filters
+        return queryset
+
+    def near_filter(self, queryset, name, value):
+        if not self._is_filter_enabled('radius'):
+            raise rest_serializers.ValidationError('radius parameter must be set to use near filter')
+
+        # Don't do anything, near parameter is used
+        # in radius filter
+        return queryset
 
     def bbox_filter(self, queryset, name, value):
         if self._is_filter_enabled('radius'):
@@ -213,7 +252,7 @@ class PanoramaFilterAdjacent(PanoramaFilter):
 
         if not ('radius' in data and data['radius']):
             data = request.GET.copy()
-            data['radius'] = self.DEFAULT_ADJACENT_RADIUS
+            data['radius'] = str(self.DEFAULT_ADJACENT_RADIUS)
 
         super().__init__(data=data, queryset=queryset, request=request, prefix=prefix)
 
@@ -223,30 +262,25 @@ class PanoramaFilterAdjacent(PanoramaFilter):
 
         return super()._get_skip_not_exists()
 
-    def _get_radius_query(self, queryset, value):
+    def _get_radius_query(self, queryset, radius):
         return queryset.annotate(within=Func(F('from_geolocation_2d_rd'), F('_geolocation_2d_rd'),
-                                             Value(value), function='ST_DWithin', output_field=models.BooleanField())
-                                 ).filter(within=True)
+                                Value(radius), function='ST_DWithin', output_field=models.BooleanField())
+                                ).filter(within=True)
 
 
 class PanoramaViewSetNew(rest.DatapuntViewSet):
     """
-    View to retrieve panoramas
-
     Parameters:
 
-        lat/lon for wgs84 coords
-        x/y for RD coords,
-
-    Optional Parameters:
-
-        radius: (int) denoting search radius in meters
-        vanaf and/or tot: Several valued are allowed:
-            - (int) timestamp
-            - (int) year
-            - (string) ISO date format yyyy-mm-dd.
-            - (string) Eu date formate dd-mm-yyyy.
-            if 'vanaf' and 'tot' are given, tot >= vanaf
+    - newest_in_range: (boolean) only return photos that are the newest within their distance interval
+    - srid: (integer) projection of coordinates, either 4326 or 28992
+    - near: (string) two-dimensional point, separated by a comma; "<lon>,<lat>" when "srid=4326", "<x>,<y>" when "srid=28992"
+    - radius: (number) search radius in meters from point "near"
+    - bbox: (string) only return photos contained by bounding box, two two-dimensional points "<northwest>,<southeast>", same as point "near"
+    - timestamp_before: (string) ISO date format (yyyy-mm-dd)
+    - timestamp_after: (string) ISO date format (yyyy-mm-dd)
+    - mission_year: (integer)
+    - mission_type: (string)
     """
 
     lookup_field = 'pano_id'
@@ -266,6 +300,9 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
 
         if adjacency_filter._is_filter_enabled('bbox'):
             raise rest_serializers.ValidationError('bbox filter not allowed for adjacent panoramas')
+
+        if adjacency_filter._is_filter_enabled('near'):
+            raise rest_serializers.ValidationError('near filter not allowed for adjacent panoramas')
 
         queryset = adjacency_filter.qs.extra(order_by=['relative_distance'])
 
