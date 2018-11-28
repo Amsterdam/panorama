@@ -26,7 +26,7 @@ SURFACE_TYPE_CHOICES = (
 )
 
 
-class Panoramas(StatusModel):
+class AbstractPanoramaNew(StatusModel):
 
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
@@ -48,8 +48,7 @@ class Panoramas(StatusModel):
     objects = Manager()
 
     class Meta:
-        managed = False
-        db_table = 'panoramas_panorama'
+        abstract = True
         ordering = ('id',)
 
     def __init__(self, *args, **kwargs):
@@ -119,7 +118,14 @@ class Panoramas(StatusModel):
         return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + SMALL_IMAGE_NAME
 
 
-class Adjacencies(Panoramas):
+class Panoramas(AbstractPanoramaNew):
+    class Meta(AbstractPanoramaNew.Meta):
+        abstract = False
+        managed = False
+        db_table = 'panoramas_panorama'
+
+
+class Adjacencies(AbstractPanoramaNew):
     from_pano_id = models.CharField(max_length=37)
     from_geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True)
 
@@ -127,7 +133,9 @@ class Adjacencies(Panoramas):
     relative_pitch = models.FloatField()
     relative_heading = models.FloatField()
 
-    class Meta(Panoramas.Meta):
+    class Meta(AbstractPanoramaNew.Meta):
+        abstract = False
+        managed = False
         db_table = "panoramas_adjacencies_new"
 
     def __str__(self):
