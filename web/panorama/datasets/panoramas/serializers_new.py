@@ -45,7 +45,7 @@ class PanoSerializerNew(HALSerializer):
                    'status', 'status_changed')
 
 
-class AdjecentLink(PanoLinksFieldNew):
+class AdjacentLink(PanoLinksFieldNew):
     """For sake of HAL-compliancy the self link of an adjacency is constructed,
         allthough there is no endpoint listening in (therefore Django couldn't construct it for us.)
     """
@@ -57,7 +57,7 @@ class AdjecentLink(PanoLinksFieldNew):
 
 class AdjacentPanoSerializer(PanoSerializerNew):
     # Content for _links:
-    serializer_url_field = AdjecentLink
+    serializer_url_field = AdjacentLink
     adjacencies = None
     adjacent = IdentityLinksField(view_name='panoramas-detail',
                                   lookup_field='pano_id',
