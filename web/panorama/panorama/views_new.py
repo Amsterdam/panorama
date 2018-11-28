@@ -6,6 +6,7 @@ from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.geos import GEOSGeometry, Polygon
 from django.db import models
 from django.db.models import Q, Exists, OuterRef, Func, F, Expression, Value
+from django.db.models.expressions import CombinedExpression
 from django_filters import widgets
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import filters
@@ -97,8 +98,12 @@ class PanoramaFilter(FilterSet):
         transformed_point = Func(srid_point, 28992,
                                 function='ST_Transform', output_field=GeometryField())
 
-        return queryset .annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
+        queryset = queryset.annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
                         Value(radius), function='ST_DWithin', output_field=models.BooleanField())).filter(within=True)
+
+        # Sort by indexed KNN distance, see https://postgis.net/docs/geometry_distance_knn.html
+        order_by_distance = CombinedExpression(F('_geolocation_2d_rd'), '<->', transformed_point)
+        return queryset.order_by(order_by_distance)
 
     def _coordinates_from_string(self, name, value, expected_coordinates):
         try:
