@@ -210,7 +210,7 @@ class ImportPanoramaJob(object):
 
         date_format = '%d-%m-%Y'
         mission_date = datetime.strptime(row['datum'], date_format).date()
-        mission_year = row['woz-jaargang']
+        mission_year = row['woz-jaargang'] if 'woz-jaargang' in row else None
         if mission_year is None or mission_year is "":
             mission_year = mission_date.year
 
