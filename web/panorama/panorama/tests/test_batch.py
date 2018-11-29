@@ -109,9 +109,9 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'bi')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'woz')
 
-        self.assertIsNone(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_year)
-        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, '2016')
-        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].mission_year, '2017')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_year, 2015)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, 2016)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].mission_year, 2017)
 
 
         recent_pano_model = models.getRecentPanoModel("recente_opnames/alle")
