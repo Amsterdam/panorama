@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0033_readd_recent_adjacencies')
+        ('panoramas', '0034_add_panoramas_indices')
     ]
 
     operations = [
@@ -24,7 +24,10 @@ class Migration(migrations.Migration):
 
                     to_filename AS filename,
                     to_path AS path,
+                    to_surface_type AS surface_type,
                     to_mission_type AS mission_type,
+                    to_mission_distance AS mission_distance,
+                    to_mission_year AS mission_year,
                     to_timestamp AS timestamp,
 
                     to_status AS status,
@@ -50,7 +53,10 @@ class Migration(migrations.Migration):
 
                         to_pano.filename AS to_filename,
                         to_pano.path AS to_path,
+                        to_pano.surface_type AS to_surface_type,
                         to_pano.mission_type AS to_mission_type,
+                        to_pano.mission_distance AS to_mission_distance,
+                        to_pano.mission_year AS to_mission_year,
                         to_pano.timestamp AS to_timestamp,
 
                         to_pano.status AS to_status,
