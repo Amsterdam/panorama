@@ -110,7 +110,8 @@ class ImportPanoramaJob(object):
                     mission_type='bi',
                     mission_distance=5,
                     date="2015-1-1",
-                    neighbourhood='AUTOMATICALLY CREATED'
+                    neighbourhood='AUTOMATICALLY CREATED',
+                    mission_year=2015
                 )
                 mission.save()
         else:
