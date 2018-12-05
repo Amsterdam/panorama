@@ -183,7 +183,6 @@ class FaceDetector(object):
 
         regions = []
         for fa in response.face_annotations:
-            log.warning(f"fa: {fa}")
             lt, _, rb, _ =  fa.bounding_poly.vertices
             regions.append((lt.x, lt.y,
                             rb.x - lt.x, rb.y - lt.y))
