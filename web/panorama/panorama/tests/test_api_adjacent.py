@@ -1,6 +1,7 @@
 # Project
 from . test_api_base import PanoramaApiTest
 
+
 class AdjacentPanoramaApiTest(PanoramaApiTest):
 
     def test_get_base_panorama(self):

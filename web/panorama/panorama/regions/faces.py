@@ -1,7 +1,9 @@
 import logging
 
-import cv2
+# This dependency is available in the docker container, which also has the binaries installed
 import dlib
+
+import cv2
 from PIL import Image
 from scipy import misc
 from google.cloud import vision
@@ -174,14 +176,16 @@ class FaceDetector(object):
 
         upload = Img.image2byte_array_sized(zoomed, size=GOOGLE_VISION_MAX_SIZE)
 
-        vision_client = vision.Client()
-        image = vision_client.image(content=upload)
+        vision_client = vision.ImageAnnotatorClient()
+        image = vision.types.Image(content=upload)
+
+        response = vision_client.face_detection(image=image)
 
         regions = []
-        for df in image.detect_faces():
-            lt, _, rb, _ =  df.bounds.vertices
-            regions.append((lt.x_coordinate, lt.y_coordinate,
-                            rb.x_coordinate - lt.x_coordinate, rb.y_coordinate - lt.y_coordinate))
+        for fa in response.face_annotations:
+            lt, _, rb, _ =  fa.bounding_poly.vertices
+            regions.append((lt.x, lt.y,
+                            rb.x - lt.x, rb.y - lt.y))
 
             derived = derive(regions, 0, GOOGLE_VISION_START_HEIGHT, zoom, 'google_vision api', 1, 'no treshold')
             face_regions.extend(derived)
