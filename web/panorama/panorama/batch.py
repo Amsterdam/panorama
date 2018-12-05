@@ -16,6 +16,7 @@ from datasets.panoramas.models import Panorama, Traject, Mission
 from datasets.panoramas.models import EQUIRECTANGULAR_SUBPATH, FULL_IMAGE_NAME
 from panorama.shared.object_store import ObjectStore
 
+EMPTY_FALLBACK_YEAR = 2000
 BATCH_SIZE = 50000
 log = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class ImportPanoramaJob(object):
                     mission_distance=5,
                     date="2015-1-1",
                     neighbourhood='AUTOMATICALLY CREATED',
-                    mission_year=2015
+                    mission_year=EMPTY_FALLBACK_YEAR
                 )
                 mission.save()
         else:
@@ -159,15 +160,18 @@ class ImportPanoramaJob(object):
         # Creating unique id from mission id and pano id
         pano_id = '%s_%s' % (path.split('/')[-2], base_filename)
 
+        pano_timestamp = self._convert_gps_time(row['gps_seconds[s]'])
+        mission_year = pano_timestamp.year if mission.mission_year == EMPTY_FALLBACK_YEAR else mission.mission_year
+
         return Panorama(
             pano_id=pano_id,
             status=pano_status,
-            timestamp=self._convert_gps_time(row['gps_seconds[s]']),
+            timestamp=pano_timestamp,
             filename=pano_image,
             path=container+'/'+path,
             mission_type=mission.mission_type,
             surface_type=mission.surface_type,
-            mission_year=mission.mission_year,
+            mission_year=mission_year,
             mission_distance=mission.mission_distance,
             geolocation=Point(
                 float(row['longitude[deg]']),
