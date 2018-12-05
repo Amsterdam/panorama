@@ -51,7 +51,7 @@ class AdjacentLink(PanoLinksFieldNew):
     """
     def to_representation(self, value):
         request = self.context.get('request')
-        href = f"{request.build_absolute_uri()}{value.from_pano_id}/"
+        href = f"{request.build_absolute_uri(request.path)}{value.from_pano_id}/"
         return dict(href=href)
 
 
