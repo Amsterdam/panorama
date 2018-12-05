@@ -1,6 +1,7 @@
 # Project
 from . test_api_base import PanoramaApiTest
 
+
 class ThumbnailApiTest(PanoramaApiTest):
 
     def test_get_thumbnail_returns_json(self):
