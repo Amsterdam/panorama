@@ -170,11 +170,14 @@ class PanoramaFilter(FilterSet):
         if not (self._is_filter_enabled('bbox') or self._is_filter_enabled('radius')):
             raise rest_serializers.ValidationError('bbox or near/radius filter must be enabled to use newest in radius')
 
+        mission_distance_margin = 0.7
+
         exists = queryset.model.objects \
             .values('id') \
+            .filter(surface_type=OuterRef('surface_type')) \
             .filter(timestamp__gt=OuterRef('timestamp')) \
             .annotate(within=Func(RawCol(queryset.model, '_geolocation_2d_rd'), F('_geolocation_2d_rd'), \
-                                  RawCol(queryset.model, 'mission_distance'), function='ST_DWithin',
+                                  RawCol(queryset.model, 'mission_distance') - mission_distance_margin, function='ST_DWithin',
                                   output_field=models.BooleanField())) \
             .filter(within=True)
 
@@ -284,8 +287,8 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
     - bbox: (string) only return photos contained by bounding box, two two-dimensional points "<northwest>,<southeast>", same as point "near"
     - timestamp_before: (string) ISO date format (yyyy-mm-dd)
     - timestamp_after: (string) ISO date format (yyyy-mm-dd)
-    - mission_year: (integer)
-    - mission_type: (string)
+    - mission_year: (integer) year (yyyy) associated with mission (can be different than timestamp)
+    - mission_type: (string) type of panorama mission, either "bi" or "woz"
     """
 
     lookup_field = 'pano_id'
