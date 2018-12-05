@@ -1,7 +1,9 @@
 import logging
 
-import cv2
+# This dependency is available in the docker container, which also has the binaries installed
 import dlib
+
+import cv2
 from PIL import Image
 from scipy import misc
 from google.cloud import vision
