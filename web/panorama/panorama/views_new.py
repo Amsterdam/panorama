@@ -4,6 +4,7 @@ import math
 from datapunt_api import rest
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.geos import GEOSGeometry, Polygon
+from django.contrib.gis.measure import D
 from django.db import models
 from django.db.models import Q, Exists, OuterRef, Func, F, Expression, Value
 from django.db.models.expressions import CombinedExpression
@@ -23,6 +24,11 @@ from datasets.panoramas.serializers_new import PanoSerializerNew, AdjacentPanoSe
 MISSION_TYPE_CHOICES = (
     ('bi', 'bi'),
     ('woz', 'woz')
+)
+
+SURFACE_TYPE_CHOICES = (
+    ('L', 'land'),
+    ('W', 'water'),
 )
 
 SRID_CHOICES = (
@@ -45,7 +51,7 @@ class RawCol(Expression):
 
 
 class PanoramaFilter(FilterSet):
-    MAX_RADIUS = 1000  # meters
+    MAX_RADIUS = 100000  # meters
 
     DEFAULT_SRID = 4326
 
@@ -64,6 +70,7 @@ class PanoramaFilter(FilterSet):
     newest_in_range = filters.BooleanFilter(method='newest_in_range_filter', label='Only return newest in range')
 
     mission_type = filters.ChoiceFilter(choices=MISSION_TYPE_CHOICES, label='Mission type')
+    surface_type = filters.ChoiceFilter(choices=SURFACE_TYPE_CHOICES, label='Surface type')
     mission_year = filters.NumberFilter(label='Mission year')
 
     class Meta(object):
@@ -77,7 +84,8 @@ class PanoramaFilter(FilterSet):
             'srid',
             'newest_in_range',
             'mission_type',
-            'mission_year'
+            'mission_year',
+            'surface_type',
         )
 
     def _get_radius_query(self, queryset, radius):
@@ -85,7 +93,6 @@ class PanoramaFilter(FilterSet):
             raise rest_serializers.ValidationError('near parameter must be set to use radius filter')
 
         near = self._get_filter_string('near')
-
         try:
             srid = self._get_srid_parameter()
             point = self._coordinates_from_string('near', near, 2)
@@ -93,13 +100,17 @@ class PanoramaFilter(FilterSet):
             rest_serializers.ValidationError(str(e))
 
         postgis_point = Func(Value(point[0]), Value(point[1]),
-                    function='ST_MakePoint', output_field=GeometryField())
+                             function='ST_MakePoint', output_field=GeometryField())
         srid_point = Func(postgis_point, srid, function='ST_SetSRID', output_field=GeometryField())
         transformed_point = Func(srid_point, 28992,
-                                function='ST_Transform', output_field=GeometryField())
+                                 function='ST_Transform', output_field=GeometryField())
 
-        queryset = queryset.annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
-                        Value(radius), function='ST_DWithin', output_field=models.BooleanField())).filter(within=True)
+        if self._is_filter_enabled('newest_in_range'):
+            queryset = queryset.annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
+                                                     Value(radius), function='ST_DWithin',
+                                                     output_field=models.BooleanField())).filter(within=True)
+        else:
+            queryset.filter(_geolocation_2d_rd__dwithin=(transformed_point, D(m=radius)))
 
         # Sort by indexed KNN distance, see https://postgis.net/docs/geometry_distance_knn.html
         order_by_distance = CombinedExpression(F('_geolocation_2d_rd'), '<->', transformed_point)
@@ -288,7 +299,8 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
     - timestamp_before: (string) ISO date format (yyyy-mm-dd)
     - timestamp_after: (string) ISO date format (yyyy-mm-dd)
     - mission_year: (integer) year (yyyy) associated with mission (can be different than timestamp)
-    - mission_type: (string) type of panorama mission, either "bi" or "woz"
+    - mission_type: (string) type of panorama mission, currently either "bi" or "woz"
+    - surface_type: (string) type of panorama surface type, currently either "L" or "W" (land of water)
     """
 
     lookup_field = 'pano_id'
