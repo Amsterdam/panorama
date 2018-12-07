@@ -76,6 +76,8 @@ class PanoramaFilter(FilterSet):
     class Meta(object):
         model = Panoramas
 
+        # when adding new filter-fields remember to add them as well to the inner-query `exists` in
+        #   the method `newest_in_range_filter`
         fields = (
             'timestamp',
             'near',
@@ -105,12 +107,9 @@ class PanoramaFilter(FilterSet):
         transformed_point = Func(srid_point, 28992,
                                  function='ST_Transform', output_field=GeometryField())
 
-        if self._is_filter_enabled('newest_in_range'):
-            queryset = queryset.annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
+        queryset = queryset.annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
                                                      Value(radius), function='ST_DWithin',
                                                      output_field=models.BooleanField())).filter(within=True)
-        else:
-            queryset.filter(_geolocation_2d_rd__dwithin=(transformed_point, D(m=radius)))
 
         # Sort by indexed KNN distance, see https://postgis.net/docs/geometry_distance_knn.html
         order_by_distance = CombinedExpression(F('_geolocation_2d_rd'), '<->', transformed_point)
@@ -233,6 +232,14 @@ class PanoramaFilter(FilterSet):
 
             # TODO: add padding to bbox with newest_in_range radius
             exists = self._get_bbox_query(exists, bbox_string)
+
+        # there is no guarantee on the order of application of filters, therefore the exists might be
+        # copied from the queryset before all filters are applied, making the inner exists subquery not
+        # match the outer subset. So we manually apply the other filters from outer as well:
+        if self._is_filter_enabled('mission_type'):
+            exists = exists.filter(mission_type=OuterRef('mission_type'))
+        if self._is_filter_enabled('mission_year'):
+            exists = exists.filter(mission_year=OuterRef('mission_year'))
 
         not_exists_filter = Q(not_exists=True)
 
