@@ -60,7 +60,7 @@ class PanoramaFilter(FilterSet):
     # Panorama photos are displayed on zoom level 11 and up.
     MAX_NEWEST_IN_RANGE_RADIUS = 250  # meters
 
-    timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
+#    timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
 
     near = filters.CharFilter(method='near_filter', label='Near point')
     radius = filters.NumberFilter(method='radius_filter', label='Radius')
@@ -79,7 +79,7 @@ class PanoramaFilter(FilterSet):
         # when adding new filter-fields remember to add them as well to the inner-query `exists` in
         #   the method `newest_in_range_filter`
         fields = (
-            'timestamp',
+ #           'timestamp',
             'near',
             'radius',
             'bbox',
@@ -303,12 +303,13 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
     - near: (string) two-dimensional point, separated by a comma; "<lon>,<lat>" when "srid=4326", "<x>,<y>" when "srid=28992"
     - radius: (number) search radius in meters from point "near"
     - bbox: (string) only return photos contained by bounding box, two two-dimensional points "<northwest>,<southeast>", same as point "near"
-    - timestamp_before: (string) ISO date format (yyyy-mm-dd)
-    - timestamp_after: (string) ISO date format (yyyy-mm-dd)
-    - mission_year: (integer) year (yyyy) associated with mission (can be different than timestamp)
+    - mission_year: (integer) year (yyyy) associated with mission
     - mission_type: (string) type of panorama mission, currently either "bi" or "woz"
     - surface_type: (string) type of panorama surface type, currently either "L" or "W" (land of water)
     """
+    #    - timestamp_before: (string) ISO date format (yyyy-mm-dd)
+    #    - timestamp_after: (string) ISO date format (yyyy-mm-dd)
+    #    - mission_year: (integer) year (yyyy) associated with mission (can be different than timestamp)
 
     lookup_field = 'pano_id'
     queryset = Panoramas.done.all()
