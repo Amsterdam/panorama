@@ -60,7 +60,7 @@ class PanoramaFilter(FilterSet):
     # Panorama photos are displayed on zoom level 11 and up.
     MAX_NEWEST_IN_RANGE_RADIUS = 250  # meters
 
-#    timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
+    timestamp = filters.DateTimeFromToRangeFilter(label='Timestamp', widget=widgets.DateRangeWidget())
 
     near = filters.CharFilter(method='near_filter', label='Near point')
     radius = filters.NumberFilter(method='radius_filter', label='Radius')
@@ -68,6 +68,7 @@ class PanoramaFilter(FilterSet):
     srid = filters.ChoiceFilter(method='srid_filter', choices=SRID_CHOICES, label='Projection (SRID)')
 
     newest_in_range = filters.BooleanFilter(method='newest_in_range_filter', label='Only return newest in range')
+    limit_results = filters.NumberFilter(method='limit_results_filter', label='Limit of the results')
 
     mission_type = filters.ChoiceFilter(choices=MISSION_TYPE_CHOICES, label='Mission type')
     surface_type = filters.ChoiceFilter(choices=SURFACE_TYPE_CHOICES, label='Surface type')
@@ -79,7 +80,7 @@ class PanoramaFilter(FilterSet):
         # when adding new filter-fields remember to add them as well to the inner-query `exists` in
         #   the method `newest_in_range_filter`
         fields = (
- #           'timestamp',
+            'timestamp',
             'near',
             'radius',
             'bbox',
@@ -88,6 +89,7 @@ class PanoramaFilter(FilterSet):
             'mission_type',
             'mission_year',
             'surface_type',
+            'limit_results',
         )
 
     def _get_radius_query(self, queryset, radius):
@@ -107,9 +109,7 @@ class PanoramaFilter(FilterSet):
         transformed_point = Func(srid_point, 28992,
                                  function='ST_Transform', output_field=GeometryField())
 
-        queryset = queryset.annotate(within=Func(transformed_point, F('_geolocation_2d_rd'),
-                                                     Value(radius), function='ST_DWithin',
-                                                     output_field=models.BooleanField())).filter(within=True)
+        queryset = queryset.filter(_geolocation_2d_rd__dwithin=(transformed_point, D(m=radius)))
 
         # Sort by indexed KNN distance, see https://postgis.net/docs/geometry_distance_knn.html
         order_by_distance = CombinedExpression(F('_geolocation_2d_rd'), '<->', transformed_point)
@@ -176,6 +176,12 @@ class PanoramaFilter(FilterSet):
     def _get_skip_not_exists(self):
         pass
 
+    def filter_queryset(self, queryset):
+        if self._is_filter_enabled('limit_results'):
+            limit_results = int(self._get_filter_string('limit_results'))
+            return super().filter_queryset(queryset)[0:limit_results]
+        return super().filter_queryset(queryset)
+
     def newest_in_range_filter(self, queryset, name, value):
         if not (self._is_filter_enabled('bbox') or self._is_filter_enabled('radius')):
             raise rest_serializers.ValidationError('bbox or near/radius filter must be enabled to use newest in radius')
@@ -240,6 +246,10 @@ class PanoramaFilter(FilterSet):
             exists = exists.filter(mission_type=OuterRef('mission_type'))
         if self._is_filter_enabled('mission_year'):
             exists = exists.filter(mission_year=OuterRef('mission_year'))
+        if self._is_filter_enabled('timestamp_before'):
+            exists = exists.filter(timestamp__lte=self._get_filter_string('timestamp_before'))
+        if self._is_filter_enabled('timestamp_after'):
+            exists = exists.filter(timestamp__gte=self._get_filter_string('timestamp_after'))
 
         not_exists_filter = Q(not_exists=True)
 
@@ -253,6 +263,10 @@ class PanoramaFilter(FilterSet):
     def srid_filter(self, queryset, name, value):
         # Don't do anything, SRID parameter is used
         # in bbox and radius filters
+        return queryset
+
+    def limit_results_filter(self, queryset, name, value):
+        # Don't do anything, is used to slice filter_queryset
         return queryset
 
     def near_filter(self, queryset, name, value):
@@ -303,13 +317,13 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
     - near: (string) two-dimensional point, separated by a comma; "<lon>,<lat>" when "srid=4326", "<x>,<y>" when "srid=28992"
     - radius: (number) search radius in meters from point "near"
     - bbox: (string) only return photos contained by bounding box, two two-dimensional points "<northwest>,<southeast>", same as point "near"
-    - mission_year: (integer) year (yyyy) associated with mission
+    - timestamp_before: (string) ISO date format (yyyy-mm-dd)
+    - timestamp_after: (string) ISO date format (yyyy-mm-dd)
+    - mission_year: (integer) year (yyyy) associated with mission (can be different than timestamp)
     - mission_type: (string) type of panorama mission, currently either "bi" or "woz"
     - surface_type: (string) type of panorama surface type, currently either "L" or "W" (land of water)
+    - limit_results: (integer) limit on the returned results (impacts count and pagination: if more results are available, they don't show up in counts). Can be used for performance reasons
     """
-    #    - timestamp_before: (string) ISO date format (yyyy-mm-dd)
-    #    - timestamp_after: (string) ISO date format (yyyy-mm-dd)
-    #    - mission_year: (integer) year (yyyy) associated with mission (can be different than timestamp)
 
     lookup_field = 'pano_id'
     queryset = Panoramas.done.all()
