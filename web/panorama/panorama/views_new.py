@@ -285,7 +285,7 @@ class PanoramaFilter(FilterSet):
 
 
 class PanoramaFilterAdjacent(PanoramaFilter):
-    DEFAULT_ADJACENT_RADIUS = 20
+    DEFAULT_ADJACENT_RADIUS = 21
 
     def __init__(self, data=None, queryset=None, request=None, prefix=None, pano_id=None):
         self.pano_id = pano_id
