@@ -70,6 +70,7 @@ class AdjacentPanoSerializer(PanoSerializerNew):
     distance = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_distance')
     direction = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_heading')
     angle = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_pitch')
+    elevation = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_elevation')
 
     class Meta(PanoSerializerNew.Meta):
         listresults_field = 'adjacencies'
