@@ -132,6 +132,7 @@ class Adjacencies(AbstractPanoramaNew):
     relative_distance = models.FloatField()
     relative_pitch = models.FloatField()
     relative_heading = models.FloatField()
+    relative_elevation = models.FloatField()
 
     class Meta(AbstractPanoramaNew.Meta):
         abstract = False
