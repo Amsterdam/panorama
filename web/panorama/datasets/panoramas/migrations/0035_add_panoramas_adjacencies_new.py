@@ -36,6 +36,7 @@ class Migration(migrations.Migration):
                     relative_distance,
                     relative_heading,
                     relative_pitch,
+                    relative_elevation,
 
                     from_geolocation_2d_rd,
 
