@@ -62,6 +62,7 @@ requests==2.20.1
 rfc3986==1.2.0
 rsa==4.0
 scipy==1.1.0
+sentry-sdk==0.6.6
 simplejson==3.16.0
 six==1.11.0
 sqlparse==0.2.4
