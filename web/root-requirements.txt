@@ -18,3 +18,4 @@ psycopg2-binary
 python-keystoneclient
 python-swiftclient
 scipy
+sentry-sdk

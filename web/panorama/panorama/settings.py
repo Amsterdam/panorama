@@ -1,5 +1,8 @@
 import os
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from panorama import objectstore_settings
 from panorama.settings_common import * # noqa F403
 from panorama.settings_common import INSTALLED_APPS, DEBUG, DATAPUNT_API_URL
@@ -70,6 +73,13 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..', 'static'))
 
 HEALTH_MODEL = 'panoramas.Panorama'
+
+SENTRY_DSN = os.getenv('SENTRY_DSN')
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()]
+    )
 
 # Set of years to group panoramas by
 PREPARED_YEARS = range(2016, 2021)
