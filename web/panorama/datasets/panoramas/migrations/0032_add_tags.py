@@ -8,7 +8,7 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0035_add_panoramas_adjacencies_new'),
+        ('panoramas', '0031_add_distance'),
     ]
 
     operations = [
