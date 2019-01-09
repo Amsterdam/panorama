@@ -44,7 +44,7 @@ mock_objectstore = 'panorama.batch.ImportPanoramaJob.object_store.%s'
 
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
-        'Render test skipped: no mounted directory found, run in docker container')
+        'Import test skipped: no mounted directory found, run in docker container')
 class ImportPanoTest(TransactionTestCase):
     """
     This is more like an integration test than a unit test
