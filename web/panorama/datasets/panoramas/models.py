@@ -1,10 +1,11 @@
 from math import atan2, degrees, cos, sin, radians
 
-from django.contrib.gis.db import models as geo
-from django.db.models import Manager
-from django.contrib.gis.geos import Point
-from django.db import models
 from django.conf import settings
+from django.contrib.gis.db import models as geo
+from django.contrib.gis.geos import Point
+from django.contrib.postgres.fields import ArrayField
+from django.db.models import Manager
+from django.db import models
 
 from model_utils.models import StatusModel
 from model_utils import Choices
@@ -47,6 +48,7 @@ class AbstractPanorama(StatusModel):
     mission_distance = models.IntegerField()
     mission_type = models.TextField(max_length=16, default='bi')
     mission_year = models.TextField(max_length=4, null=True)
+    tags = ArrayField(models.CharField(max_length=32), db_index=True, blank=True)
 
     objects = Manager()
 
