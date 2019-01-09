@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0036_add_tags')
+        ('panoramas', '0035_add_panoramas_indices')
     ]
 
     operations = [
