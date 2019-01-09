@@ -33,7 +33,8 @@ class TestTransformer(TestCase):
                 pitch=-6.76660799409535,
                 heading=219.760795827427,
                 mission_distance=5.0,
-                mission_year="2016"
+                mission_year="2016",
+                tags=[]
             )
 
         try:
@@ -52,7 +53,8 @@ class TestTransformer(TestCase):
                 pitch=0.281594736873711,
                 heading=295.567147056641,
                 mission_distance=5.0,
-                mission_year="2016"
+                mission_year="2016",
+                tags=[]
             )
 
         cls.images = [
