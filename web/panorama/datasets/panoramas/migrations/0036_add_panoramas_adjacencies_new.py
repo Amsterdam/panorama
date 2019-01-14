@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0034_add_panoramas_indices')
+        ('panoramas', '0035_add_panoramas_indices')
     ]
 
     operations = [
@@ -28,6 +28,7 @@ class Migration(migrations.Migration):
                     to_mission_type AS mission_type,
                     to_mission_distance AS mission_distance,
                     to_mission_year AS mission_year,
+                    to_tags AS tags,
                     to_timestamp AS timestamp,
 
                     to_status AS status,
@@ -58,6 +59,7 @@ class Migration(migrations.Migration):
                         to_pano.mission_type AS to_mission_type,
                         to_pano.mission_distance AS to_mission_distance,
                         to_pano.mission_year AS to_mission_year,
+                        to_pano.tags AS to_tags,
                         to_pano.timestamp AS to_timestamp,
 
                         to_pano.status AS to_status,

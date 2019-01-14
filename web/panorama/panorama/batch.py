@@ -129,6 +129,25 @@ class ImportPanoramaJob(object):
         """
         Process a single row in the panorama photos metadata csv
         """
+        def _create_tags(mission, mission_year):
+
+            tags = []
+
+            if  mission.mission_type:
+                tags.append('mission-'+mission.mission_type)
+
+            tags.append('mission-'+str(mission_year))
+
+            if mission.surface_type == 'L':
+                tags.append('surface-land')
+            elif mission.surface_type == 'W':
+                tags.append('surface-water')
+
+            if mission.mission_distance:
+                tags.append('mission-distance-'+str(mission.mission_distance))
+
+            return tags
+
         try:
             base_filename = row['panorama_file_name']
         except KeyError:
@@ -163,6 +182,8 @@ class ImportPanoramaJob(object):
         pano_timestamp = self._convert_gps_time(row['gps_seconds[s]'])
         mission_year = pano_timestamp.year if mission.mission_year == EMPTY_FALLBACK_YEAR else mission.mission_year
 
+        tags = _create_tags(mission, mission_year)
+
         return Panorama(
             pano_id=pano_id,
             status=pano_status,
@@ -173,6 +194,7 @@ class ImportPanoramaJob(object):
             surface_type=mission.surface_type,
             mission_year=mission_year,
             mission_distance=mission.mission_distance,
+            tags=tags,
             geolocation=Point(
                 float(row['longitude[deg]']),
                 float(row['latitude[deg]']),

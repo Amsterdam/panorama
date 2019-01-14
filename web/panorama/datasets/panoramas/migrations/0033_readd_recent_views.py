@@ -117,7 +117,7 @@ ORDER BY pp.id
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('panoramas', '0031_add_distance')
+        ('panoramas', '0032_add_tags')
     ]
 
     operations = views_recent_pano + mvs_recent_pano + ids_mvs_recent_pano

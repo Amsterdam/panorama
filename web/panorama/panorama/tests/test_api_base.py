@@ -30,7 +30,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2014
+            mission_year=2014,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_2_2014_CLOSE',
@@ -44,7 +45,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2014
+            mission_year=2014,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_3_2015_CLOSE',
@@ -58,7 +60,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2015
+            mission_year=2015,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_5_2014_CLOSE_BUT_NO_CIGAR',
@@ -72,7 +75,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2014
+            mission_year=2014,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_5_2015_CLOSE_BUT_NO_CIGAR',
@@ -86,7 +90,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2015
+            mission_year=2015,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_6_2016_CLOSE',
@@ -99,7 +104,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2016
+            mission_year=2016,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_7_2016_CLOSE_BUT_NO_CIGAR',
@@ -112,7 +118,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2016
+            mission_year=2016,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_8_2017_CLOSE',
@@ -125,7 +132,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2017
+            mission_year=2017,
+            tags=[]
         )
         factories.PanoramaFactory.create(
             pano_id='PANO_9_2017_CLOSE_BUT_NO_CIGAR',
@@ -138,7 +146,8 @@ class PanoramaApiTest(APITestCase):
             pitch=factory.fuzzy.FuzzyFloat(-10, 10),
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
-            mission_year=2017
+            mission_year=2017,
+            tags=[]
         )
 
         RefreshViews().refresh_views()
