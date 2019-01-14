@@ -44,7 +44,7 @@ mock_objectstore = 'panorama.batch.ImportPanoramaJob.object_store.%s'
 
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
-        'Render test skipped: no mounted directory found, run in docker container')
+        'Import test skipped: no mounted directory found, run in docker container')
 class ImportPanoTest(TransactionTestCase):
     """
     This is more like an integration test than a unit test
@@ -71,13 +71,10 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(missies.count(), 11)
 
         self.assertEqual(Mission.objects.filter(neighbourhood='AUTOMATICALLY CREATED').count(), 2)
-
         self.assertEqual(Mission.objects.filter(surface_type='L').count(), 7)
         self.assertEqual(Mission.objects.filter(surface_type='W').count(), 4)
-
         self.assertEqual(Mission.objects.filter(mission_distance=5).count(), 7)
         self.assertEqual(Mission.objects.filter(mission_distance=10).count(), 4)
-
         self.assertEqual(Mission.objects.filter(mission_type='bi').count(), 8)
         self.assertEqual(Mission.objects.filter(mission_type='woz').count(), 3)
         self.assertEqual(Mission.objects.filter(mission_year='2016').count(), 8)
@@ -97,6 +94,7 @@ class ImportPanoTest(TransactionTestCase):
         adjecencies = Adjacency.objects.all()
         self.assertEqual(adjecencies.count(), 12)
 
+        # test old-style attributes
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].surface_type, 'L')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].surface_type, 'W')
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].surface_type, 'L')
@@ -113,6 +111,22 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, 2016)
         self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].mission_year, 2017)
 
+        # test new-style attributes
+        self.assertIn('surface-land', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        self.assertIn('surface-water', Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
+        self.assertIn('surface-land', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+
+        self.assertIn('mission-distance-5', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        self.assertIn('mission-distance-10', Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
+        self.assertIn('mission-distance-5', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+
+        self.assertIn('mission-bi', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        self.assertIn('mission-bi', Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
+        self.assertIn('mission-woz', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+
+        self.assertIn('mission-2016', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        self.assertIn('mission-2016', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+        self.assertIn('mission-2017', Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].tags)
 
         recent_pano_model = models.getRecentPanoModel("recente_opnames/alle")
         recent = recent_pano_model.objects.all()

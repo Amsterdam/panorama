@@ -70,6 +70,7 @@ class PanoramaFilter(FilterSet):
     newest_in_range = filters.BooleanFilter(method='newest_in_range_filter', label='Only return newest in range')
     limit_results = filters.NumberFilter(method='limit_results_filter', label='Limit of the results')
 
+    tags = filters.CharFilter(method='tags_filter', label='Tags')
     mission_type = filters.ChoiceFilter(choices=MISSION_TYPE_CHOICES, label='Mission type')
     surface_type = filters.ChoiceFilter(choices=SURFACE_TYPE_CHOICES, label='Surface type')
     mission_year = filters.NumberFilter(label='Mission year')
@@ -86,6 +87,7 @@ class PanoramaFilter(FilterSet):
             'bbox',
             'srid',
             'newest_in_range',
+            'tags',
             'mission_type',
             'mission_year',
             'surface_type',
@@ -250,6 +252,9 @@ class PanoramaFilter(FilterSet):
             exists = exists.filter(timestamp__lte=self._get_filter_string('timestamp_before'))
         if self._is_filter_enabled('timestamp_after'):
             exists = exists.filter(timestamp__gte=self._get_filter_string('timestamp_after'))
+        if self._is_filter_enabled('tags'):
+            tags = self._get_filter_string('tags')
+            exists = exists.filter(tags__contains=tags.split(','))
 
         not_exists_filter = Q(not_exists=True)
 
@@ -259,6 +264,9 @@ class PanoramaFilter(FilterSet):
         return queryset.annotate(
             not_exists=~Exists(exists, output_field=models.BooleanField())
         ).filter(not_exists_filter)
+
+    def tags_filter(self, queryset, name, value):
+        return queryset.filter(tags__contains=value.split(','))
 
     def srid_filter(self, queryset, name, value):
         # Don't do anything, SRID parameter is used
@@ -319,6 +327,7 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
     - bbox: (string) only return photos contained by bounding box, two two-dimensional points "<northwest>,<southeast>", same as point "near"
     - timestamp_before: (string) ISO date format (yyyy-mm-dd)
     - timestamp_after: (string) ISO date format (yyyy-mm-dd)
+    - tags: (string) a comma-seperated list of tags to filter on, for example: "mission-bi,mission2017"
     - mission_year: (integer) year (yyyy) associated with mission (can be different than timestamp)
     - mission_type: (string) type of panorama mission, currently either "bi" or "woz"
     - surface_type: (string) type of panorama surface type, currently either "L" or "W" (land of water)
