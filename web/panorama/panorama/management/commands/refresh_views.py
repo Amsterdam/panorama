@@ -8,10 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    views = ['panoramas_adjacencies', 'panoramas_recent_all', 'panoramas_adjacencies_recent_all']
-    for year in settings.PREPARED_YEARS:
-        views.extend([f"panoramas_recent_{year}", f"panoramas_adjacencies_recent_{year}"])
-
     def handle(self, *args, **options):
         self.refresh_views()
 
@@ -19,9 +15,6 @@ class Command(BaseCommand):
         if not conn:
             conn = connection
 
-        for view in self.views:
-            with conn.cursor() as cursor:
-                self.stdout.write(f'refreshing materialized view {view}')
-                cursor.execute(f"REFRESH MATERIALIZED VIEW public.{view}")
-
-        self.stdout.write('refresh {} views'.format(len(self.views)))
+        with conn.cursor() as cursor:
+            self.stdout.write('refreshing materialized view panoramas_recent_all')
+            cursor.execute("REFRESH MATERIALIZED VIEW public.panoramas_recent_all")

@@ -1,28 +1,46 @@
 import logging
+from collections import OrderedDict
 # Packages
+from django.db.models import BooleanField
+from django.db.models import Q, Exists, OuterRef, Func, F, Expression, Value
+from django.db.models.expressions import CombinedExpression
+
 from rest_framework import serializers
 from rest_framework.fields import empty
 from rest_framework_gis import fields
 # Project
-from datasets.panoramas import models
+from datasets.panoramas import models, models_new
 from datapunt_api.rest import LinksField, HALSerializer
+
+from panorama.views_new import RawCol
 
 log = logging.getLogger(__name__)
 
 MAX_ADJACENCY = 21
+MAX_MISSION_DISTANCE = 10
+MISSION_DISTANCE_MARGIN = 0.7
 
 
 class AdjacencySerializer(serializers.ModelSerializer):
-    pano_id = serializers.ReadOnlyField(source='to_pano.pano_id')
-    direction = serializers.DecimalField(max_digits=20, decimal_places=2)
-    angle = serializers.DecimalField(max_digits=20, decimal_places=2)
-    pitch = serializers.DecimalField(max_digits=20, decimal_places=2)
-    distance = serializers.DecimalField(max_digits=20, decimal_places=2)
-    year = serializers.IntegerField(source='to_year')
+    pano_id = serializers.ReadOnlyField()
+    direction = serializers.SerializerMethodField(source='get_direction')
+    angle = serializers.SerializerMethodField(source='get_angle')
+    heading = serializers.DecimalField(source='relative_heading', max_digits=20, decimal_places=2)
+    pitch = serializers.DecimalField(source='relative_pitch', max_digits=20, decimal_places=2)
+    distance = serializers.DecimalField(source='relative_distance', max_digits=20, decimal_places=2)
+    year = serializers.IntegerField(source='mission_year')
 
     class Meta:
-        model = models.Adjacency
+        model = models_new.Adjacencies
         fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch', 'distance', 'year',)
+
+    def get_direction(self, instance):
+        "Unused - meaningless parameter, forcefully set to null"
+        return None
+
+    def get_angle(self, instance):
+        "Unused - meaningless parameter, forcefully set to null"
+        return None
 
 
 class ImageLinksSerializer(serializers.ModelSerializer):
@@ -62,7 +80,7 @@ class PanoSerializer(HALSerializer):
 
     class Meta:
         model = models.Panorama
-        exclude = ('path', 'geolocation', 'adjacent_panos', '_geolocation_2d',
+        exclude = ('path', 'geolocation', '_geolocation_2d',
                    '_geolocation_2d_rd', 'status', 'status_changed', 'mission_year',
                    'mission_distance', 'surface_type')
 
@@ -74,27 +92,68 @@ class PanoSerializer(HALSerializer):
         return serializer.data
 
 
-class FilteredPanoSerializer(PanoSerializer):
+class RecentPanoLinksField(PanoLinksField):
+    def to_representation(self, value):
+        request = self.context.get('request')
+        modified_view_name = self.view_name.replace('recentpanorama', f"recentpanorama-alle")
+        return OrderedDict([
+            ('self', dict(href=self.get_url(value, modified_view_name, request, None))),
+        ])
+
+
+class RecentPanoSerializer(PanoSerializer):
+    serializer_url_field = RecentPanoLinksField
+
+    class Meta(PanoSerializer.Meta):
+        model = models.RecentPanorama
+
+
+class PanoDetailSerializer(PanoSerializer):
     adjacent = serializers.SerializerMethodField(source='get_adjacent')
 
-    class Models:
-        adjacency_model = models.Adjacency
-        adjacency_serializer = AdjacencySerializer
-
     def __init__(self, instance=None, data=empty, filter_dict={}, **kwargs):
-        self.filter = filter_dict
         super().__init__(instance, data, **kwargs)
+        self.filter = filter_dict
+
+    def _filter_recent(self, queryset):
+        return queryset
 
     def get_adjacent(self, instance):
-        qs = self.Models.adjacency_model.objects.filter(
-            from_pano=instance,
-            distance__lt=MAX_ADJACENCY,
-            to_pano__status=self.Meta.model.STATUS.done
+        qs = models_new.Adjacencies.objects.filter(
+            Q(from_pano_id=instance.pano_id),
+            ~Q(pano_id=instance.pano_id)
         )
-        if 'vanaf' in self.filter:
-            qs = qs.exclude(to_pano__timestamp__lt=self.filter['vanaf'])
-        if 'tot' in self.filter:
-            qs = qs.exclude(to_pano__timestamp__gt=self.filter['tot'])
 
-        serializer = self.Models.adjacency_serializer(instance=qs, many=True)
+        if 'vanaf' in self.filter:
+            qs = qs.exclude(timestamp__lt=self.filter['vanaf'])
+        if 'tot' in self.filter:
+            qs = qs.exclude(timestamp__gt=self.filter['tot'])
+
+        qs = self._filter_recent(qs)
+        qs = qs.annotate(within=Func(F('from_geolocation_2d_rd'), F('_geolocation_2d_rd'), Value(MAX_ADJACENCY),
+                                     function='ST_DWithin', output_field=BooleanField())).filter(within=True)
+
+        qs = qs.order_by('relative_distance')
+
+        serializer = AdjacencySerializer(instance=qs, many=True)
         return serializer.data
+
+
+class RecentPanoDetailSerializer(PanoDetailSerializer):
+    def _filter_recent(self, queryset):
+        exists = queryset.model.objects \
+            .values('id') \
+            .filter(surface_type=OuterRef('surface_type')) \
+            .filter(timestamp__gt=OuterRef('timestamp')) \
+            .annotate(within=Func(RawCol(queryset.model, '_geolocation_2d_rd'), F('_geolocation_2d_rd'),
+                                  RawCol(queryset.model, 'mission_distance') - MISSION_DISTANCE_MARGIN,
+                                  function='ST_DWithin', output_field=BooleanField())) \
+            .filter(within=True)
+
+        exists.annotate(within=Func(F('from_geolocation_2d_rd'), F('_geolocation_2d_rd'),
+                                    Value(MAX_ADJACENCY + MAX_MISSION_DISTANCE), function='ST_DWithin',
+                                    output_field=BooleanField())).filter(within=True)
+
+        not_exists_filter = Q(not_exists=True)
+
+        return queryset.annotate(not_exists=~Exists(exists, output_field=BooleanField())).filter(not_exists_filter)
