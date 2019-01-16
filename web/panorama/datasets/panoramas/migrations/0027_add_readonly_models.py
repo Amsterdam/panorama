@@ -49,7 +49,6 @@ class Migration(migrations.Migration):
                 ('surface_type', models.CharField(choices=[('L', 'land'), ('W', 'water')], default='L', max_length=1)),
                 ('mission_type', models.CharField(default='bi', max_length=16)),
                 ('mission_year', models.CharField(max_length=4)),
-                ('adjacent_panos', models.ManyToManyField(through='panoramas.Adjacency', to='panoramas.RecentPanorama')),
             ],
             options={
                 'db_table': 'panoramas_recent_all',

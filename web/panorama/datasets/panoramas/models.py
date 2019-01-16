@@ -43,7 +43,6 @@ class AbstractPanorama(StatusModel):
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
-    adjacent_panos = models.ManyToManyField('self', through='Adjacency', symmetrical=False)
     surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
     mission_distance = models.IntegerField()
     mission_type = models.TextField(max_length=16, default='bi')
@@ -114,43 +113,11 @@ class Panorama(AbstractPanorama):
         abstract = False
 
 
-class AbstractAdjacency(models.Model):
-    from_pano = models.ForeignKey(Panorama, on_delete=models.CASCADE, related_name='to_adjacency')
-    to_pano = models.ForeignKey(Panorama, on_delete=models.CASCADE, related_name='from_adjacency')
-    heading = models.DecimalField(max_digits=20, decimal_places=2)
-    to_year = models.IntegerField()
-    distance = models.FloatField()
-    elevation = models.FloatField()
-
-    class Meta:
-        abstract = True
-        index_together = [['from_pano', 'distance']]
-        managed = False
-
-    def __str__(self):
-        return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.to_pano_id)
-
-    @property
-    def direction(self):
-        return (self.heading - self.from_pano.heading) % 360
-
-    @property
-    def angle(self):
-        cam_angle = self.from_pano.pitch*cos(radians(self.direction)) \
-                    - self.from_pano.roll*sin(radians(self.direction))
-        return self.pitch - cam_angle
-
-    @property
-    def pitch(self):
-        if not self.elevation or self.distance <= 0.0:
-            return 0.0
-        return degrees(atan2(self.elevation, self.distance))
-
-
-class Adjacency(AbstractAdjacency):
-    class Meta(AbstractAdjacency.Meta):
+class RecentPanorama(AbstractPanorama):
+    class Meta(AbstractPanorama.Meta):
         abstract = False
-        db_table = "panoramas_adjacencies"
+        managed = False
+        db_table = "panoramas_recent_all"
 
 
 class Region(models.Model):

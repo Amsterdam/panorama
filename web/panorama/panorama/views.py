@@ -2,7 +2,7 @@
 from rest_framework.response import Response
 
 # Project
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.models import Panorama, RecentPanorama
 from datasets.panoramas import serializers
 from datapunt_api import rest
 
@@ -30,7 +30,7 @@ class PanoramaViewSet(rest.DatapuntViewSet):
     """
     lookup_field = 'pano_id'
     queryset = Panorama.done.all()
-    serializer_detail_class = serializers.FilteredPanoSerializer
+    serializer_detail_class = serializers.PanoDetailSerializer
     serializer_class = serializers.PanoSerializer
 
     def list(self, request, *_args, **_kwargs):
@@ -45,8 +45,11 @@ class PanoramaViewSet(rest.DatapuntViewSet):
         # nothing to work with
         coords = get_request_coord(request.query_params)
         if not coords:
-            return super().list(self, request)
+            return super().list(request)
+        else:
+            return self.get_nearest_or_none(request, coords)
 
+    def get_nearest_or_none(self, request, coords):
         adjacent_filter, queryset = self._get_filter_and_queryset(
             coords, request)
 
@@ -65,7 +68,7 @@ class PanoramaViewSet(rest.DatapuntViewSet):
         return Response([], status=200)
 
     def get_queryset(self, *args, **kwargs):
-        _, queryset =  self._get_filter_and_queryset_by_date(self.queryset, self.request)
+        _, queryset = self._get_filter_and_queryset_by_date(self.queryset, self.request)
         return queryset
 
     def _get_filter_and_queryset_by_date(self, queryset, request):
@@ -97,3 +100,9 @@ class PanoramaViewSet(rest.DatapuntViewSet):
         queryset = queryset.extra(order_by=['distance'])
 
         return adjacent_filter, queryset
+
+
+class RecentPanoramaViewSet(PanoramaViewSet):
+    queryset = RecentPanorama.done.all()
+    serializer_class = serializers.RecentPanoSerializer
+    serializer_detail_class = serializers.RecentPanoDetailSerializer

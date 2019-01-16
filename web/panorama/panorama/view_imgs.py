@@ -10,7 +10,7 @@ from scipy import misc
 from datasets.panoramas.models import Panorama
 from datasets.panoramas.serializers import ThumbnailSerializer
 from panorama.transform.thumbnail import Thumbnail
-from panorama.derived_views import RecentPanoramaViewSet
+from panorama.views import RecentPanoramaViewSet
 from .queryparam_utils import get_float_value, get_int_value, get_request_coord
 
 
@@ -65,7 +65,6 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
         the thumb looking at the given point
         :param **kwargs:
         """
-        self._set_queryset_and_serializers("recente_opnames/alle")
         coords = get_request_coord(request.query_params)
 
         if not coords:
@@ -120,7 +119,6 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
         return degrees(atan2(d_lon, d_phi)) % 360.0
 
     def retrieve(self, request, pano_id=None, heading=0):
-        self._set_queryset_and_serializers("recente_opnames/alle")
         target_heading = get_int_value(
             request, 'heading', default=heading, upper=360, strategy='modulo')
 

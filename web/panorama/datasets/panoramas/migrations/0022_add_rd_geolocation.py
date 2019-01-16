@@ -23,8 +23,4 @@ class Migration(migrations.Migration):
             "update public.panoramas_panorama set _geolocation_2d_rd = ST_Transform(_geolocation_2d, 28992)",
             "update public.panoramas_panorama set _geolocation_2d_rd = null"
         ),
-        migrations.RunSQL(
-            "CREATE INDEX panoramas_panorama_geo_2d_rd_id ON public.panoramas_panorama USING GIST (_geolocation_2d_rd)",
-            "DROP INDEX public.panoramas_panorama_geo_2d_rd_id"
-        ),
     ]
