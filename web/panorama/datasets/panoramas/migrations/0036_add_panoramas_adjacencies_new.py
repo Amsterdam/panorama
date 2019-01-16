@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
 
                     relative_distance,
                     relative_heading,
-                    relative_pitch,
+                    degrees(atan2(relative_elevation, relative_distance)) AS relative_pitch,
                     relative_elevation,
 
                     from_geolocation_2d_rd,
@@ -45,9 +45,6 @@ class Migration(migrations.Migration):
                     to_geolocation_2d AS _geolocation_2d,
                     to_geolocation AS geolocation
                 FROM (SELECT
-                        *,
-                        degrees(atan2(relative_elevation, relative_distance)) AS relative_pitch
-                    FROM (SELECT
                         from_pano.id || '-' || to_pano.id AS id,
 
                         from_pano.pano_id AS from_pano_id,
@@ -82,7 +79,7 @@ class Migration(migrations.Migration):
                         panoramas_panorama to_pano
                     WHERE
                         to_pano.status = 'done'
-                    ) subquery1 ) subquery2
+                    ) subquery1
             """
         )
     ]

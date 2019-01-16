@@ -49,22 +49,3 @@ class AdjacentPanoramaApiTest(PanoramaApiTest):
         self.assertEqual(response.data['pano_id'], 'PANO_8_2017_CLOSE')
         self.assertIn('adjacent', response.data)
         self.assertEqual(2, len(response.data['adjacent']))
-
-    def test_get_recent2016_panorama(self):
-        response = self.client.get('/panorama/recente_opnames/2016/PANO_6_2016_CLOSE/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'], 'PANO_6_2016_CLOSE')
-        self.assertIn('adjacent', response.data)
-        self.assertEqual(1, len(response.data['adjacent']))
-        self.assertEqual(2016, response.data['adjacent'][0]['year'])
-
-    def test_get_recent2017_panorama(self):
-        response = self.client.get('/panorama/recente_opnames/2017/PANO_8_2017_CLOSE/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('pano_id', response.data)
-        self.assertEqual(response.data['pano_id'], 'PANO_8_2017_CLOSE')
-        self.assertIn('adjacent', response.data)
-        self.assertEqual(1, len(response.data['adjacent']))
-        self.assertEqual(2017, response.data['adjacent'][0]['year'])
-

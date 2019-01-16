@@ -25,9 +25,4 @@ class Migration(migrations.Migration):
                 'db_table': 'panoramas_adjacencies',
             },
         ),
-        migrations.AddField(
-            model_name='panorama',
-            name='adjacent_panos',
-            field=models.ManyToManyField(through='panoramas.Adjacency', to='panoramas.Panorama'),
-        ),
     ]

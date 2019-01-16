@@ -98,7 +98,7 @@ ORDER BY pp.id
         ),
         migrations.RunSQL(
             f"CREATE INDEX recent_{year}_id_idx ON public.panoramas_recent_{year} (id) ",
-            f"DROP INDEX recent_{year}_pano_id_idx ",
+            f"DROP INDEX recent_{year}_id_idx ",
         ),
         migrations.RunSQL(
             f"CREATE INDEX recent_{year}_geo_2d_rd_idx ON public.panoramas_recent_{year} USING GIST (_geolocation_2d_rd)",
