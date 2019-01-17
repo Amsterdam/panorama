@@ -2,8 +2,7 @@ import logging
 from collections import OrderedDict
 # Packages
 from django.db.models import BooleanField
-from django.db.models import Q, Exists, OuterRef, Func, F, Expression, Value
-from django.db.models.expressions import CombinedExpression
+from django.db.models import Q, Exists, OuterRef, Func, F, Value
 
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -141,19 +140,5 @@ class PanoDetailSerializer(PanoSerializer):
 
 class RecentPanoDetailSerializer(PanoDetailSerializer):
     def _filter_recent(self, queryset):
-        exists = queryset.model.objects \
-            .values('id') \
-            .filter(surface_type=OuterRef('surface_type')) \
-            .filter(timestamp__gt=OuterRef('timestamp')) \
-            .annotate(within=Func(RawCol(queryset.model, '_geolocation_2d_rd'), F('_geolocation_2d_rd'),
-                                  RawCol(queryset.model, 'mission_distance') - MISSION_DISTANCE_MARGIN,
-                                  function='ST_DWithin', output_field=BooleanField())) \
-            .filter(within=True)
-
-        exists.annotate(within=Func(F('from_geolocation_2d_rd'), F('_geolocation_2d_rd'),
-                                    Value(MAX_ADJACENCY + MAX_MISSION_DISTANCE), function='ST_DWithin',
-                                    output_field=BooleanField())).filter(within=True)
-
-        not_exists_filter = Q(not_exists=True)
-
-        return queryset.annotate(not_exists=~Exists(exists, output_field=BooleanField())).filter(not_exists_filter)
+        exists = models.RecentPanorama.objects.filter(pano_id=OuterRef('pano_id'))
+        return queryset.annotate(adjacent=Exists(exists)).filter(adjacent=True)
