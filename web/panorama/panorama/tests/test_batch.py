@@ -125,7 +125,7 @@ class ImportPanoTest(TransactionTestCase):
         self.assertIn('mission-2017', Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].tags)
 
         recent = RecentPanorama.objects.all()
-        self.assertEqual(recent.count(), 14)
+        self.assertEqual(recent.count(), 9)
 
 
     def test_panoramarow_sets_status(self, *args):
