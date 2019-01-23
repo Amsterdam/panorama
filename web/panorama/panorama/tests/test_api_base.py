@@ -31,6 +31,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2014,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -46,6 +47,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2014,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -61,6 +63,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2015,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -76,6 +79,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2014,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -91,6 +95,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2015,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -105,6 +110,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2016,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -119,6 +125,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2016,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -133,6 +140,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2017,
+            mission_type='bi',
             tags=[]
         )
         factories.PanoramaFactory.create(
@@ -147,6 +155,7 @@ class PanoramaApiTest(APITestCase):
             heading=factory.fuzzy.FuzzyFloat(-10, 10),
             mission_distance=5.0,
             mission_year=2017,
+            mission_type='bi',
             tags=[]
         )
 
