@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from scipy import misc
 
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.models import Panorama, RecentPanorama
 from datasets.panoramas.serializers import ThumbnailSerializer
 from panorama.transform.thumbnail import Thumbnail
 from panorama.views import RecentPanoramaViewSet
@@ -56,6 +56,7 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
         aspect: aspect ratio of thumbnail (width/height, min 1) (default 1.5 (3/2)
     """
 
+    queryset = RecentPanorama.objects.all()
     lookup_field = 'pano_id'
     renderer_classes = (renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
 

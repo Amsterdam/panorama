@@ -1,11 +1,9 @@
-import os
-
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 from panorama import objectstore_settings
 from panorama.settings_common import * # noqa F403
-from panorama.settings_common import INSTALLED_APPS, DEBUG, DATAPUNT_API_URL
+from panorama.settings_common import INSTALLED_APPS
 from panorama.settings_databases import LocationKey, \
     get_docker_host, \
     get_database_key, \

@@ -6,6 +6,7 @@ reports
 *_dev_settings.py
 web/static/*
 .env
+.venv
 .jenkins/backups
 /panoramas_test
 test_output

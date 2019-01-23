@@ -1,12 +1,40 @@
+# Python
+import datetime
+# Packages
+from django.contrib.gis.geos import Point
+from django.utils.timezone import utc as UTC_TZ
+import factory
+import factory.fuzzy
 # Project
 from . test_api_base import PanoramaApiTest
-
+from datasets.panoramas.models import Panorama
+from datasets.panoramas.tests import factories
 
 class ThumbnailApiTest(PanoramaApiTest):
 
+    @classmethod
+    def setUpClass(cls):
+        # Adding locations
+        factories.PanoramaFactory.create(
+            pano_id='PANO_WOZ_2018',
+            status=Panorama.STATUS.done,
+            timestamp=datetime.datetime(2018, 5, 5, tzinfo=UTC_TZ),
+            filename=factory.fuzzy.FuzzyText(length=30),
+            path=factory.fuzzy.FuzzyText(length=30),
+            geolocation=Point(4.897071, 52.377956, 10),
+            roll=factory.fuzzy.FuzzyFloat(-10, 10),
+            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
+            heading=factory.fuzzy.FuzzyFloat(-10, 10),
+            mission_distance=5.0,
+            mission_year=2018,
+            mission_type='woz',
+            tags=[]
+        )
+        super().setUpClass()
+
     def test_get_thumbnail_returns_json(self):
         response = self.client.get(
-            '/panorama/thumbnail/?lat=52.377956&lon=4.897070&radius=1000')
+            '/panorama/thumbnail/?lat=52.377956&lon=4.897070&radius=100')
         self.assertEqual(response.status_code, 200)
         self.assertIn('pano_id', response.data)
         self.assertIn('url', response.data)
