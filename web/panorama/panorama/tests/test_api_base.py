@@ -158,6 +158,21 @@ class PanoramaApiTest(APITestCase):
             mission_type='bi',
             tags=[]
         )
+        factories.PanoramaFactory.create(
+            pano_id='PANO_WOZ_2018',
+            status=Panorama.STATUS.done,
+            timestamp=datetime.datetime(2018, 5, 5, tzinfo=UTC_TZ),
+            filename=factory.fuzzy.FuzzyText(length=30),
+            path=factory.fuzzy.FuzzyText(length=30),
+            geolocation=Point(4.897071, 52.377956, 10),
+            roll=factory.fuzzy.FuzzyFloat(-10, 10),
+            pitch=factory.fuzzy.FuzzyFloat(-10, 10),
+            heading=factory.fuzzy.FuzzyFloat(-10, 10),
+            mission_distance=5.0,
+            mission_year=2018,
+            mission_type='woz',
+            tags=[]
+        )
 
         RefreshViews().refresh_views()
         time.sleep(2)
