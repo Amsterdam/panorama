@@ -82,6 +82,7 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Mission.objects.filter(mission_year='2017', mission_type='bi').count(), 0)
 
         panos = Panorama.done.all()
+        log.warning(f"panos: {[pano.pano_id for pano in panos]}")
         self.assertEqual(panos.count(), 16)
 
         self.assertIsNotNone(panos[0]._geolocation_2d_rd)
@@ -126,7 +127,6 @@ class ImportPanoTest(TransactionTestCase):
 
         recent = RecentPanorama.objects.all()
         self.assertEqual(recent.count(), 9)
-
 
     def test_panoramarow_sets_status(self, *args):
         mission = Mission()
