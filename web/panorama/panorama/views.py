@@ -103,6 +103,6 @@ class PanoramaViewSet(rest.DatapuntViewSet):
 
 
 class RecentPanoramaViewSet(PanoramaViewSet):
-    queryset = RecentPanorama.done.all()
+    queryset = RecentPanorama.objects.all()
     serializer_class = serializers.RecentPanoSerializer
     serializer_detail_class = serializers.RecentPanoDetailSerializer
