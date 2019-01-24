@@ -11,8 +11,6 @@ from rest_framework_gis import fields
 from datasets.panoramas import models, models_new
 from datapunt_api.rest import LinksField, HALSerializer
 
-from panorama.views_new import RawCol
-
 log = logging.getLogger(__name__)
 
 MAX_ADJACENCY = 21
@@ -34,11 +32,11 @@ class AdjacencySerializer(serializers.ModelSerializer):
         fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch', 'distance', 'year',)
 
     def get_direction(self, instance):
-        "Unused - meaningless parameter, forcefully set to null"
+        # Unused - meaningless parameter, forcefully set to null
         return None
 
     def get_angle(self, instance):
-        "Unused - meaningless parameter, forcefully set to null"
+        # Unused - meaningless parameter, forcefully set to null
         return None
 
 
