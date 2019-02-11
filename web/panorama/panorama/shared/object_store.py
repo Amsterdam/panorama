@@ -62,13 +62,13 @@ class ObjectStore(object):
     def get_csvs(self, csv_identifier):
         csvs = []
         for container in settings.PANORAMA_CONTAINERS:
-            for month in self._get_subdirs(container, ''):
-                for day in self._get_subdirs(container, month):
-                    for trajectory in self._get_subdirs(container, day):
-                        csvs.extend(self._get_csv_type(container, trajectory, csv_identifier))
+            for month in self.get_subdirs(container, ''):
+                for day in self.get_subdirs(container, month):
+                    for trajectory in self.get_subdirs(container, day):
+                        csvs.extend(self.get_csv_type(container, trajectory, csv_identifier))
         return csvs
 
-    def _get_subdirs(self, container, path):
+    def get_subdirs(self, container, path):
         objects_from_store = self._get_full_container_list(self.panorama_conn,
                                                            container,
                                                            [],
@@ -92,7 +92,7 @@ class ObjectStore(object):
                                                            prefix=path)
         return [store_object['subdir'] for store_object in objects_from_store if 'subdir' in store_object]
 
-    def _get_csv_type(self, container, path, csv_identifier):
+    def get_csv_type(self, container, path, csv_identifier):
         csvs = self._get_full_container_list(self.panorama_conn,
                                              container,
                                              [],
@@ -125,5 +125,5 @@ class ObjectStore(object):
     def get_containerroot_csvs(self, csv_identifier):
         csvs = []
         for container in settings.PANORAMA_CONTAINERS:
-            csvs.extend(self._get_csv_type(container, '', csv_identifier))
+            csvs.extend(self.get_csv_type(container, '', csv_identifier))
         return csvs

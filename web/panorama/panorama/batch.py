@@ -133,7 +133,7 @@ class ImportPanoramaJob(object):
 
             tags = []
 
-            if  mission.mission_type:
+            if mission.mission_type:
                 tags.append('mission-'+mission.mission_type)
 
             tags.append('mission-'+str(mission_year))
