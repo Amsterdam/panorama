@@ -27,7 +27,7 @@ def image2byte_array(image: Image, quality=80):
     return img_byte_array.getvalue()
 
 
-def  image2byte_array_sized(image: Image, size=1000000):
+def image2byte_array_sized(image: Image, size=1000000):
     """
     Translate PIL image to byte array with maximum file size (deault 1MB)
     :param image: the PIL image
