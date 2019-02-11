@@ -2,14 +2,9 @@ import logging
 from swiftclient import ClientException
 
 from datasets.panoramas.models import EQUIRECTANGULAR_SUBPATH, FULL_IMAGE_NAME
+from panorama.etl.etl_settings import DUMP_FILENAME, SOURCE_LISTING_NAME, INTERMEDIATE_LISTING_NAME, BLURRED_LISTING_NAME, \
+    INCREMENTS_CONTAINER, INTERMEDIATE_CONTAINER
 from panorama.shared.object_store import ObjectStore
-
-SOURCE_LISTING_NAME = "sources.txt"
-INTERMEDIATE_LISTING_NAME = "intermediate.txt"
-BLURRED_LISTING_NAME = "blurred.txt"
-
-INCREMENTS_CONTAINER = "increments"
-INTERMEDIATE_CONTAINER = "intermediate"
 
 panorama_images = {}
 panorama_rendered = {}
@@ -140,6 +135,16 @@ def set_uptodate_info(container, path):
 
     objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, f"{container}/{path}{BLURRED_LISTING_NAME}",
                                         blurred_listing, "text/plain")
+
+
+def increment_exists(increment_path):
+    """Check if an increment is present at the given path
+
+    :param increment_path: the path to check for existince of increment
+    :return: True or False, depending on if the path contains an increment
+    """
+    dirlist = objectstore.get_panorama_store_objects(INCREMENTS_CONTAINER, f"{increment_path}")
+    return f"{increment_path}{DUMP_FILENAME}" in [obj['name'] for obj in dirlist]
 
 
 def is_increment_uptodate(container, path):

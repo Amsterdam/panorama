@@ -3,8 +3,9 @@ import logging
 from swiftclient import ClientException
 import re
 
-from panorama.etl.check_objectstore import is_increment_uptodate, INCREMENTS_CONTAINER
-from panorama.etl.db_actions import DUMP_FILENAME
+from panorama.etl.check_objectstore import is_increment_uptodate, increment_exists
+from panorama.etl.db_actions import restore_increment, clear_database, dump_increment
+from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
 from panorama.objectstore_settings import PANORAMA_CONTAINERS
 from panorama.shared.object_store import ObjectStore
 
@@ -59,8 +60,8 @@ def _check_and_process_recursively(source_container, path, increment, missions_t
     subdirs = objectstore.get_subdirs(source_container, path)
     for subdir in subdirs:
         # process only if subdir is in parent/child tree of increment, if no increment is given process always
-        do_process = increment and (f"{source_container}/{subdir}" in increment or
-                                    increment in f"{source_container}/{subdir}")
+        do_process = increment is None or (f"{source_container}/{subdir}" in increment or
+                                           increment in f"{source_container}/{subdir}")
 
         if do_process:
             # terminate at mission-dirs, or propagate recursion
@@ -95,3 +96,24 @@ def check_increments(increment=None):
                    for year in PANORAMA_CONTAINERS]
 
     return all(up_to_dates), missions_to_rebuild
+
+
+def rebuild_increments_recursively(path=""):
+    """Re-construct the increments that have been deleted when checking for increments that were no longer up-to-date
+    Assumes mission-level increments are present
+
+    :return: None
+    """
+
+    subdirs = objectstore.get_subdirs(INCREMENTS_CONTAINER, path)
+
+    for subdir in subdirs:
+        if not increment_exists(subdir):
+            rebuild_increments_recursively(subdir)
+
+    clear_database()
+    for subdir in subdirs:
+        restore_increment(subdir)
+
+    log.info(f"building increment in /{path}")
+    dump_increment(path)
