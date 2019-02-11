@@ -4,11 +4,11 @@ import logging
 from django.contrib.gis.geos import Point
 
 from datasets.panoramas.models import Mission, Panorama
+from panorama.batch import EMPTY_FALLBACK_YEAR
 from panorama.etl.check_objectstore import panorama_image_file_exists, panorama_blurred_file_exists, \
     panorama_rendered_file_exists
 from panorama.etl.date_util import _convert_gps_time
 
-EMPTY_FALLBACK_YEAR = 2000
 log = logging.getLogger(__name__)
 
 
