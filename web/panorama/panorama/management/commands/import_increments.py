@@ -17,6 +17,9 @@ class Command(BaseCommand):
 
     @staticmethod
     def _check_increment(increment):
+        if increment is None:
+            return
+
         increment_in = increment
 
         if increment[:1] == "/":
