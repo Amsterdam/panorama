@@ -3,10 +3,8 @@ import csv
 
 from datasets.panoramas.models import Mission, Panorama
 from panorama.etl.data_to_model import process_mission_row, process_panorama_row
+from panorama.etl.etl_settings import BATCH_SIZE
 from panorama.shared.object_store import ObjectStore
-
-EMPTY_FALLBACK_YEAR = 2000
-BATCH_SIZE = 50000
 
 log = logging.getLogger(__name__)
 objectstore = ObjectStore()
