@@ -18,4 +18,4 @@ services:
       DB_PASSWORD: insecure
       OBJECTSTORE_PASSWORD:
     command: >
-      bash -c "python manage.py import_increments --increment /2017/"
+      bash -c "python manage.py import_increments --increment /2018/"
