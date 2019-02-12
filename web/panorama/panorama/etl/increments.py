@@ -13,10 +13,10 @@ log = logging.getLogger(__name__)
 objectstore = ObjectStore()
 
 
-def _remove_stale_increment(container, path):
+def _remove_stale_increment(increment_path):
     """Remove an increment
 
-        _remove_stale_increment('2015', '05/07')
+        _remove_stale_increment('2015/05/07')
 
     will remove the file: increments/2015/05/07/increment.dump from the objectstore
 
@@ -26,7 +26,7 @@ def _remove_stale_increment(container, path):
     """
 
     try:
-        objectstore.panorama_conn.delete_object(INCREMENTS_CONTAINER, f"{container}/{path}{DUMP_FILENAME}")
+        objectstore.panorama_conn.delete_object(INCREMENTS_CONTAINER, f"{increment_path}{DUMP_FILENAME}")
     except ClientException:
         pass
 
@@ -44,13 +44,14 @@ def _is_mission(subdir):
     return pattern.match(subdir)
 
 
-def _check_and_process_recursively(source_container, path, increment, missions_to_rebuild):
+def _check_and_process_recursively(source_container, path, increment, force_rebuild, missions_to_rebuild):
     """Tests recursively if the directory is still up to date, recursion terminates when `_is_mission(subdir`
     returns True. Any mission-increment that is no longer up to date
 
     :param source_container: container to check: in panorama 'year'
     :param path: path to check recursively
     :param increment: restrict processing only to this increment
+    :param force_rebuild: always do a new import of the missions
     :param missions_to_rebuild: a running List of missions that need to be rebuild
     :return: True if the subtree is still up date
     """
@@ -66,23 +67,25 @@ def _check_and_process_recursively(source_container, path, increment, missions_t
         if do_process:
             # terminate at mission-dirs, or propagate recursion
             if _is_mission(subdir):
-                log.info(f"Checking if path is still up to data: {source_container}/{subdir}")
-                if not is_increment_uptodate(source_container, subdir):
-                    _remove_stale_increment(source_container, subdir)
+                increment_path = f"{source_container}/{subdir}"
+                log.info(f"Checking if path is still up to data: {increment_path}")
+                if force_rebuild or not is_increment_uptodate(source_container, subdir):
+                    _remove_stale_increment(increment_path)
                     missions_to_rebuild.append((source_container, subdir))
                     up_to_date = False
                     log.info(f"    Not up to date: {source_container}/{subdir}")
             else:
-                up_to_date = _check_and_process_recursively(source_container, subdir, increment,
+                up_to_date = _check_and_process_recursively(source_container, subdir, increment, force_rebuild,
                                                             missions_to_rebuild) and up_to_date
 
     if not up_to_date:
-        log.info(f"    Not up to date: {source_container}/{path}")
-        _remove_stale_increment(source_container, path)
+        increment_path = f"{source_container}/{path}"
+        log.info(f"    Not up to date: {increment_path}")
+        _remove_stale_increment(increment_path)
     return up_to_date
 
 
-def check_increments(increment=None):
+def check_increments(increment=None, force_rebuild=False):
     """Test all missions to see if the are still up to date, and if not, remove them recursively. Returning missions
     to (re)build
 
@@ -92,10 +95,14 @@ def check_increments(increment=None):
     """
 
     missions_to_rebuild = []
-    up_to_dates = [_check_and_process_recursively(year, "", increment, missions_to_rebuild)
+    up_to_dates = [_check_and_process_recursively(year, "", increment, force_rebuild, missions_to_rebuild)
                    for year in PANORAMA_CONTAINERS]
 
-    return all(up_to_dates), missions_to_rebuild
+    all_up_to_date = all(up_to_dates)
+    if force_rebuild or (increment is None and not all_up_to_date):
+        _remove_stale_increment("")
+
+    return all_up_to_date, missions_to_rebuild
 
 
 def rebuild_increments_recursively(path=""):
