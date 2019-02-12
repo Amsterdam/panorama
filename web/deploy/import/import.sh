@@ -26,7 +26,7 @@ dc run importer /deploy/docker-migrate.sh
 echo "Importing data"
 dc run --rm importer
 
-# echo "Running backups"
-# dc exec -T database backup-db.sh panorama
+echo "Running backups"
+dc exec -T database backup-db.sh panorama
 
 echo "Done"
