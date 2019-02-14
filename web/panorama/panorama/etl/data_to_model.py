@@ -138,7 +138,7 @@ def process_panorama_row(headers, row, csv_file):
         status=panorama_status,
         timestamp=pano_timestamp,
         filename=filename,
-        path=f"{container}/{path}",
+        path=f"{container}/{path}/",
         mission_type=mission.mission_type,
         surface_type=mission.surface_type,
         mission_year=mission_year,
