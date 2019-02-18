@@ -5,22 +5,22 @@ from rest_framework import serializers
 from rest_framework_gis import fields
 
 # Project
-from datasets.panoramas.hal_serializer import HALSerializer, HyperLinksField, IdentityLinksField, HALListSerializer
-from datasets.panoramas.models_new import Panoramas
+from datasets.panoramas.v2.hal_serializer import HALSerializer, HyperLinksField, IdentityLinksField, HALListSerializer
+from datasets.panoramas.v2.models import Panoramas
 
 log = logging.getLogger(__name__)
 
 MAX_ADJACENCY = 21
 
 
-class PanoLinksFieldNew(IdentityLinksField):
+class PanoLinksField(IdentityLinksField):
     lookup_field = 'pano_id'
 
 
-class PanoSerializerNew(HALSerializer):
+class PanoSerializer(HALSerializer):
 
     # Content for _links in HAL-json:
-    serializer_url_field = PanoLinksFieldNew
+    serializer_url_field = PanoLinksField
     equirectangular_full = HyperLinksField()
     equirectangular_medium = HyperLinksField()
     equirectangular_small = HyperLinksField()
@@ -45,7 +45,7 @@ class PanoSerializerNew(HALSerializer):
                    'status', 'status_changed')
 
 
-class AdjacentLink(PanoLinksFieldNew):
+class AdjacentLink(PanoLinksField):
     """For sake of HAL-compliancy the self link of an adjacency is constructed,
         allthough there is no endpoint listening in (therefore Django couldn't construct it for us.)
     """
@@ -55,7 +55,7 @@ class AdjacentLink(PanoLinksFieldNew):
         return dict(href=href)
 
 
-class AdjacentPanoSerializer(PanoSerializerNew):
+class AdjacentPanoSerializer(PanoSerializer):
     # Content for _links:
     serializer_url_field = AdjacentLink
     adjacencies = None
@@ -72,5 +72,5 @@ class AdjacentPanoSerializer(PanoSerializerNew):
     angle = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_pitch')
     elevation = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_elevation')
 
-    class Meta(PanoSerializerNew.Meta):
+    class Meta(PanoSerializer.Meta):
         listresults_field = 'adjacencies'

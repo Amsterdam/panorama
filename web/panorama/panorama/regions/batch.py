@@ -1,7 +1,8 @@
 import csv
 import logging
 
-from datasets.panoramas.models import Panorama, Region
+from datasets.panoramas.models import Region
+from datasets.panoramas.v1.models import Panorama
 from panorama.shared.object_store import ObjectStore
 
 BATCH_SIZE = 1000

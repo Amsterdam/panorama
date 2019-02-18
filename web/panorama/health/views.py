@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse
 
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 
 log = logging.getLogger(__name__)
 

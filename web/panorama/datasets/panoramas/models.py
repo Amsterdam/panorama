@@ -1,5 +1,3 @@
-from math import atan2, degrees, cos, sin, radians
-
 from django.conf import settings
 from django.contrib.gis.db import models as geo
 from django.contrib.gis.geos import Point
@@ -110,36 +108,6 @@ class AbstractBasePanorama(StatusModel):
     @property
     def equirectangular_small(self):
         return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + SMALL_IMAGE_NAME
-
-
-class AbstractPanorama(AbstractBasePanorama):
-    roll = models.FloatField()
-    pitch = models.FloatField()
-    heading = models.FloatField()
-
-    @property
-    def cubic_img_urls(self):
-        return {'baseurl': self.cubic_img_baseurl,
-                'pattern': self.cubic_img_pattern,
-                'preview': self.cubic_img_preview}
-
-    @property
-    def equirectangular_img_urls(self):
-        return {'full': self.equirectangular_full,
-                'medium': self.equirectangular_medium,
-                'small': self.equirectangular_small}
-
-
-class Panorama(AbstractPanorama):
-    class Meta(AbstractPanorama.Meta):
-        abstract = False
-
-
-class RecentPanorama(AbstractPanorama):
-    class Meta(AbstractPanorama.Meta):
-        abstract = False
-        managed = False
-        db_table = "panoramas_recent_all"
 
 
 class Region(models.Model):

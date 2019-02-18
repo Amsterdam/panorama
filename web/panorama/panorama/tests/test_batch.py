@@ -4,7 +4,8 @@ import os
 from django.test import TransactionTestCase
 from unittest import mock, skipIf
 
-from datasets.panoramas.models import Panorama, Traject, Mission, RecentPanorama
+from datasets.panoramas.models import Traject, Mission
+from datasets.panoramas.v1.models import Panorama, RecentPanorama
 from panorama.batch import ImportPanoramaJob
 from panorama.management.commands.refresh_views import Command as RefreshCommand
 

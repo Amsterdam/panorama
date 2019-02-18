@@ -12,7 +12,8 @@ from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as utc_tz
 
 # Project
-from datasets.panoramas.models import Panorama, Traject, Mission
+from datasets.panoramas.models import Traject, Mission
+from datasets.panoramas.v1.models import Panorama
 from datasets.panoramas.models import EQUIRECTANGULAR_SUBPATH, FULL_IMAGE_NAME
 from panorama.shared.object_store import ObjectStore
 

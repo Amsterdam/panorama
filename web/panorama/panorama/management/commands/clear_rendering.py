@@ -1,5 +1,5 @@
 from django.core.management import BaseCommand
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 
 
 class Command(BaseCommand):

@@ -1,6 +1,6 @@
 import logging
 
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 from job import render
 from .pano_processor import PanoProcessor
 

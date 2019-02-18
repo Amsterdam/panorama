@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from django.contrib.gis.geos import Point
 
-from .. import models
+import datasets.panoramas.v1.models
 
 
 class TestModel(TestCase):
@@ -19,7 +19,7 @@ class TestModel(TestCase):
              'https://acc.data.amsterdam.nl/panorama/container/path/image/cubic/preview.jpg'),
         ]
         for c in cases:
-            p = models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
+            p = datasets.panoramas.v1.models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
             self.assertEqual(c[2], p.equirectangular_img_urls['full'])
             self.assertEqual(c[3], p.equirectangular_img_urls['medium'])
             self.assertEqual(c[4], p.equirectangular_img_urls['small'])
@@ -33,5 +33,5 @@ class TestModel(TestCase):
         ]
 
         for c in cases:
-            p = models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
+            p = datasets.panoramas.v1.models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
             self.assertEqual(c[2], p.get_raw_image_objectstore_id())

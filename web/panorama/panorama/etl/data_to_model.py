@@ -3,7 +3,8 @@ import logging
 
 from django.contrib.gis.geos import Point
 
-from datasets.panoramas.models import Mission, Panorama
+from datasets.panoramas.models import Mission
+from datasets.panoramas.v1.models import Panorama
 from panorama.batch import EMPTY_FALLBACK_YEAR
 from panorama.etl.check_objectstore import panorama_image_file_exists, panorama_blurred_file_exists, \
     panorama_rendered_file_exists
