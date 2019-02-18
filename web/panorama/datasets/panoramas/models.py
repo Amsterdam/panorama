@@ -45,8 +45,6 @@ class AbstractBasePanorama(StatusModel):
     mission_year = models.TextField(max_length=4, null=True)
     tags = ArrayField(models.CharField(max_length=32), db_index=True, blank=True)
 
-    objects = Manager()
-
     class Meta:
         abstract = True
         ordering = ('id',)
@@ -129,6 +127,8 @@ class Region(models.Model):
     right_bottom_y = models.IntegerField()
     left_bottom_x = models.IntegerField()
     left_bottom_y = models.IntegerField()
+
+    objects = Manager()
 
     class Meta:
         ordering = ('id',)

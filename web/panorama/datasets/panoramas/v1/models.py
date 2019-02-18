@@ -1,12 +1,18 @@
 from django.db import models
+from django.db.models import Manager
 
 from datasets.panoramas.models import AbstractBasePanorama
 
 
 class AbstractPanorama(AbstractBasePanorama):
+    objects = Manager()
+
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
+
+    class Meta(AbstractBasePanorama.Meta):
+        abstract = True
 
     @property
     def cubic_img_urls(self):
