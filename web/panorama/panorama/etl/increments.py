@@ -16,7 +16,7 @@ objectstore = ObjectStore()
 def _remove_stale_increment(increment_path):
     """Remove an increment
 
-        _remove_stale_increment('2015/05/07')
+        _remove_stale_increment('2015/05/07/')
 
     will remove the file: increments/2015/05/07/increment.dump from the objectstore
 
