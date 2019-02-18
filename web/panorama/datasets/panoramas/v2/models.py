@@ -1,5 +1,6 @@
 from django.contrib.gis.db import models as geo
 from django.db import models
+from django.db.models import Manager
 from django.urls import reverse
 
 
@@ -8,6 +9,11 @@ from datasets.panoramas.models import AbstractBasePanorama
 
 
 class AbstractPanoramas(AbstractBasePanorama):
+    objects = Manager()
+
+    class Meta(AbstractBasePanorama.Meta):
+        abstract = True
+
     @property
     def thumbnail(self):
         return reverse('thumbnail-detail', args=(self.pano_id,))
