@@ -2,7 +2,8 @@ import csv
 import logging
 import io
 
-from datasets.panoramas.models import Panorama, Region
+from datasets.panoramas.models import Region
+from datasets.panoramas.v1.models import Panorama
 from panorama.shared.object_store import ObjectStore
 
 log = logging.getLogger(__name__)

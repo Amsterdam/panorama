@@ -5,7 +5,7 @@ from django.core.management.color import no_style
 from django.db import connection
 # from django.db.models.functions import ExtractYear, ExtractMonth, ExtractDay, Substr
 
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
 from panorama.shared.object_store import ObjectStore
 

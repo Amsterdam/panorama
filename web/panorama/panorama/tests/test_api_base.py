@@ -7,7 +7,7 @@ import factory
 import factory.fuzzy
 from rest_framework.test import APITestCase
 # Project
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 from datasets.panoramas.tests import factories
 from panorama.management.commands.refresh_views import Command as RefreshViews
 

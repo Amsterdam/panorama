@@ -8,7 +8,8 @@ from rest_framework import serializers
 from rest_framework.fields import empty
 from rest_framework_gis import fields
 # Project
-from datasets.panoramas import models, models_new
+import datasets.panoramas.v1.models
+from datasets.panoramas.v2 import models
 from datapunt_api.rest import LinksField, HALSerializer
 
 log = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ class AdjacencySerializer(serializers.ModelSerializer):
     year = serializers.IntegerField(source='mission_year')
 
     class Meta:
-        model = models_new.Adjacencies
+        model = models.Adjacencies
         fields = ('pano_id', 'direction', 'angle', 'heading', 'pitch', 'distance', 'year',)
 
     def get_direction(self, instance):
@@ -48,7 +49,7 @@ class ImageLinksSerializer(serializers.ModelSerializer):
                                                      format='html')
 
     class Meta:
-        model = models.Panorama
+        model = datasets.panoramas.v1.models.Panorama
         fields = ('equirectangular', 'thumbnail', 'cubic')
 
 
@@ -58,7 +59,7 @@ class ThumbnailSerializer(serializers.ModelSerializer):
     url = serializers.ReadOnlyField()
 
     class Meta:
-        model = models.Panorama
+        model = datasets.panoramas.v1.models.Panorama
         fields = ('url', 'heading', 'pano_id')
 
 
@@ -76,7 +77,7 @@ class PanoSerializer(HALSerializer):
     mission_type = serializers.CharField(source='surface_type')
 
     class Meta:
-        model = models.Panorama
+        model = datasets.panoramas.v1.models.Panorama
         exclude = ('path', 'geolocation', '_geolocation_2d',
                    '_geolocation_2d_rd', 'status', 'status_changed', 'mission_year',
                    'mission_distance', 'surface_type')
@@ -102,7 +103,7 @@ class RecentPanoSerializer(PanoSerializer):
     serializer_url_field = RecentPanoLinksField
 
     class Meta(PanoSerializer.Meta):
-        model = models.RecentPanorama
+        model = datasets.panoramas.v1.models.RecentPanorama
 
 
 class PanoDetailSerializer(PanoSerializer):
@@ -116,7 +117,7 @@ class PanoDetailSerializer(PanoSerializer):
         return queryset
 
     def get_adjacent(self, instance):
-        qs = models_new.Adjacencies.objects.filter(
+        qs = models.Adjacencies.objects.filter(
             Q(from_pano_id=instance.pano_id),
             ~Q(pano_id=instance.pano_id)
         )
@@ -138,5 +139,5 @@ class PanoDetailSerializer(PanoSerializer):
 
 class RecentPanoDetailSerializer(PanoDetailSerializer):
     def _filter_recent(self, queryset):
-        exists = models.RecentPanorama.objects.filter(pano_id=OuterRef('pano_id'))
+        exists = datasets.panoramas.v1.models.RecentPanorama.objects.filter(pano_id=OuterRef('pano_id'))
         return queryset.annotate(adjacent=Exists(exists)).filter(adjacent=True)
