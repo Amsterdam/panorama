@@ -2,7 +2,6 @@ import logging
 
 from django.core.management import BaseCommand
 from django.db import connection
-from django.conf import settings
 
 log = logging.getLogger(__name__)
 
