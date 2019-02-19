@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Command to work with incremental updates.
+    help = """Command to work with incremental updates.
 
         manage.py import_increments
 
