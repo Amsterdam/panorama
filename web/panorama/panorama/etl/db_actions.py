@@ -105,12 +105,12 @@ def clear_database():
     Panorama.objects.all().delete()
 
 
-def reset_sequences():
+def reset_sequences(*models):
     """Reset the sequence, so that after restore of the root increment, the id's start with 1
 
     :return: None
     """
-    sequence_sql = connection.ops.sequence_reset_sql(no_style(), [Panorama])
+    sequence_sql = connection.ops.sequence_reset_sql(no_style(), models)
     with connection.cursor() as cursor:
         for sql in sequence_sql:
             cursor.execute(sql)
@@ -122,7 +122,7 @@ def restore_all():
     :return: None
     """
     clear_database()
-    reset_sequences()
+    reset_sequences(*[Panorama])
 
     # restore root increment:
     restore_increment("")
