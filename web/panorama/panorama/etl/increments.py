@@ -40,6 +40,7 @@ def _is_mission(subdir):
     :param subdir: the path of the subdir
     :return: True or False if the subdir is a mission dir or not
     """
+
     pattern = re.compile(r'\d\d/\d\d/\S\S\S\d\d\d\d\d\d\d\d\d\d\S\d\d\d\d\d\d/')
     return pattern.match(subdir)
 
@@ -60,7 +61,8 @@ def _check_and_process_recursively(source_container, path, increment, force_rebu
     up_to_date = True
     subdirs = objectstore.get_subdirs(source_container, path)
     for subdir in subdirs:
-        # process only if subdir is in parent/child tree of increment, if no increment is given process always
+        # process only if subdir is in parent/child tree of increment.
+        # If no increment is given process always
         do_process = increment is None or (f"{source_container}/{subdir}" in increment or
                                            increment in f"{source_container}/{subdir}")
 

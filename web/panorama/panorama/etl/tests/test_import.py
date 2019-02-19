@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 
 
 def mock_get_csvs(csv_type):
-    log.warning("-- mock_get_csvs")
     files = []
     if csv_type == 'panorama':
         files = glob.glob('/app/panoramas_test/**/panorama*.csv', recursive=True)
@@ -26,7 +25,6 @@ def mock_get_csvs(csv_type):
 
 
 def mock_get_csv_type(container, mission_path, csv_type):
-    log.warning("-- mock_get_csv_type")
     files = []
     if csv_type == 'panorama':
         files = glob.glob(f'/app/panoramas_test/{container}/{mission_path}panorama*.csv',
@@ -35,7 +33,6 @@ def mock_get_csv_type(container, mission_path, csv_type):
 
 
 def mock_get_root_csvs(csv_type):
-    log.warning("-- mock_get_root_csvs")
     files = []
     if csv_type == 'missiegegevens':
         files = glob.glob('/app/panoramas_test/**/missiegegevens.csv', recursive=True)
@@ -43,14 +40,12 @@ def mock_get_root_csvs(csv_type):
 
 
 def mock_get_csv(csv):
-    log.warning("-- mock_get_csv")
     with open(csv['name'], mode='rb') as file:
         return file.read()
 
 
 def mock_file_exists(_, path, filename):
     file = f'{path}/{filename}'
-    log.warning(f"try: {file}")
     return Path(file).is_file()
 
 
@@ -58,6 +53,7 @@ mock_objectstore = 'panorama.etl.batch_import.objectstore.%s'
 file_exists = True
 blurred_file_exists = False
 rendered_file_exists = False
+
 
 @skipIf(not os.path.exists('/app/panoramas_test'),
         'Import test skipped: no mounted directory found, run in docker container')
