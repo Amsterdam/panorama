@@ -7,7 +7,7 @@ import factory
 import factory.fuzzy
 # Project
 from . test_api_base import PanoramaApiTest
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 from datasets.panoramas.tests import factories
 
 class ThumbnailApiTest(PanoramaApiTest):

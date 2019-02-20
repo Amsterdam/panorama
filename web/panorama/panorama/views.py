@@ -2,8 +2,8 @@
 from rest_framework.response import Response
 
 # Project
-from datasets.panoramas.models import Panorama, RecentPanorama
-from datasets.panoramas import serializers
+from datasets.panoramas.v1.models import Panorama, RecentPanorama
+from datasets.panoramas.v1 import serializers
 from datapunt_api import rest
 
 from .queryparam_utils import get_request_coord, convert_to_date, get_int_value

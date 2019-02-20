@@ -1,5 +1,3 @@
-from math import atan2, degrees, cos, sin, radians
-
 from django.conf import settings
 from django.contrib.gis.db import models as geo
 from django.contrib.gis.geos import Point
@@ -28,7 +26,7 @@ SURFACE_TYPE_CHOICES = (
 )
 
 
-class AbstractPanorama(StatusModel):
+class AbstractBasePanorama(StatusModel):
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
 
@@ -40,20 +38,16 @@ class AbstractPanorama(StatusModel):
     geolocation = geo.PointField(dim=3, srid=4326, spatial_index=True)
     _geolocation_2d = geo.PointField(dim=2, srid=4326, spatial_index=True, null=True)
     _geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True, null=True)
-    roll = models.FloatField()
-    pitch = models.FloatField()
-    heading = models.FloatField()
+
     surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
     mission_distance = models.IntegerField()
     mission_type = models.TextField(max_length=16, default='bi')
     mission_year = models.TextField(max_length=4, null=True)
     tags = ArrayField(models.CharField(max_length=32), db_index=True, blank=True)
 
-    objects = Manager()
-
     class Meta:
-        ordering = ('id',)
         abstract = True
+        ordering = ('id',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,42 +76,36 @@ class AbstractPanorama(StatusModel):
         return f"{objectstore_id['container']}/{objectstore_id['name']}"
 
     @property
-    def cubic_img_urls(self):
+    def img_baseurl(self):
+        return f"{settings.PANO_IMAGE_URL}/{self.path}{self.filename[:-4]}"
 
-        baseurl = '{}/{}{}'.format(
-            settings.PANO_IMAGE_URL, self.path,
-            self.filename[:-4] + CUBIC_SUBPATH)
-
-        return {'baseurl': baseurl,
-                'pattern': baseurl + MARZIPANO_URL_PATTERN,
-                'preview': baseurl + PREVIEW_IMAGE}
+    @property
+    def cubic_img_baseurl(self):
+        return self.img_baseurl + CUBIC_SUBPATH
 
     @property
     def detection_result_dir(self):
         return 'results/{}{}'.format(self.path, self.filename[:-4])
 
     @property
-    def equirectangular_img_urls(self):
-        baseurl = '{}/{}{}'.format(
-            settings.PANO_IMAGE_URL,
-            self.path,
-            self.filename[:-4] + EQUIRECTANGULAR_SUBPATH)
+    def cubic_img_pattern(self):
+        return self.cubic_img_baseurl + MARZIPANO_URL_PATTERN
 
-        return {'full': baseurl + FULL_IMAGE_NAME,
-                'medium': baseurl + MEDIUM_IMAGE_NAME,
-                'small': baseurl + SMALL_IMAGE_NAME}
+    @property
+    def cubic_img_preview(self):
+        return self.cubic_img_baseurl + PREVIEW_IMAGE
 
+    @property
+    def equirectangular_full(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + FULL_IMAGE_NAME
 
-class Panorama(AbstractPanorama):
-    class Meta(AbstractPanorama.Meta):
-        abstract = False
+    @property
+    def equirectangular_medium(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + MEDIUM_IMAGE_NAME
 
-
-class RecentPanorama(AbstractPanorama):
-    class Meta(AbstractPanorama.Meta):
-        abstract = False
-        managed = False
-        db_table = "panoramas_recent_all"
+    @property
+    def equirectangular_small(self):
+        return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + SMALL_IMAGE_NAME
 
 
 class Region(models.Model):
@@ -139,6 +127,8 @@ class Region(models.Model):
     right_bottom_y = models.IntegerField()
     left_bottom_x = models.IntegerField()
     left_bottom_y = models.IntegerField()
+
+    objects = Manager()
 
     class Meta:
         ordering = ('id',)

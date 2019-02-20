@@ -3,6 +3,7 @@ import logging
 from swiftclient import ClientException
 import re
 
+from datasets.panoramas.v1.models import Panorama
 from panorama.etl.check_objectstore import is_increment_uptodate, increment_exists
 from panorama.etl.db_actions import restore_increment, clear_database, dump_increment
 from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
@@ -16,7 +17,7 @@ objectstore = ObjectStore()
 def _remove_stale_increment(increment_path):
     """Remove an increment
 
-        _remove_stale_increment('2015/05/07')
+        _remove_stale_increment('2015/05/07/')
 
     will remove the file: increments/2015/05/07/increment.dump from the objectstore
 
@@ -40,6 +41,7 @@ def _is_mission(subdir):
     :param subdir: the path of the subdir
     :return: True or False if the subdir is a mission dir or not
     """
+
     pattern = re.compile(r'\d\d/\d\d/\S\S\S\d\d\d\d\d\d\d\d\d\d\S\d\d\d\d\d\d/')
     return pattern.match(subdir)
 
@@ -60,7 +62,8 @@ def _check_and_process_recursively(source_container, path, increment, force_rebu
     up_to_date = True
     subdirs = objectstore.get_subdirs(source_container, path)
     for subdir in subdirs:
-        # process only if subdir is in parent/child tree of increment, if no increment is given process always
+        # process only if subdir is in parent/child tree of increment.
+        # If no increment is given process always
         do_process = increment is None or (f"{source_container}/{subdir}" in increment or
                                            increment in f"{source_container}/{subdir}")
 
@@ -118,7 +121,7 @@ def rebuild_increments_recursively(path=""):
         if not increment_exists(subdir):
             rebuild_increments_recursively(subdir)
 
-    clear_database()
+    clear_database([Panorama])
     for subdir in subdirs:
         restore_increment(subdir)
 

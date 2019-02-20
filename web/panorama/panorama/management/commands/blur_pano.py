@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from datasets.panoramas.models import Panorama, Region
+from datasets.panoramas.models import Region
+from datasets.panoramas.v1.models import Panorama
 from panorama.regions.blur import dict_from, RegionBlurrer
 from panorama.transform import utils_img_file_set as ImgSet
 

@@ -1,6 +1,7 @@
 import logging
 
-from datasets.panoramas.models import Panorama, Region
+from datasets.panoramas.models import Region
+from datasets.panoramas.v1.models import Panorama
 from panorama.regions import blur
 from panorama.transform import utils_img_file_set as ImgSet
 from .pano_processor import PanoProcessor

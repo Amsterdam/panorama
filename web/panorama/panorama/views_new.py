@@ -17,9 +17,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 # Project
-from datasets.panoramas.hal_serializer import HALPaginationEmbedded, simple_hal_embed
-from datasets.panoramas.models_new import Panoramas, Adjacencies
-from datasets.panoramas.serializers_new import PanoSerializerNew, AdjacentPanoSerializer
+from datasets.panoramas.v2.hal_serializer import HALPaginationEmbedded, simple_hal_embed
+from datasets.panoramas.v2.models import Panoramas, Adjacencies
+from datasets.panoramas.v2.serializers import PanoSerializer, AdjacentPanoSerializer
 
 MISSION_TYPE_CHOICES = (
     ('bi', 'bi'),
@@ -336,8 +336,8 @@ class PanoramaViewSetNew(rest.DatapuntViewSet):
 
     lookup_field = 'pano_id'
     queryset = Panoramas.done.all()
-    serializer_detail_class = PanoSerializerNew
-    serializer_class = PanoSerializerNew
+    serializer_detail_class = PanoSerializer
+    serializer_class = PanoSerializer
     pagination_class = HALPaginationEmbedded
 
     filter_backends = (DjangoFilterBackend,)

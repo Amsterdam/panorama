@@ -8,7 +8,7 @@ import factory
 import factory.fuzzy
 # Project
 from datasets.panoramas.tests import factories
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 
 
 class TestTransformer(TestCase):
