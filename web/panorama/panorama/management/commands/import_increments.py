@@ -1,9 +1,11 @@
 import logging
+import os
 import re
 import sys
 
 from django.core.management import BaseCommand
 
+from datasets.panoramas.v1.models import Panorama
 from panorama.etl.batch_import import rebuild_mission, import_mission_metadata
 from panorama.etl.check_objectstore import set_uptodate_info
 from panorama.etl.db_actions import dump_mission, restore_all
@@ -108,6 +110,13 @@ class Command(BaseCommand):
 
         return increment
 
+    @staticmethod
+    def _set_env_for_swarm_start():
+        to_process_count = Panorama.objects.all.count() - Panorama.done.all.count()
+        if to_process_count > 2000:
+            os.environ["START_SWARM"] = "1"
+            os.environ["PANOS_TO_PROCESS"] = str(to_process_count)
+
     def handle(self, *args, **options):
         force_rebuild = options['r']
         force_import = options['f']
@@ -124,6 +133,7 @@ class Command(BaseCommand):
         rebuild_increments_recursively()
         if increment is None or force_import:
             restore_all()
+            self._set_env_for_swarm_start()
         else:
             # make sure exit is not treated as a signal that the database is usable.
             sys.exit(42)
