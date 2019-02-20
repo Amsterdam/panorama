@@ -7,8 +7,8 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from scipy import misc
 
-from datasets.panoramas.models import Panorama, RecentPanorama
-from datasets.panoramas.serializers import ThumbnailSerializer
+from datasets.panoramas.v1.models import Panorama, RecentPanorama
+from datasets.panoramas.v1.serializers import ThumbnailSerializer
 from panorama.transform.thumbnail import Thumbnail
 from panorama.views import RecentPanoramaViewSet
 from .queryparam_utils import get_float_value, get_int_value, get_request_coord

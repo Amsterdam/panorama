@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Command to work with incremental updates.
+    help = """Command to work with incremental updates.
 
         manage.py import_increments
 
@@ -86,7 +86,7 @@ class Command(BaseCommand):
                                                             "missing or out of date.")
 
     @staticmethod
-    def _check_increment(increment):
+    def _check_increment_arg(increment):
         if increment is None:
             return
 
@@ -111,7 +111,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         force_rebuild = options['r']
         force_import = options['f']
-        increment = self._check_increment(options['increment']) if 'increment' in options else None
+        increment = self._check_increment_arg(options['increment']) if 'increment' in options else None
 
         _, missions_to_rebuild = check_increments(increment=increment, force_rebuild=force_rebuild)
 

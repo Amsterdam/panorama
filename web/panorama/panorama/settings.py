@@ -14,7 +14,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PANO_IMAGE_URL = os.getenv('PANORAMA_IMAGE_URL', 'https://acc.data.amsterdam.nl/panorama')
 
 INSTALLED_APPS += [
-    'geo_views',
     'datasets.panoramas',
     'panorama',
     'health',

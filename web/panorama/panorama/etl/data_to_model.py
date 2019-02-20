@@ -3,8 +3,8 @@ import logging
 
 from django.contrib.gis.geos import Point
 
-from datasets.panoramas.models import Mission, Panorama
-from panorama.batch import EMPTY_FALLBACK_YEAR
+from datasets.panoramas.models import Mission
+from datasets.panoramas.v1.models import Panorama
 from panorama.etl.check_objectstore import panorama_image_file_exists, panorama_blurred_file_exists, \
     panorama_rendered_file_exists
 from panorama.etl.date_util import _convert_gps_time
@@ -116,7 +116,7 @@ def process_panorama_row(headers, row, csv_file):
 
     # check if panorama file exists
     if not panorama_image_file_exists(container, path, filename):
-        log.error(f"MISSING Panorama: {container}/{path}/{filename}")
+        log.error(f"MISSING Panorama: {container}{path}/{filename}")
         return None
 
     # determine panorama_status based on presence of images
@@ -153,3 +153,31 @@ def process_panorama_row(headers, row, csv_file):
         pitch=float(data['pitch[deg]']),
         heading=float(data['heading[deg]']),
     )
+
+
+def process_traject_row(headers, row, _):
+    """
+    Process a single row in the trajectory csv file
+    """
+    if not row:
+        return None
+
+    data = dict(zip(headers, row))
+
+    return Traject(
+        timestamp=_convert_gps_time(data['gps_seconds[s]']),
+        geolocation=Point(
+            float(data['longitude[deg]']),
+            float(data['latitude[deg]']),
+            float(data['altitude_ellipsoidal[m]'])
+        ),
+        north_rms=float(data['north_rms[m]']),
+        east_rms=float(data['east_rms[m]']),
+        down_rms=float(data['down_rms[m]']),
+        roll_rms=float(data['roll_rms[deg]']),
+        pitch_rms=float(data['pitch_rms[deg]']),
+        heading_rms=float(data['heading_rms[deg]']),
+    )
+
+
+EMPTY_FALLBACK_YEAR = 2000

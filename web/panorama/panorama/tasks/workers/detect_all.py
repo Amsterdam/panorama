@@ -1,7 +1,7 @@
 import logging
 import time
 
-from datasets.panoramas.models import Panorama
+from datasets.panoramas.v1.models import Panorama
 from panorama.regions import license_plates
 from panorama.regions import faces
 from panorama.tasks.detection import save_regions, region_writer
