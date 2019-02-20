@@ -169,4 +169,5 @@ def is_increment_uptodate(container, path):
 
     return source_listing == stored_source and \
            intermediate_listing == stored_intermediate and \
-           blurred_listing == stored_blurred
+           blurred_listing == stored_blurred and \
+           increment_exists(f"{container}/{path}")

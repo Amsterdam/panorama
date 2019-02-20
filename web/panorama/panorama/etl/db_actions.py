@@ -3,7 +3,6 @@ import logging
 
 from django.core.management.color import no_style
 from django.db import connection
-# from django.db.models.functions import ExtractYear, ExtractMonth, ExtractDay, Substr
 
 from datasets.panoramas.v1.models import Panorama
 from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
@@ -11,6 +10,25 @@ from panorama.shared.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
 objectstore = ObjectStore()
+
+
+def _dump(filename, query, parameters=None):
+    """Dumps the contents of the query, with parameters, in the objectstore
+
+    :param filename: target filename
+    :param query: query to output
+    :param parameters: parameters that will be substituted in the query
+    :return: None
+    """
+    with connection.cursor() as cursor:
+        # cursor.mogrify encodes parameters and outputs byte-array
+        query_bytes = cursor.mogrify(query) if parameters is None else cursor.mogrify(query, parameters)
+        copy_command = f"COPY ({query_bytes.decode()}) TO STDOUT WITH (FORMAT binary)"
+
+        output_stream = io.BytesIO()
+        cursor.copy_expert(copy_command, output_stream)
+        objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream.getvalue(),
+                                            "binary/octet-stream")
 
 
 def dump_mission(container, mission_path):
@@ -29,25 +47,14 @@ def dump_mission(container, mission_path):
     table_name = Panorama._meta.db_table
 
     base_query = f"SELECT {', '.join(fields)} FROM {table_name}"
-
     mission_where_clause = " WHERE SUBSTRING(pano_id from 1 for 20) = %s"
-    mission_name = mission_path.split("/")[-2]
-
     mission_order_clause = " ORDER BY pano_id ASC"
+    full_query = base_query+mission_where_clause+mission_order_clause
 
-    with connection.cursor() as cursor:
-        # create the query, with proper escaping (mogrify returns bytes, decode to string):
-        complete_query = cursor.mogrify(base_query+mission_where_clause+mission_order_clause, (mission_name,)).decode()
-        # create the custom copy command
-        copy_command = f"COPY ({complete_query}) TO STDOUT WITH (FORMAT binary)"
+    mission_name = mission_path.split("/")[-2]
+    filename = f"{container}/{mission_path}{DUMP_FILENAME}"
 
-        outputstream = io.BytesIO()
-
-        cursor.copy_expert(copy_command, outputstream)
-        objectstore.put_into_panorama_store(INCREMENTS_CONTAINER,
-                                            f"{container}/{mission_path}{DUMP_FILENAME}",
-                                            outputstream.getvalue(),
-                                            "binary/octet-stream")
+    _dump(filename, full_query, (mission_name,))
 
 
 def dump_increment(increment_path):
@@ -60,20 +67,10 @@ def dump_increment(increment_path):
     fields = [field.name for field in Panorama._meta.get_fields() if field.name != 'id']
     table_name = Panorama._meta.db_table
 
-    base_query = f"SELECT {', '.join(fields)} FROM {table_name}"
-    order_clause = " ORDER BY pano_id ASC"
+    query = f"SELECT {', '.join(fields)} FROM {table_name} ORDER BY pano_id ASC"
+    filename = f"{increment_path}{DUMP_FILENAME}"
 
-    with connection.cursor() as cursor:
-        # create the custom copy command
-        copy_command = f"COPY ({base_query+order_clause}) TO STDOUT WITH (FORMAT binary)"
-
-        outputstream = io.BytesIO()
-
-        cursor.copy_expert(copy_command, outputstream)
-        objectstore.put_into_panorama_store(INCREMENTS_CONTAINER,
-                                            f"{increment_path}{DUMP_FILENAME}",
-                                            outputstream.getvalue(),
-                                            "binary/octet-stream")
+    _dump(filename, query)
 
 
 def restore_increment(increment_path):
@@ -97,20 +94,21 @@ def restore_increment(increment_path):
         cursor.copy_expert(copy_command, file)
 
 
-def clear_database():
+def clear_database(model_list):
     """Clear the models from the database
 
     :return: None
     """
-    Panorama.objects.all().delete()
+    for model in model_list:
+        model.objects.all().delete()
 
 
-def reset_sequences(*models):
+def reset_sequences(model_list):
     """Reset the sequence, so that after restore of the root increment, the id's start with 1
 
     :return: None
     """
-    sequence_sql = connection.ops.sequence_reset_sql(no_style(), models)
+    sequence_sql = connection.ops.sequence_reset_sql(no_style(), model_list)
     with connection.cursor() as cursor:
         for sql in sequence_sql:
             cursor.execute(sql)
@@ -121,8 +119,8 @@ def restore_all():
 
     :return: None
     """
-    clear_database()
-    reset_sequences(*[Panorama])
+    clear_database([Panorama])
+    reset_sequences([Panorama])
 
     # restore root increment:
     restore_increment("")
