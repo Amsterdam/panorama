@@ -2,6 +2,7 @@ import logging
 
 from datasets.panoramas.v1.models import Panorama
 from panorama.transform.equirectangular import EquirectangularTransformer
+from panorama.transform.utils_img_file import save_array_image
 from .pano_processor import PanoProcessor
 
 log = logging.getLogger(__name__)
@@ -22,4 +23,4 @@ class PanoRenderer(PanoProcessor):
         intermediate_path = 'intermediate/{}'.format(panorama_path)
         log.info("saving intermediate: {}".format(intermediate_path))
 
-        Img.save_array_image(projection, intermediate_path, in_panorama_store=True)
+        save_array_image(projection, intermediate_path, in_panorama_store=True)
