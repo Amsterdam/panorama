@@ -3,6 +3,7 @@ import logging
 from swiftclient import ClientException
 import re
 
+from datasets.panoramas.v1.models import Panorama
 from panorama.etl.check_objectstore import is_increment_uptodate, increment_exists
 from panorama.etl.db_actions import restore_increment, clear_database, dump_increment
 from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
@@ -120,7 +121,7 @@ def rebuild_increments_recursively(path=""):
         if not increment_exists(subdir):
             rebuild_increments_recursively(subdir)
 
-    clear_database()
+    clear_database([Panorama])
     for subdir in subdirs:
         restore_increment(subdir)
 
