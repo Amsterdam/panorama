@@ -112,7 +112,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _set_env_for_swarm_start():
-        to_process_count = Panorama.objects.all.count() - Panorama.done.all.count()
+        to_process_count = Panorama.objects.count() - Panorama.done.count()
         if to_process_count > 2000:
             os.environ["START_SWARM"] = "1"
             os.environ["PANOS_TO_PROCESS"] = str(to_process_count)
