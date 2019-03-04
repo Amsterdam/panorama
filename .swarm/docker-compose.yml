@@ -30,6 +30,10 @@ services:
       DATABASE_USER: panorama
       DATABASE_PASSWORD: insecure
     deploy:
+      restart_policy:
+        condition: none
+        delay: 5s
+        max_attempts: 1
       replicas: 1
       placement:
         constraints:

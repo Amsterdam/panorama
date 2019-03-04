@@ -82,26 +82,13 @@ Ga dan naar het panorama project en voer de volgende commando's uit:
 cd .swarm
 export OBJECTSTORE_PASSWORD=<OBJECT_STORE_PASSWORD>
 docker-compose -f docker-compose-local.yml build --pull --build-arg OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD worker
+docker-compose -f docker-compose-local.yml build --pull --build-arg OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD dataloader
 docker-compose -f docker-compose-local.yml build --pull database
 docker-compose -f docker-compose-local.yml push
 docker stack deploy --compose-file docker-compose-local.yml panoslocal
 ```
 
 Om de swarm op te starten, lokaal.
-
-Wil je gebruik maken van de volledige database gebruik dan onderstaande - uit `dl_and_load_data.sh` gekopieerde commando's om de database op te halen
-
-```bash
-_db_docker=`docker ps -q -f "name=panoslocal_database"`
-
-docker exec -it $_db_docker /bin/download-db.sh panorama <username>
-docker exec $_db_docker /bin/update-table.sh panorama panoramas_region public panorama
-docker exec $_db_docker psql -U panorama -c 'create sequence panoramas_region_id_seq'
-docker exec $_db_docker psql -U panorama -c "alter table panoramas_region alter id set default nextval('panoramas_region_id_seq')"
-docker exec $_db_docker /bin/update-table.sh panorama panoramas_panorama public panorama
-docker exec $_db_docker psql -U panorama -c "delete from panoramas_panorama where status='done'"
-```
-
 
 Lokaal stoppen kan met:
 
