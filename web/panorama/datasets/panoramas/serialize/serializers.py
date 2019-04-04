@@ -5,8 +5,8 @@ from rest_framework import serializers
 from rest_framework_gis import fields
 
 # Project
-from datasets.panoramas.v2.hal_serializer import HALSerializer, HyperLinksField, IdentityLinksField, HALListSerializer
-from datasets.panoramas.v2.models import Panoramas
+from datasets.panoramas.serialize.hal_serializer import HALSerializer, HyperLinksField, IdentityLinksField, HALListSerializer
+from datasets.panoramas.models import Panoramas
 
 log = logging.getLogger(__name__)
 
@@ -74,3 +74,13 @@ class AdjacentPanoSerializer(PanoSerializer):
 
     class Meta(PanoSerializer.Meta):
         listresults_field = 'adjacencies'
+
+
+class ThumbnailSerializer(serializers.ModelSerializer):
+    heading = serializers.DecimalField(max_digits=20, decimal_places=2)
+    pano_id = serializers.ReadOnlyField()
+    url = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Panoramas
+        fields = ('url', 'heading', 'pano_id')

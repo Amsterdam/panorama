@@ -20,7 +20,7 @@ class ApiMetasTest(PanoramaApiTest):
         """
         Cross Origin Requests should be allowed.
         """
-        request = Mock(path='https://api.data.amsterdam.nl/panorama/opnamelocatie/?lat=52.3779561&lon=4.8970701')
+        request = Mock(path='https://api.data.amsterdam.nl/panorama/panoramas/?lat=52.3779561&lon=4.8970701')
         request.method = 'GET'
         request.is_secure = lambda: True
         request.META = {

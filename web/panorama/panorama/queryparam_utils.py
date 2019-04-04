@@ -15,9 +15,7 @@ SRID_RD = 28992
 def get_request_coord(query_params):
     """
     Retrieves the coordinates to work with. It allows for either lat/lon coord,
-    for wgs84 or 'x' and 'y' for RD. Just to be on the safe side a value check
-    a value check is done to make sure that the values are within the expected
-    range.
+    for wgs84 or 'x' and 'y' for RD.
 
     Parameters:
     query_params - the query parameters dict from which to retrieve the coords

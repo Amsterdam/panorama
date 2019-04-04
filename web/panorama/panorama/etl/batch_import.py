@@ -2,7 +2,7 @@ import logging
 import csv
 
 from datasets.panoramas.models import Mission
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.etl.data_to_model import process_mission_row, process_panorama_row
 from panorama.etl.etl_settings import BATCH_SIZE
 from panorama.shared.object_store import ObjectStore
@@ -60,7 +60,7 @@ def rebuild_mission(container, mission_path):
     panorama_csvs = objectstore.get_csv_type(container, mission_path, "panorama")
     for csv_file in panorama_csvs:
         log.info(f"READING panoramas: {csv_file['name']}")
-        Panorama.objects.bulk_create(
+        Panoramas.objects.bulk_create(
             process_csv(csv_file, process_panorama_row),
             batch_size=BATCH_SIZE
         )
