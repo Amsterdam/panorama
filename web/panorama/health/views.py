@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse
 
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def health(request):
             "Debug mode not allowed in production",
             content_type="text/plain", status=500)
 
-    if Panorama.objects.all().count() < 500000:
+    if Panoramas.objects.all().count() < 500000:
         return HttpResponse(
             "Too few Panoramas in the database",
             content_type="text/plain", status=500)

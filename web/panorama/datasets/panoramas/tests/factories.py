@@ -1,12 +1,11 @@
 import factory
 
-import datasets.panoramas.v1.models
 from .. import models
 
 
 class PanoramaFactory(factory.DjangoModelFactory):
     class Meta:
-        model = datasets.panoramas.v1.models.Panorama
+        model = models.Panoramas
 
 
 class TrajectFactory(factory.DjangoModelFactory):

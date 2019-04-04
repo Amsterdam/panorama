@@ -1,7 +1,7 @@
 from django.conf import settings
 from PIL.Image import BICUBIC
 
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.shared.object_store import ObjectStore
 from . transformer import PANO_FOV, PANO_HORIZON, PANO_ASPECT
 from . utils_img_file import get_panorama_image
@@ -53,7 +53,7 @@ class Thumbnail(object):
     """
         Thambnail for a panorama
     """
-    def __init__(self, panorama: Panorama):
+    def __init__(self, panorama: Panoramas):
         self.panorama = panorama
 
     def get_image(self, target_width=750, target_fov=80, target_horizon=0.3, target_heading=0, target_aspect=1.5):
@@ -76,8 +76,11 @@ class Thumbnail(object):
                                                   target_heading,
                                                   target_horizon)
         width, height = right-left, bottom-top
+        images = {'full': self.panorama.equirectangular_full,
+                  'medium': self.panorama.equirectangular_medium,
+                  'small': self.panorama.equirectangular_small}
 
-        image_path = self.panorama.equirectangular_img_urls[source_image].replace(settings.PANO_IMAGE_URL+'/', '')
+        image_path = images[source_image].replace(settings.PANO_IMAGE_URL+'/', '')
         full_img = get_panorama_image(image_path)
 
         thumbnail = full_img.crop((left, top, right, bottom))

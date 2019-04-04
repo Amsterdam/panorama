@@ -8,7 +8,7 @@ import factory
 import factory.fuzzy
 # Project
 from datasets.panoramas.tests import factories
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 
 
 class TestTransformer(TestCase):
@@ -18,7 +18,7 @@ class TestTransformer(TestCase):
         super().setUpClass()
 
         try:
-            Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
+            Panoramas.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
         except IndexError:
             factories.PanoramaFactory.create(
                 pano_id='TMX7315120208-000073_pano_0004_000087',
@@ -38,7 +38,7 @@ class TestTransformer(TestCase):
             )
 
         try:
-            Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0]
+            Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0]
         except IndexError:
             factories.PanoramaFactory.create(
                 pano_id='TMX7315120208-000067_pano_0011_000463',
@@ -58,7 +58,7 @@ class TestTransformer(TestCase):
             )
 
         cls.images = [
-            Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0],
-            Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0],
+            Panoramas.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0],
+            Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0],
         ]
 

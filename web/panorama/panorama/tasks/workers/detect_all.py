@@ -1,7 +1,7 @@
 import logging
 import time
 
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.regions import license_plates
 from panorama.regions import faces
 from panorama.tasks.detection import save_regions, region_writer
@@ -11,9 +11,9 @@ log = logging.getLogger(__name__)
 
 
 class AllRegionDetector(PanoProcessor):
-    status_queryset = Panorama.rendered
-    status_in_progress = Panorama.STATUS.detecting_regions
-    status_done = Panorama.STATUS.detected
+    status_queryset = Panoramas.rendered
+    status_in_progress = Panoramas.STATUS.detecting_regions
+    status_done = Panoramas.STATUS.detected
 
     def process_one(self, panorama: Panorama):
         start_time = time.time()

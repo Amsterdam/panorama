@@ -4,11 +4,16 @@ from django.contrib.gis.geos import Point
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import Manager
 from django.db import models
+from django.urls import reverse
 
 from model_utils.models import StatusModel
 from model_utils import Choices
 
 # Project
+
+
+
+
 
 CUBIC_SUBPATH = '/cubic/'
 EQUIRECTANGULAR_SUBPATH = '/equirectangular/'
@@ -26,7 +31,7 @@ SURFACE_TYPE_CHOICES = (
 )
 
 
-class AbstractBasePanorama(StatusModel):
+class AbstractPanoramas(StatusModel):
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
 
@@ -44,6 +49,12 @@ class AbstractBasePanorama(StatusModel):
     mission_type = models.TextField(max_length=16, default='bi')
     mission_year = models.TextField(max_length=4, null=True)
     tags = ArrayField(models.CharField(max_length=32), db_index=True, blank=True)
+
+    roll = models.FloatField()
+    pitch = models.FloatField()
+    heading = models.FloatField()
+
+    objects = Manager()
 
     class Meta:
         abstract = True
@@ -74,6 +85,14 @@ class AbstractBasePanorama(StatusModel):
     def get_intermediate_url(self):
         objectstore_id = self.get_raw_image_objectstore_id()
         return f"{objectstore_id['container']}/{objectstore_id['name']}"
+
+    @property
+    def thumbnail(self):
+        return reverse('thumbnail-detail', args=(self.pano_id,))
+
+    @property
+    def adjacencies(self):
+        return reverse('panoramas-adjacencies', args=(self.pano_id,))
 
     @property
     def img_baseurl(self):
@@ -167,3 +186,27 @@ class Mission(models.Model):
     mission_year = models.TextField(max_length=4, null=True)
     mission_distance = models.IntegerField()
     date = models.DateField(null=True)
+
+
+class Panoramas(AbstractPanoramas):
+    class Meta(AbstractPanoramas.Meta):
+        abstract = False
+        db_table = 'panoramas_panorama'
+
+
+class Adjacencies(AbstractPanoramas):
+    from_pano_id = models.CharField(max_length=37)
+    from_geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True)
+
+    relative_distance = models.FloatField()
+    relative_pitch = models.FloatField()
+    relative_heading = models.FloatField()
+    relative_elevation = models.FloatField()
+
+    class Meta(AbstractPanoramas.Meta):
+        abstract = False
+        managed = False
+        db_table = "panoramas_adjacencies_new"
+
+    def __str__(self):
+        return '<Adjacency %s -> /%s>' % (self.from_pano_id, self.pano_id)
