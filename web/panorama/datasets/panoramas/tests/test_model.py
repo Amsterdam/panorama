@@ -20,12 +20,12 @@ class TestModel(TestCase):
         ]
         for c in cases:
             p = Panoramas(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
-            self.assertEqual(c[2], p.equirectangular_img_urls['full'])
-            self.assertEqual(c[3], p.equirectangular_img_urls['medium'])
-            self.assertEqual(c[4], p.equirectangular_img_urls['small'])
-            self.assertEqual(c[5], p.cubic_img_urls['baseurl'])
-            self.assertEqual(c[6], p.cubic_img_urls['pattern'])
-            self.assertEqual(c[7], p.cubic_img_urls['preview'])
+            self.assertEqual(c[2], p.equirectangular_full)
+            self.assertEqual(c[3], p.equirectangular_medium)
+            self.assertEqual(c[4], p.equirectangular_small)
+            self.assertEqual(c[5], p.cubic_img_baseurl)
+            self.assertEqual(c[6], p.cubic_img_pattern)
+            self.assertEqual(c[7], p.cubic_img_preview)
 
     def get_raw_image_objectstore_id(self):
         cases = [
