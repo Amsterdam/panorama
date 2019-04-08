@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from datasets.panoramas.models import Region
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.regions.blur import dict_from, RegionBlurrer
 from panorama.transform import utils_img_file_set as ImgSet
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
             return
 
         pano_id = options['pano_id']
-        pano = Panorama.objects.filter(pano_id=pano_id).all()[0]
+        pano = Panoramas.objects.filter(pano_id=pano_id).all()[0]
 
         if pano:
             pano_path = pano.path+pano.filename

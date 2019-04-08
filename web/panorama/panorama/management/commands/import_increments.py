@@ -5,7 +5,7 @@ import sys
 
 from django.core.management import BaseCommand
 
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.etl.batch_import import rebuild_mission, import_mission_metadata
 from panorama.etl.check_objectstore import set_uptodate_info
 from panorama.etl.db_actions import dump_mission, restore_all
@@ -112,7 +112,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _set_env_for_swarm_start():
-        to_process_count = Panorama.objects.count() - Panorama.done.count()
+        to_process_count = Panoramas.objects.count() - Panoramas.done.count()
         if to_process_count > 2000:
             os.environ["START_SWARM"] = "1"
             os.environ["PANOS_TO_PROCESS"] = str(to_process_count)

@@ -87,53 +87,6 @@ class Migration(migrations.Migration):
             },
         ),
         datasets.migrate.ManageView(
-            view_name='panoramas_recent_ids_all',
-            sql="""
-                    SELECT pano_id FROM panoramas_panorama p
-                    WHERE p.status = 'done' AND p.surface_type = 'L' AND p.mission_type = 'bi' AND NOT EXISTS (
-                        SELECT * FROM panoramas_panorama n WHERE n.status = 'done' AND n.surface_type = 'L' 
-                        AND n.mission_type = 'bi' AND n.timestamp > p.timestamp 
-                        AND ST_DWithin(n._geolocation_2d_rd, p._geolocation_2d_rd, 4.3)
-                    )
-                    UNION
-                    SELECT pano_id FROM panoramas_panorama p
-                    WHERE p.status = 'done' AND p.surface_type = 'W' AND p.mission_type = 'bi' AND NOT EXISTS (
-                        SELECT * FROM panoramas_panorama n WHERE n.status = 'done' AND n.surface_type = 'W' 
-                        AND n.mission_type = 'bi' AND n.timestamp > p.timestamp 
-                        AND ST_DWithin(n._geolocation_2d_rd, p._geolocation_2d_rd, 9.3)
-                    )
-                    ORDER BY 1
-                """,
-        ),
-        datasets.migrate.ManageMaterializedView(
-            view_name='panoramas_recent_all',
-            sql="""
-                    SELECT * FROM panoramas_panorama pp
-                    WHERE EXISTS (SELECT * FROM panoramas_recent_ids_all pi WHERE pi.pano_id = pp.pano_id)
-                    ORDER BY pp.id
-                """,
-        ),
-        migrations.RunSQL(
-            sql='CREATE INDEX recent_all_pano_id_idx ON public.panoramas_recent_all (pano_id) ',
-            reverse_sql='DROP INDEX recent_all_pano_id_idx ',
-        ),
-        migrations.RunSQL(
-            sql='CREATE INDEX recent_all_id_idx ON public.panoramas_recent_all (id) ',
-            reverse_sql='DROP INDEX recent_all_pano_id_idx ',
-        ),
-        migrations.RunSQL(
-            sql='CREATE INDEX recent_all_geo_2d_rd_idx ON public.panoramas_recent_all USING GIST (_geolocation_2d_rd)',
-            reverse_sql='DROP INDEX public.recent_all_geo_2d_rd_idx',
-        ),
-        migrations.RunSQL(
-            sql='CREATE INDEX recent_all_geo_2d_id ON public.panoramas_recent_all USING GIST (_geolocation_2d)',
-            reverse_sql='DROP INDEX public.recent_all_geo_2d_id',
-        ),
-        migrations.RunSQL(
-            sql='CREATE INDEX recent_all_geo_3d_id ON public.panoramas_recent_all USING GIST (geolocation)',
-            reverse_sql='DROP INDEX public.recent_all_geo_3d_id',
-        ),
-        datasets.migrate.ManageView(
             view_name="panoramas_adjacencies_new",
             sql="""
                 SELECT

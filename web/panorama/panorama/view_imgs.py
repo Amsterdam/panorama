@@ -7,10 +7,10 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from scipy import misc
 
-from datasets.panoramas.v1.models import Panorama, RecentPanorama
-from datasets.panoramas.v1.serializers import ThumbnailSerializer
+from datasets.panoramas.models import Panoramas
+from datasets.panoramas.serialize.serializers import ThumbnailSerializer
 from panorama.transform.thumbnail import Thumbnail
-from panorama.views import RecentPanoramaViewSet
+from panorama.views import PanoramasViewSet
 from .queryparam_utils import get_float_value, get_int_value, get_request_coord
 
 
@@ -21,8 +21,11 @@ class ImgRenderer(renderers.BaseRenderer):
     media_type = 'image/*'
     format = 'jpg'
 
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        pass
 
-class ThumbnailViewSet(RecentPanoramaViewSet):
+
+class ThumbnailViewSet(PanoramasViewSet):
 
     """
     View to retrieve thumbs of a panorama
@@ -38,7 +41,7 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
 
         in the later case, optional Parameters for finding a panorama:
 
-        radius: (int) denoting search radius in meters (default = 20m)
+        radius: (int) denoting search radius in meters (default = 20m, max = 250)
 
         when either providing
             - an Accept: image/* header, or
@@ -56,56 +59,69 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
         aspect: aspect ratio of thumbnail (width/height, min 1) (default 1.5 (3/2)
     """
 
-    queryset = RecentPanorama.objects.all()
-    lookup_field = 'pano_id'
     renderer_classes = (renderers.JSONRenderer, renderers.BrowsableAPIRenderer, ImgRenderer)
 
     def list(self, request, **kwargs):
         """
         Overloading the list view to enable in finding
-        the thumb looking at the given point
+        the thumb looking at the given point,
         :param **kwargs:
         """
         coords = get_request_coord(request.query_params)
+        image_redirect = 'image/' in request.accepted_renderer.media_type \
+                         or 'image_redirect' in request.query_params
 
         if not coords:
             return Response({'error': 'pano_id'})
 
-        _, queryset = self._get_filter_and_queryset(coords, request)
+        request._request.GET = request._request.GET.copy()
+
+        request._request.GET['newest_in_range'] = 'True'
+        request._request.GET['srid'] = '4326'
+        request._request.GET['near'] = f"{coords[0]},{coords[1]}"
+        request._request.GET['limit_results'] = '1'
+        request._request.GET['tags'] = 'mission-bi'
+
+        request._request.META = request._request.META.copy()
+        request._request.META['HTTP_ACCEPT'] = 'text/html'
+
+        if 'radius' not in request._request.GET:
+            request._request.GET['radius'] = '20'
+
+        pano_view = PanoramasViewSet.as_view({'get': 'list'})
+        pano_resultset = pano_view(request._request, **kwargs)
+
+        if pano_resultset.status_code != 200:
+            return pano_resultset
 
         try:
-            pano = queryset[0]
-            max_range = get_int_value(request, 'radius', 20)
-            if pano.distance_meters > max_range:
-                return Response([], status=200)
+            pano_id = pano_resultset.data['_embedded']['panoramas'][0]['pano_id']
+            location = pano_resultset.data['_embedded']['panoramas'][0]['geometry']['coordinates']
         except (IndexError):
             # No results were found
             return Response([], status=200)
 
-        heading = round(self._get_heading(pano.geolocation, coords))
-        url = self._get_thumb_url(pano.pano_id, heading, request)
-        image_redirect = 'image/' in request.accepted_renderer.media_type \
-                         or 'image_redirect' in request.query_params
+        heading = round(self._get_heading(location, coords))
+        url = self._get_thumb_url(pano_id, heading, request)
 
         if image_redirect:
             return HttpResponseRedirect(url)
         else:
             resp = ThumbnailSerializer({'url': url,
                                         'heading': heading,
-                                        'pano_id': pano.pano_id},
+                                        'pano_id': pano_id},
                                        context={'request': request})
             return Response(resp.data)
 
     def _get_thumb_url(self, pano_id, heading, request):
-        path = reverse('thumbnail-detail', args=[pano_id], request=request)
+        _strip_params = ['radius', 'x', 'y', 'lat', 'lon', 'newest_in_range', 'srid', 'near', 'limit_results', 'tags']
 
+        path = reverse('thumbnail-detail', args=[pano_id], request=request)
         parameters = QueryDict('', mutable=True)
-        parameters.update({k: v for k, v in request.query_params.items()
-                           if k != 'radius' and k != 'lat' and k != 'lon'})
+        parameters.update({k: v for k, v in request.query_params.items() if k not in _strip_params})
         parameters['heading'] = heading
 
-        url = '%s?%s' % (path, parameters.urlencode())
-        return url
+        return f"{path}?{parameters.urlencode()}"
 
     def _get_heading(self, from_coords, to_coords):
         # http://gis.stackexchange.com/questions/29239/calculate-bearing-between-two-decimal-gps-coordinates
@@ -137,7 +153,7 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
         target_aspect = get_float_value(
             request, 'aspect', default=1.5, lower=1.0)
 
-        pano = get_object_or_404(Panorama, pano_id=pano_id)
+        pano = get_object_or_404(Panoramas, pano_id=pano_id)
         thumb = Thumbnail(pano)
         thumb_img = thumb.get_image(target_width=target_width,
                                     target_fov=target_fov,
@@ -152,7 +168,7 @@ class ThumbnailViewSet(RecentPanoramaViewSet):
     def _max_fov_per_width(self, width, fov):
         """
         source resolution is a little over 22 px / degree field of view
-        for thumbnails we cap this at 20 px /  degree field of view
+        for thumbnails we cap this at a maximum of 20 px /  degree field of view
         """
         if width/fov > 20:
             return width, round(width/20)

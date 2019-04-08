@@ -2,7 +2,7 @@ import csv
 import logging
 
 from datasets.panoramas.models import Region
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.shared.object_store import ObjectStore
 
 BATCH_SIZE = 1000
@@ -47,7 +47,7 @@ class ImportRegions(object):
         panorama = None
         for idx, row in enumerate(rows):
             if panorama is None:
-                panorama = Panorama.objects.get(pano_id=pano_id)
+                panorama = Panoramas.objects.get(pano_id=pano_id)
             model_data = dict(zip(headers, row))
             region = self.process_region_row(model_data, panorama)
             if region:
@@ -55,7 +55,7 @@ class ImportRegions(object):
 
         return regions
 
-    def process_region_row(self, model_data, panorama: Panorama):
+    def process_region_row(self, model_data, panorama: Panoramas):
         try:
             region_type = model_data['region_type']
         except KeyError:

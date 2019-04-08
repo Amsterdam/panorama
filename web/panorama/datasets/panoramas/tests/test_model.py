@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from django.contrib.gis.geos import Point
 
-import datasets.panoramas.v1.models
+from datasets.panoramas.models import Panoramas
 
 
 class TestModel(TestCase):
@@ -19,13 +19,13 @@ class TestModel(TestCase):
              'https://acc.data.amsterdam.nl/panorama/container/path/image/cubic/preview.jpg'),
         ]
         for c in cases:
-            p = datasets.panoramas.v1.models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
-            self.assertEqual(c[2], p.equirectangular_img_urls['full'])
-            self.assertEqual(c[3], p.equirectangular_img_urls['medium'])
-            self.assertEqual(c[4], p.equirectangular_img_urls['small'])
-            self.assertEqual(c[5], p.cubic_img_urls['baseurl'])
-            self.assertEqual(c[6], p.cubic_img_urls['pattern'])
-            self.assertEqual(c[7], p.cubic_img_urls['preview'])
+            p = Panoramas(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
+            self.assertEqual(c[2], p.equirectangular_full)
+            self.assertEqual(c[3], p.equirectangular_medium)
+            self.assertEqual(c[4], p.equirectangular_small)
+            self.assertEqual(c[5], p.cubic_img_baseurl)
+            self.assertEqual(c[6], p.cubic_img_pattern)
+            self.assertEqual(c[7], p.cubic_img_preview)
 
     def get_raw_image_objectstore_id(self):
         cases = [
@@ -33,5 +33,5 @@ class TestModel(TestCase):
         ]
 
         for c in cases:
-            p = datasets.panoramas.v1.models.Panorama(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
+            p = Panoramas(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
             self.assertEqual(c[2], p.get_raw_image_objectstore_id())

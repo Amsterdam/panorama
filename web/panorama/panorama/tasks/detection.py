@@ -3,13 +3,13 @@ import logging
 import io
 
 from datasets.panoramas.models import Region
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.shared.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
 
 
-def region_writer(panorama: Panorama, lp=False, dlib=False, google=False):
+def region_writer(panorama: Panoramas, lp=False, dlib=False, google=False):
     """
     Save detected regions to the objectstore
 
@@ -41,7 +41,7 @@ def region_writer(panorama: Panorama, lp=False, dlib=False, google=False):
     object_store.put_into_datapunt_store(csv_name, output.getvalue(), 'text/csv')
 
 
-def save_regions(regions, panorama: Panorama, region_type='G'):
+def save_regions(regions, panorama: Panoramas, region_type='G'):
     models = []
     for region in regions:
         rg = Region()
