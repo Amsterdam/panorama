@@ -1,6 +1,6 @@
 import logging
 
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.transform.equirectangular import EquirectangularTransformer
 from panorama.transform.utils_img_file import save_array_image
 from .pano_processor import PanoProcessor
@@ -9,11 +9,11 @@ log = logging.getLogger(__name__)
 
 
 class PanoRenderer(PanoProcessor):
-    status_queryset = Panorama.to_be_rendered
-    status_in_progress = Panorama.STATUS.rendering
-    status_done = Panorama.STATUS.rendered
+    status_queryset = Panoramas.to_be_rendered
+    status_in_progress = Panoramas.STATUS.rendering
+    status_done = Panoramas.STATUS.rendered
 
-    def process_one(self, panorama: Panorama):
+    def process_one(self, panorama: Panoramas):
         panorama_path = panorama.path + panorama.filename
         log.info('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_path))
 

@@ -10,9 +10,7 @@ from rest_framework_swagger.renderers import OpenAPIRenderer
 from rest_framework_swagger.renderers import SwaggerUIRenderer
 
 from .view_imgs import ThumbnailViewSet
-from .views import PanoramaViewSet
-from .views import RecentPanoramaViewSet
-from .views_new import PanoramaViewSetNew
+from .views import PanoramasViewSet
 
 
 class PanoramaView(routers.APIRootView):
@@ -33,13 +31,10 @@ class PanoramaRouter(routers.DefaultRouter):
     """
     APIRootView = PanoramaView
 
+
 panorama = PanoramaRouter()
-panorama.register('opnamelocatie', PanoramaViewSet, base_name='panorama')
 panorama.register('thumbnail', ThumbnailViewSet, base_name='thumbnail')
-panorama.register('recente_opnames/alle', RecentPanoramaViewSet, base_name=f'recentpanorama-alle')
-
-panorama.register('panoramas', PanoramaViewSetNew, base_name='panoramas')
-
+panorama.register('panoramas', PanoramasViewSet, base_name='panoramas')
 
 APIS = [
     url(r'^panorama/', include(panorama.urls))

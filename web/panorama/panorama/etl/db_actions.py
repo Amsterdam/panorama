@@ -4,7 +4,7 @@ import logging
 from django.core.management.color import no_style
 from django.db import connection
 
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
 from panorama.shared.object_store import ObjectStore
 
@@ -43,8 +43,8 @@ def dump_mission(container, mission_path):
     :return: None
     """
 
-    fields = [field.name for field in Panorama._meta.get_fields() if field.name != 'id']
-    table_name = Panorama._meta.db_table
+    fields = [field.name for field in Panoramas._meta.get_fields() if field.name != 'id']
+    table_name = Panoramas._meta.db_table
 
     base_query = f"SELECT {', '.join(fields)} FROM {table_name}"
     mission_where_clause = " WHERE SUBSTRING(pano_id from 1 for 20) = %s"
@@ -64,8 +64,8 @@ def dump_increment(increment_path):
     :return: None
     """
 
-    fields = [field.name for field in Panorama._meta.get_fields() if field.name != 'id']
-    table_name = Panorama._meta.db_table
+    fields = [field.name for field in Panoramas._meta.get_fields() if field.name != 'id']
+    table_name = Panoramas._meta.db_table
 
     query = f"SELECT {', '.join(fields)} FROM {table_name} ORDER BY pano_id ASC"
     filename = f"{increment_path}{DUMP_FILENAME}"
@@ -84,8 +84,8 @@ def restore_increment(increment_path):
     :return: None
     """
 
-    fields = [field.name for field in Panorama._meta.get_fields() if field.name != 'id']
-    table_name = Panorama._meta.db_table
+    fields = [field.name for field in Panoramas._meta.get_fields() if field.name != 'id']
+    table_name = Panoramas._meta.db_table
 
     copy_command = f"COPY {table_name} ({', '.join(fields)}) FROM  STDIN (FORMAT binary)"
     file = io.BytesIO(objectstore.get_panorama_store_object({'container': INCREMENTS_CONTAINER,
@@ -119,8 +119,8 @@ def restore_all():
 
     :return: None
     """
-    clear_database([Panorama])
-    reset_sequences([Panorama])
+    clear_database([Panoramas])
+    reset_sequences([Panoramas])
 
     # restore root increment:
     restore_increment("")

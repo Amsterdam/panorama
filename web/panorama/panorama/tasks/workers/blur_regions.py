@@ -1,7 +1,7 @@
 import logging
 
 from datasets.panoramas.models import Region
-from datasets.panoramas.v1.models import Panorama
+from datasets.panoramas.models import Panoramas
 from panorama.regions import blur
 from panorama.transform import utils_img_file_set as ImgSet
 from .pano_processor import PanoProcessor
@@ -10,11 +10,11 @@ log = logging.getLogger(__name__)
 
 
 class RegionBlurrer(PanoProcessor):
-    status_queryset = Panorama.detected
-    status_in_progress = Panorama.STATUS.blurring
-    status_done = Panorama.STATUS.done
+    status_queryset = Panoramas.detected
+    status_in_progress = Panoramas.STATUS.blurring
+    status_done = Panoramas.STATUS.done
 
-    def process_one(self, panorama: Panorama):
+    def process_one(self, panorama: Panoramas):
         region_blurrer = blur.RegionBlurrer(panorama.get_intermediate_url())
         regions = []
         for region in Region.objects.filter(pano_id=panorama.pano_id).all():
