@@ -121,7 +121,7 @@ def rebuild_increments_recursively(path=""):
         if not increment_exists(subdir):
             rebuild_increments_recursively(subdir)
 
-    clear_database([PanoramaS])
+    clear_database([Panoramas])
     for subdir in subdirs:
         restore_increment(subdir)
 

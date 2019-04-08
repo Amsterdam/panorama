@@ -9,12 +9,6 @@ from django.urls import reverse
 from model_utils.models import StatusModel
 from model_utils import Choices
 
-# Project
-
-
-
-
-
 CUBIC_SUBPATH = '/cubic/'
 EQUIRECTANGULAR_SUBPATH = '/equirectangular/'
 
