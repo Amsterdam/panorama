@@ -6,7 +6,7 @@ from rest_framework_gis import fields
 
 # Project
 from datasets.panoramas.serialize.hal_serializer import HALSerializer, HyperLinksField, IdentityLinksField, HALListSerializer
-from datasets.panoramas.models import Panoramas
+from datasets.panoramas.models import Panoramas, Adjacencies
 
 log = logging.getLogger(__name__)
 
@@ -73,6 +73,7 @@ class AdjacentPanoSerializer(PanoSerializer):
     elevation = serializers.DecimalField(max_digits=20, decimal_places=2, source='relative_elevation')
 
     class Meta(PanoSerializer.Meta):
+        model = Adjacencies
         listresults_field = 'adjacencies'
 
 
