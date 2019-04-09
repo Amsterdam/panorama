@@ -44,10 +44,6 @@ class AbstractPanoramas(StatusModel):
     mission_year = models.TextField(max_length=4, null=True)
     tags = ArrayField(models.CharField(max_length=32), db_index=True, blank=True)
 
-    roll = models.FloatField()
-    pitch = models.FloatField()
-    heading = models.FloatField()
-
     objects = Manager()
 
     class Meta:
@@ -183,6 +179,10 @@ class Mission(models.Model):
 
 
 class Panoramas(AbstractPanoramas):
+    roll = models.FloatField()
+    pitch = models.FloatField()
+    heading = models.FloatField()
+
     class Meta(AbstractPanoramas.Meta):
         abstract = False
         db_table = 'panoramas_panorama'
