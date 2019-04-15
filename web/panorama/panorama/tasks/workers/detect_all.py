@@ -15,7 +15,7 @@ class AllRegionDetector(PanoProcessor):
     status_in_progress = Panoramas.STATUS.detecting_regions
     status_done = Panoramas.STATUS.detected
 
-    def process_one(self, panorama: Panorama):
+    def process_one(self, panorama: Panoramas):
         start_time = time.time()
         lp_detector = license_plates.LicensePlateDetector(panorama.get_intermediate_url())
 
