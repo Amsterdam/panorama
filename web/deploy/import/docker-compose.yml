@@ -1,12 +1,13 @@
-version: "2.0"
+version: "3.7"
 services:
   database:
-    image: amsterdam/postgres
+    image: amsterdam/postgres11
     environment:
       POSTGRES_PASSWORD: insecure
       POSTGRES_USER: panorama
     volumes:
       - ./backups:/tmp/backups
+    shm_size: '4gb'
 
   importer:
     image: build.datapunt.amsterdam.nl:5000/datapunt/panorama:${ENVIRONMENT}
