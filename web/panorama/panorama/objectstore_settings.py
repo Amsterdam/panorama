@@ -2,6 +2,8 @@ import os
 
 # OBJECT_STORE SETTINGS
 
+RUNNING_OS_INTERNALLY = bool(os.getenv('RUNNING_OS_INTERNALLY', False))
+
 OBJECTSTORE_USER = os.getenv('OBJECTSTORE_USER', 'panorama')
 OBJECTSTORE_PASSWORD = os.getenv('OBJECTSTORE_PASSWORD', 'insecure')
 
