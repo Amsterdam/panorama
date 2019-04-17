@@ -21,18 +21,14 @@ class ObjectStore(object):
                                                tenant_name=settings.DATAPUNT_TENANT_NAME,
                                                auth_version=settings.AUTH_VERSION,
                                                os_options={'tenant_id': settings.DATAPUNT_TENANT_ID,
-                                                           'region_name': settings.REGION_NAME,
-                                                           'endpoint_type': 'internalURL'
-                                                           })
+                                                           'region_name': settings.REGION_NAME})
         self.panorama_conn = client.Connection(authurl=settings.AUTHURL,
                                                user=settings.OBJECTSTORE_USER,
                                                key=settings.OBJECTSTORE_PASSWORD,
                                                tenant_name=settings.PANORAMA_TENANT_NAME,
                                                auth_version=settings.AUTH_VERSION,
                                                os_options={'tenant_id': settings.PANORAMA_TENANT_ID,
-                                                           'region_name': settings.REGION_NAME,
-                                                           'endpoint_type': 'internalURL'
-                                                           })
+                                                           'region_name': settings.REGION_NAME})
 
     def get_panorama_store_object(self, object_meta_data):
         return self.panorama_conn.get_object(object_meta_data['container'], object_meta_data['name'])[1]

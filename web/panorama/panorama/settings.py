@@ -78,9 +78,6 @@ if SENTRY_DSN:
         integrations=[DjangoIntegration()]
     )
 
-# Set of years to group panoramas by
-PREPARED_YEARS = range(2016, 2021)
-
 # OBJECT_STORE SETTINGS
 
 OBJECTSTORE_USER = objectstore_settings.OBJECTSTORE_USER
