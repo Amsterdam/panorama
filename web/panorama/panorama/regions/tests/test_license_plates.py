@@ -10,12 +10,10 @@ from numpy import array
 
 # Project
 from panorama.regions.license_plates import LicensePlateDetector
-from panorama.shared.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 from .test_faces import draw_lines
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
 
 test_set = [
     "2016/04/18/TMX7315120208-000030/pano_0000_000853.jpg",  # 3

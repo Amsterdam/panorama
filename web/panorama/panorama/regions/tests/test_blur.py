@@ -7,12 +7,10 @@ from unittest import TestCase, skipIf
 import cv2
 from numpy import array
 
-from panorama.shared.object_store import ObjectStore
 from . import test_util
 from .. import blur
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
 
 test_set = [
     "2016/04/18/TMX7315120208-000030/pano_0000_000853.jpg",  # 3

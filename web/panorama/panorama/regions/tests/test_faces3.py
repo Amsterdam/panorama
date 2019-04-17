@@ -9,11 +9,9 @@ from numpy import array, int32
 
 from panorama.regions.faces import FaceDetector
 from panorama.regions.util import wrap_around
-from panorama.shared.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
 
 test_set = [
     # Bijlmer
