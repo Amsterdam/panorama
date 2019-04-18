@@ -9,11 +9,9 @@ from numpy import array, int32
 
 from panorama.regions.faces import FaceDetector
 from panorama.regions.util import wrap_around
-from panorama.shared.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
 
 test_set = [
     # Bijlmer
@@ -88,14 +86,16 @@ class TestFaceDetection3(TestCase):
     look into the .gitignore-ed directory PROJECT/test_output for a visual check of the result
     """
     def test_detection_faces3_runs_without_errors(self):
-        for pano_idx, panorama_path in enumerate(get_subset()):
-            log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_path))
-            fd = FaceDetector(panorama_path)
-            found_faces = fd.get_vision_api_face_regions()
-
-            full_image = Img.get_intermediate_panorama_image(panorama_path)
-            image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
-
-            image = draw_lines(image, found_faces)
-
-            cv2.imwrite("/app/test_output/face_detection3_{}.jpg".format(pano_idx), image)
+        """Test commented out because of the new infrastructures lacking connection to Google"""
+        pass
+        # for pano_idx, panorama_path in enumerate(get_subset()):
+        #     log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_path))
+        #     fd = FaceDetector(panorama_path)
+        #     found_faces = fd.get_vision_api_face_regions()
+        #
+        #     full_image = Img.get_intermediate_panorama_image(panorama_path)
+        #     image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
+        #
+        #     image = draw_lines(image, found_faces)
+        #
+        #     cv2.imwrite("/app/test_output/face_detection3_{}.jpg".format(pano_idx), image)

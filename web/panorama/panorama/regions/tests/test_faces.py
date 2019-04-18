@@ -10,12 +10,10 @@ from numpy import array, int32
 
 # Project
 from panorama.regions.faces import FaceDetector
-from panorama.shared.object_store import ObjectStore
 from panorama.regions.util import wrap_around
 from panorama.transform import utils_img_file as Img
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
 
 test_set = [
     "2016/06/07/TMX7315120208-000070/pano_0006_000457.jpg",
