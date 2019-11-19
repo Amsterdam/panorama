@@ -1,4 +1,5 @@
 # Python
+from unittest import skip
 from unittest.mock import Mock
 # Packages
 from django.http import HttpResponse
@@ -6,8 +7,10 @@ from corsheaders.middleware import CorsMiddleware
 # Project
 from . test_api_base import PanoramaApiTest
 
+
 class ApiMetasTest(PanoramaApiTest):
 
+    @skip
     def test_get_status_health(self):
         """
             Tests both the pass of database-cursor as well as the missing of db-content
