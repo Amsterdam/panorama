@@ -1,5 +1,4 @@
 # Python
-from unittest import skip
 from unittest.mock import Mock
 # Packages
 from django.http import HttpResponse
@@ -10,14 +9,13 @@ from . test_api_base import PanoramaApiTest
 
 class ApiMetasTest(PanoramaApiTest):
 
-    @skip
     def test_get_status_health(self):
         """
             Tests both the pass of database-cursor as well as the missing of db-content
         """
         response = self.client.get('/status/health')
         self.assertEqual(response.status_code, 500)
-        self.assertIn('Too few Panoramas', str(response.content))
+        self.assertIn('Database panorama is not present', str(response.content))
 
     def test_cors(self):
         """
