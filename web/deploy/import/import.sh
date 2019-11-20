@@ -27,7 +27,7 @@ echo "Importing data"
 dc run --rm importer
 
 echo "Print counts"
-dc exec database psql -U panorama -c 'select status, count(*) from panoramas_panorama group by 1'
+dc exec -T database psql -U panorama -c 'select status, count(*) from panoramas_panorama group by 1'
 
 echo "Running backups"
 dc exec -T database backup-db.sh panorama
