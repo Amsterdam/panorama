@@ -23,11 +23,14 @@ dc up -d database
 dc run importer /deploy/docker-wait.sh
 dc run importer /deploy/docker-migrate.sh
 
+echo "Print counts"
+docker-compose -p panorama -f ${DIR}/docker-compose.yml exec -T database psql -U panorama -c 'select status, count(*) from panoramas_panorama group by 1'
+
 echo "Importing data"
 dc run --rm importer
 
 echo "Print counts"
-dc exec -T database psql -U panorama -c 'select status, count(*) from panoramas_panorama group by 1'
+docker-compose -p panorama -f ${DIR}/docker-compose.yml exec -T database psql -U panorama -c 'select status, count(*) from panoramas_panorama group by 1'
 
 echo "Running backups"
 dc exec -T database backup-db.sh panorama
