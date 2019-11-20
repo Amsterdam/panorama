@@ -11,11 +11,10 @@ class ApiMetasTest(PanoramaApiTest):
 
     def test_get_status_health(self):
         """
-            Tests both the pass of database-cursor as well as the missing of db-content
+            Tests Health status
         """
         response = self.client.get('/status/health')
-        self.assertEqual(response.status_code, 500)
-        self.assertIn('Database panorama is not present', str(response.content))
+        self.assertEqual(response.status_code, 200)
 
     def test_cors(self):
         """
