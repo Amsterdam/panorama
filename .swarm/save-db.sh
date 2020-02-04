@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-ARCHIVE_PATH=~/archive
+ARCHIVE_PATH=~/panorama/archive
 
 if [ ! -d  $ARCHIVE_PATH ]; then
-	mkdir $ARCHIVE_PATH
+	mkdir -p $ARCHIVE_PATH
 fi
 
 if [ -f $ARCHIVE_PATH/exported_regions.dmp ]; then
