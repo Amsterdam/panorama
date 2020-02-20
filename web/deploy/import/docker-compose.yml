@@ -10,7 +10,7 @@ services:
     shm_size: '4gb'
 
   importer:
-    image: repo.data.amsterdam.nl/datapunt/panorama:${ENVIRONMENT}
+    image: docker-registry.data.amsterdam.nl/datapunt/panorama:${ENVIRONMENT}
     links:
       - database:database
     environment:
