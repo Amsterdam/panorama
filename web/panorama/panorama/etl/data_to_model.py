@@ -35,7 +35,7 @@ def process_mission_row(headers, row, _):
         name=data['Missienaam'],
         surface_type=data['water/land'][:1].upper(),
         mission_distance=data['rijafstand'],
-        mission_type=data['missietype'],
+        mission_type=data['missietype'].lower(),
         mission_year=mission_year,
         date=mission_date,
         neighbourhood=data['Gebied']
