@@ -21,5 +21,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(update_woz),
+        migrations.RunSQL(update_woz, migrations.RunSQL.noop),
     ]
