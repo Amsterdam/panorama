@@ -10,7 +10,7 @@ services:
     shm_size: '4gb'
 
   importer:
-    image: docker-registry.data.amsterdam.nl/datapunt/panorama:${ENVIRONMENT}
+    image: ${DOCKER_REGISTRY_HOST}/datapunt/panorama:${ENVIRONMENT}
     links:
       - database:database
     environment:
