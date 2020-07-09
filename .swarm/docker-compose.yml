@@ -1,15 +1,17 @@
 version: "3"
 services:
   database:
-    image: master.swarm.datapunt.amsterdam.nl:5000/stackdb
+    image: master.swarm.data.amsterdam.nl:5000/v2/stackdb
     build: ./database
     networks:
       - default
+    ports:
+      - 5432:5432
     deploy:
       mode: global
       placement:
         constraints:
-          - node.hostname == master.swarm.datapunt.amsterdam.nl
+          - node.hostname == master.swarm.data.amsterdam.nl
     environment:
       POSTGRES_PASSWORD: insecure
       POSTGRES_USER: panorama
@@ -18,7 +20,7 @@ services:
     build:
       context: ../web
       dockerfile: WorkerDockerfile
-    image: master.swarm.datapunt.amsterdam.nl:5000/stackdataloader
+    image: master.swarm.data.amsterdam.nl:5000/v2/stackdataloader
     links:
       - database:database
     networks:
@@ -37,7 +39,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == master.swarm.datapunt.amsterdam.nl
+          - node.hostname == master.swarm.data.amsterdam.nl
     command: >
       bash -c "sleep 60 && python manage.py migrate && python manage.py load_data"
 
@@ -45,7 +47,7 @@ services:
     build:
       context: ../web
       dockerfile: WorkerDockerfile
-    image: master.swarm.datapunt.amsterdam.nl:5000/stackworker
+    image: master.swarm.data.amsterdam.nl:5000/v2/stackworker
     links:
       - database:database
     networks:
@@ -61,4 +63,4 @@ services:
       replicas: 0
       placement:
         constraints:
-          - node.hostname != master.swarm.datapunt.amsterdam.nl
+          - node.hostname != master.swarm.data.amsterdam.nl
