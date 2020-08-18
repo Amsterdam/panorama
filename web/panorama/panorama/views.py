@@ -186,6 +186,7 @@ class PanoramaFilter(FilterSet):
 
         exists = queryset.model.objects \
             .values('id') \
+            .filter(status='done') \
             .filter(surface_type=OuterRef('surface_type')) \
             .filter(timestamp__gt=OuterRef('timestamp')) \
             .annotate(within=Func(RawCol(queryset.model, '_geolocation_2d_rd'), F('_geolocation_2d_rd'), \
