@@ -29,7 +29,7 @@ services:
       UWSGI_HTTP: ":8000"
       UWSGI_MODULE: "panorama.wsgi:application"
       UWSGI_MASTER: 1
-      UWSGI_STATIC_MAP: "/static=/static"
+      UWSGI_STATIC_MAP: "/panorama/static=/static"
       UWSGI_DIE_ON_TERM: 1
 
   demo:
