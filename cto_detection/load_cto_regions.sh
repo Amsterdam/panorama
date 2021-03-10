@@ -2,9 +2,10 @@
 
 export PGDATABASE=panorama
 export PGUSER=panorama
-export PGPORT="${PG_PORT:-5454}"
+export PGPORT="${PGPORT:-5454}"
 export PGPASSWORD="${PGPASSWORD:-insecure}"
-export PGHOST="${PGHOST:-localhost}"
+# export PGHOST="${PGHOST:-localhost}"
+export PGHOSTADDR=${PGHOSTADDR:-127.0.0.1}
 
 psql -c "CREATE TABLE IF NOT EXISTS panoramas_region_external (LIKE panoramas_region)"
 COLS=region_type,left_top_x,left_top_y,right_top_x,right_top_y,left_bottom_x,left_bottom_y,right_bottom_x,right_bottom_y,detected_by,pano_id
