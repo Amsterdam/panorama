@@ -59,7 +59,7 @@ pytz==2018.9
 PyYAML==4.2b4
 requests==2.21.0
 rfc3986==1.2.0
-rsa==4.0
+rsa==4.1
 scipy==1.2.0
 sentry-sdk==0.6.6
 simplejson==3.16.0
