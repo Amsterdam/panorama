@@ -29,37 +29,32 @@ class PanoramaRouter(routers.DefaultRouter):
 
     Deze api geeft toegang tot de panorama beelden van de Gemeente Amsterdam en omstreken.
     """
+
     APIRootView = PanoramaView
 
 
 panorama = PanoramaRouter()
-panorama.register('thumbnail', ThumbnailViewSet, base_name='thumbnail')
-panorama.register('panoramas', PanoramasViewSet, base_name='panoramas')
+panorama.register("thumbnail", ThumbnailViewSet, basename="thumbnail")
+panorama.register("panoramas", PanoramasViewSet, basename="panoramas")
 
-APIS = [
-    url(r'^panorama/', include(panorama.urls))
-]
+APIS = [url(r"^panorama/", include(panorama.urls))]
 
 
 @api_view()
-@renderer_classes(
-    [SwaggerUIRenderer, OpenAPIRenderer, renderers.CoreJSONRenderer])
+@renderer_classes([SwaggerUIRenderer, OpenAPIRenderer, renderers.CoreJSONRenderer])
 def swagger_schema_view(request):
-    generator = schemas.SchemaGenerator(
-        title='Panoramabeelden Amsterdam API', patterns=APIS)
-    return response.Response(
-        generator.get_schema(request=request)
-    )
+    generator = schemas.SchemaGenerator(title="Panoramabeelden Amsterdam API", patterns=APIS)
+    return response.Response(generator.get_schema(request=request))
 
 
 urlpatterns = APIS + [
-    url(r'^status/', include('health.urls')),
-    url('^panorama/docs/$', swagger_schema_view),
+    url(r"^status/", include("health.urls")),
+    url("^panorama/docs/$", swagger_schema_view),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
 
     urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        url(r"^__debug__/", include(debug_toolbar.urls)),
     ]
