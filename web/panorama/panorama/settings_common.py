@@ -96,6 +96,7 @@ REST_FRAMEWORK = dict(
     PAGE_SIZE=25,
     UNAUTHENTICATED_USER={},
     UNAUTHENTICATED_TOKEN={},
+    DEFAULT_SCHEMA_CLASS="rest_framework.schemas.coreapi.AutoSchema",
     MAX_PAGINATE_BY=100,
     DEFAULT_AUTHENTICATION_CLASSES=(
         "rest_framework.authentication.BasicAuthentication",
