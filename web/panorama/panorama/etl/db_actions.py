@@ -20,15 +20,15 @@ def _dump(filename, query, parameters=None):
     :param parameters: parameters that will be substituted in the query
     :return: None
     """
+    output_stream = io.BytesIO()
     with connection.cursor() as cursor:
         # cursor.mogrify encodes parameters and outputs byte-array
         query_bytes = cursor.mogrify(query) if parameters is None else cursor.mogrify(query, parameters)
         copy_command = f"COPY ({query_bytes.decode()}) TO STDOUT WITH (FORMAT binary)"
-
-        output_stream = io.BytesIO()
         cursor.copy_expert(copy_command, output_stream)
-        objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream.getvalue(),
-                                            "binary/octet-stream")
+    output_stream.seek(0)
+    objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream,
+                                        "binary/octet-stream")
 
 
 def dump_mission(container, mission_path):
