@@ -27,8 +27,7 @@ def _dump(filename, query, parameters=None):
 
         output_stream = io.BytesIO()
         cursor.copy_expert(copy_command, output_stream)
-        objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream.getvalue(),
-                                            "binary/octet-stream")
+        objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream, "binary/octet-stream")
 
 
 def dump_mission(container, mission_path):
