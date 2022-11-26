@@ -27,16 +27,23 @@ def get_docker_host():
 
 
 def in_docker():
+    """Check if we are running in a Docker container.
+
+    The presence of a /.dockerenv file on the root filesystem in Linux is probably a
+    more reliable way to know that you’re running inside a Docker container.
+
+    :return: True when running in a Docker container, False otherwise
     """
-    Checks pid 1 cgroup settings to check with reasonable certainty we're in a
-    docker env.
-    :return: true when running in a docker container, false otherwise
-    """
+    if os.path.isfile('/.dockerenv') or os.getenv('OS_ENV') == "container":
+        return True
     try:
-        cgroup = open('/proc/1/cgroup', 'r').read()
-        return ':/docker/' in cgroup or ':/docker-ce/' in cgroup
+        with open('/proc/1/sched', 'r') as sched_info:
+            if sched_info.readline().startswith('bash '):
+                return True
+            return False
     except IOError:
         return False
+    return False
 
 
 class LocationKey:
@@ -48,7 +55,7 @@ class LocationKey:
 def get_database_key():
     if os.getenv(OVERRIDE_HOST_ENV_VAR):
         return LocationKey.override
-    elif in_docker():
+    if in_docker():
         return LocationKey.docker
 
     return LocationKey.local
