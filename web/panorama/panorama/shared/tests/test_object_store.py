@@ -9,8 +9,8 @@ from .. import object_store
 log = logging.getLogger(__name__)
 
 
-@unittest.skipIf(settings.OBJECTSTORE_PASSWORD == 'insecure',
-                 'Object store tests skipped: no objectstore password is set in the environment')
+@unittest.skipIf(settings.DATAPUNT_OBJECTSTORE_PASSWORD == 'insecure',
+                 'Datapunt objectstore tests skipped: no password set in the environment')
 class TestObjectStore(unittest.TestCase):
     object_store = object_store.ObjectStore()
 

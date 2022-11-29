@@ -1,26 +1,24 @@
 Op de swarm
 ===========
 
-Uitgaande van een gecloned git-project in /home/user/panorama
+Uitgaande van een gecloned git-project in `/home/user/panorama`.
 
-
-```
+```bash
 cd /home/user/panorama
 git pull
 ```
 
-In de map `web/panorama` moet een valide `google-application-credentials.json` worden geplaatst
-zodat het cluster na bouwen gebruik kan maken van de Google Vision API
+In de map `web/panorama` moet een valide `google-application-credentials.json` worden geplaatst zodat het cluster na bouwen gebruik kan maken van de Google Vision API.
 
-Om te bouwen/installeren. Run als sudo su -
+Om te bouwen/installeren. Run als `sudo su -`:
 
-```
+```bash
 export OBJECTSTORE_PASSWORD=<OBJECT_STORE_PASSWORD>
 ```
 
 en in dezelfde sudo sessie:
 
-```
+```bash
 cd /home/panorama
 cd .swarm
 docker-compose build --pull --build-arg OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD worker
@@ -29,17 +27,17 @@ docker-compose push
 docker stack deploy --compose-file docker-compose.yml panoswarm
 ```
 
-Let op! De naam van het cluster is belangrijk (wordt gebruikt in `save-db.sh`)
+Let op! De naam van het cluster is belangrijk (wordt gebruikt in `save-db.sh`).
 
-En als het cluster succesvol is opgestart - uitgaande van 6cpu's, en > 16GB memory per node:
+En als het cluster succesvol is opgestart - uitgaande van 6 CPU's, en > 16GB memory per node:
 
-```
+```bash
 docker service scale panoswarm_worker=192
 ```
 
 Het beste kun je stapsgewijs opschalen:
 
-```
+```bash
 docker service scale panoswarm_worker=32
 # wacht een minuutje
 docker service scale panoswarm_worker=64
@@ -55,21 +53,20 @@ docker service scale panoswarm_worker=196
 
 Stel de gegevens - de resultaten van detectie - in de database veilig, wannneer de swarm klaar is:
 
-```
+```bash
 ./save-db.sh
 ```
 
 Stop swarm - *zorg ervoor dat de gegevens uit de database zijn veiliggesteld!* zie stap hierboven - met het volgende commando:
 
-```
+```bash
 docker stack rm panoswarm
 ```
 
 Lokaal
 ======
 
-Bijvoorbeeld voor ontwikkelen kun je de stack ook lokaal opstarten
- (zie [https://docs.docker.com/engine/swarm/stack-deploy/](https://docs.docker.com/engine/swarm/stack-deploy/) ):
+Bijvoorbeeld voor ontwikkelen kun je de stack ook lokaal opstarten (zie [Deploy a stack to a swarm](https://docs.docker.com/engine/swarm/stack-deploy/)):
 
 ```bash
 docker swarm init

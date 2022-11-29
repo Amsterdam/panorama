@@ -9,7 +9,7 @@ logging.getLogger("swiftclient").setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
 
-class ObjectStore(object):
+class ObjectStore:
     RESP_LIMIT = 10000  # serverside limit of the response
     datapunt_conn = None
     panorama_conn = None
@@ -20,14 +20,14 @@ class ObjectStore(object):
             base_options['endpoint_type'] = 'internalURL'
 
         self.datapunt_conn = client.Connection(authurl=settings.AUTHURL,
-                                               user=settings.OBJECTSTORE_USER,
-                                               key=settings.OBJECTSTORE_PASSWORD,
+                                               user=settings.DATAPUNT_OBJECTSTORE_USER,
+                                               key=settings.DATAPUNT_OBJECTSTORE_PASSWORD,
                                                tenant_name=settings.DATAPUNT_TENANT_NAME,
                                                auth_version=settings.AUTH_VERSION,
                                                os_options={'tenant_id': settings.DATAPUNT_TENANT_ID, **base_options})
         self.panorama_conn = client.Connection(authurl=settings.AUTHURL,
-                                               user=settings.OBJECTSTORE_USER,
-                                               key=settings.OBJECTSTORE_PASSWORD,
+                                               user=settings.PANORAMA_OBJECTSTORE_USER,
+                                               key=settings.PANORAMA_OBJECTSTORE_PASSWORD,
                                                tenant_name=settings.PANORAMA_TENANT_NAME,
                                                auth_version=settings.AUTH_VERSION,
                                                os_options={'tenant_id': settings.PANORAMA_TENANT_ID, **base_options})
@@ -76,10 +76,10 @@ class ObjectStore(object):
 
     def get_detection_csvs(self, day):
         csvs = []
-        log.info('day: {}'.format(day))
+        log.info('day: %s', day)
         for trajectory in self.get_datapunt_subdirs(day):
-                for panorama in self.get_datapunt_subdirs(trajectory):
-                    csvs.extend(self._get_datapunt_csv_type(panorama, 'region'))
+            for panorama in self.get_datapunt_subdirs(trajectory):
+                csvs.extend(self._get_datapunt_csv_type(panorama, 'region'))
         return csvs
 
     def get_datapunt_subdirs(self, path):

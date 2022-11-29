@@ -1,3 +1,6 @@
+"""Panorama settings."""
+
+
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -81,19 +84,20 @@ if SENTRY_DSN:
 
 # OBJECT_STORE SETTINGS
 
-OBJECTSTORE_USER = objectstore_settings.OBJECTSTORE_USER
-OBJECTSTORE_PASSWORD = objectstore_settings.OBJECTSTORE_PASSWORD
-
 AUTH_VERSION = objectstore_settings.AUTH_VERSION
 AUTHURL = objectstore_settings.AUTHURL
 
+DATAPUNT_OBJECTSTORE_USER = objectstore_settings.DATAPUNT_OBJECTSTORE_USER
+DATAPUNT_OBJECTSTORE_PASSWORD = objectstore_settings.DATAPUNT_OBJECTSTORE_PASSWORD
 DATAPUNT_TENANT_NAME = objectstore_settings.DATAPUNT_TENANT_NAME
 DATAPUNT_TENANT_ID = objectstore_settings.DATAPUNT_TENANT_ID
+DATAPUNT_CONTAINER = objectstore_settings.DATAPUNT_CONTAINER
+
+PANORAMA_OBJECTSTORE_USER = objectstore_settings.PANORAMA_OBJECTSTORE_USER
+PANORAMA_OBJECTSTORE_PASSWORD = objectstore_settings.PANORAMA_OBJECTSTORE_PASSWORD
 PANORAMA_TENANT_NAME = objectstore_settings.PANORAMA_TENANT_NAME
 PANORAMA_TENANT_ID = objectstore_settings.PANORAMA_TENANT_ID
-
 PANORAMA_CONTAINERS = objectstore_settings.PANORAMA_CONTAINERS
-DATAPUNT_CONTAINER = objectstore_settings.DATAPUNT_CONTAINER
 
 REGION_NAME = objectstore_settings.REGION_NAME
 
