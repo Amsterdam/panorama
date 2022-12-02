@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from django.contrib.gis.geos import Point
+from django.conf import settings
 
 from datasets.panoramas.models import Panoramas
 
@@ -11,12 +12,12 @@ class TestModel(TestCase):
         cases = [
             ('container/path/',
              'image.jpg',
-             'https://acc.data.amsterdam.nl/panorama/container/path/image/equirectangular/panorama_8000.jpg',
-             'https://acc.data.amsterdam.nl/panorama/container/path/image/equirectangular/panorama_4000.jpg',
-             'https://acc.data.amsterdam.nl/panorama/container/path/image/equirectangular/panorama_2000.jpg',
-             'https://acc.data.amsterdam.nl/panorama/container/path/image/cubic/',
-             'https://acc.data.amsterdam.nl/panorama/container/path/image/cubic/{z}/{f}/{y}/{x}.jpg',
-             'https://acc.data.amsterdam.nl/panorama/container/path/image/cubic/preview.jpg'),
+             settings.PANO_IMAGE_URL + '/container/path/image/equirectangular/panorama_8000.jpg',
+             settings.PANO_IMAGE_URL + '/container/path/image/equirectangular/panorama_4000.jpg',
+             settings.PANO_IMAGE_URL + '/container/path/image/equirectangular/panorama_2000.jpg',
+             settings.PANO_IMAGE_URL + '/container/path/image/cubic/',
+             settings.PANO_IMAGE_URL + '/container/path/image/cubic/{z}/{f}/{y}/{x}.jpg',
+             settings.PANO_IMAGE_URL + '/container/path/image/cubic/preview.jpg'),
         ]
         for c in cases:
             p = Panoramas(path=c[0], filename=c[1], geolocation=Point(1, 1, 1))
