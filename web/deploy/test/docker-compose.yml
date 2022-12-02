@@ -1,4 +1,4 @@
-version: "3.7"
+version: "2.4"
 services:
   database:
     image: amsterdam/postgres11
@@ -20,9 +20,9 @@ services:
       DATABASE_NAME: panorama
       DATABASE_USER: panorama
       DATABASE_PASSWORD: insecure
-      OBJECTSTORE_USER: "${OBJECTSTORE_USER}"
-      OBJECTSTORE_PASSWORD: "${OBJECTSTORE_PASSWORD}"
-      PANORAMA_TENANT_ID: "${PANORAMA_TENANT_ID}"
-      DATAPUNT_TENANT_ID: "${DATAPUNT_TENANT_ID}"
+      OBJECTSTORE_USER:
+      OBJECTSTORE_PASSWORD:
+      PANORAMA_TENANT_ID:
+      DATAPUNT_TENANT_ID:
     command: >
       bash -c "/deploy/test/test.sh"
