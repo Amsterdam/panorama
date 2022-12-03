@@ -46,9 +46,16 @@ node {
 
     stage("Build image") {
         tryStep "build", {
+            withCredentials([
+                [$class: 'StringBinding', credentialsId: 'panorama_objectstore_user', variable: 'OBJECTSTORE_USER'],
+                [$class: 'StringBinding', credentialsId: 'panorama_objectstore_key', variable: 'OBJECTSTORE_PASSWORD'],
+                [$class: 'StringBinding', credentialsId: 'panorama_panorama_tenant_id', variable: 'PANORAMA_TENANT_ID'],
+                [$class: 'StringBinding', credentialsId: 'panorama_datapunt_tenant_id', variable: 'DATAPUNT_TENANT_ID']
+            ]) {
                 docker.withRegistry("${DOCKER_REGISTRY_HOST}",'docker_registry_auth') {
                 def image = docker.build("datapunt/panorama:${env.BUILD_NUMBER}", "web")
                 image.push()
+                }
             }
         }
     }

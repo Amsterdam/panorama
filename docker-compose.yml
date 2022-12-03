@@ -25,7 +25,10 @@ services:
       DB_NAME: panorama
       DB_PASSWORD: insecure
       PANORAMA_IMAGE_URL: https://acc.panorama.data.amsterdam.nl/panorama
+      OBJECTSTORE_USER:
       OBJECTSTORE_PASSWORD:
+      PANORAMA_TENANT_ID:
+      DATAPUNT_TENANT_ID:
       UWSGI_HTTP: ":8000"
       UWSGI_MODULE: "panorama.wsgi:application"
       UWSGI_MASTER: 1
