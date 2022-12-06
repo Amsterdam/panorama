@@ -1,7 +1,7 @@
 import logging
+import re
 
 from swiftclient import ClientException
-import re
 
 from datasets.panoramas.models import Panoramas
 from panorama.etl.check_objectstore import is_increment_uptodate, increment_exists
@@ -47,8 +47,10 @@ def _is_mission(subdir):
 
 
 def _check_and_process_recursively(source_container, path, increment, force_rebuild, missions_to_rebuild):
-    """Tests recursively if the directory is still up to date, recursion terminates when `_is_mission(subdir`
-    returns True. Any mission-increment that is no longer up to date
+    """Tests recursively if the directory is still up to date.
+
+    Recursion terminates when `_is_mission(subdir)` returns True.
+    Any mission-increment that is no longer up to date will be removed and rebuild.
 
     :param source_container: container to check: in panorama 'year'
     :param path: path to check recursively
@@ -109,21 +111,24 @@ def check_increments(increment=None, force_rebuild=False):
 
 
 def rebuild_increments_recursively(path=""):
-    """Re-construct the increments that have been deleted when checking for increments that were no longer up-to-date
-    Assumes mission-level increments are present
+    """Re-construct the increments that have been deleted when checking for increments that were no longer up-to-date.
+
+    Assumes mission-level increments are present.
 
     :return: None
     """
-
     subdirs = objectstore.get_subdirs(INCREMENTS_CONTAINER, path)
 
     for subdir in subdirs:
         if not increment_exists(subdir):
+            log.info(f"Recursing into {subdir}")
             rebuild_increments_recursively(subdir)
 
+    log.info("Clearing models (panoramas_panorama)")
     clear_database([Panoramas])
     for subdir in subdirs:
+        log.info(f"Restoring increment in {subdir}")
         restore_increment(subdir)
 
-    log.info(f"building increment in /{path}")
+    log.info(f"Dumping increment in /{path}")
     dump_increment(path)
