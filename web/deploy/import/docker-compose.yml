@@ -17,6 +17,9 @@ services:
       DB_NAME: panorama
       DB_USER: panorama
       DB_PASSWORD: insecure
+      OBJECTSTORE_USER:
       OBJECTSTORE_PASSWORD:
+      PANORAMA_TENANT_ID:
+      DATAPUNT_TENANT_ID:
     command: >
       bash -c "python manage.py import_increments ${IMPORT_ARGS}"
