@@ -60,7 +60,10 @@ def _check_and_process_recursively(source_container, path, increment, force_rebu
     :return: True if the subtree is still up date
     """
 
-    log.info(f"Checking if path is still up to data: {source_container}/{path}")
+    if path:
+        log.info(f"Checking if path is still up to data: {source_container}/{path}")
+    else:
+        log.info(f"Checking if container is still up to data: {source_container}/")
     up_to_date = True
     subdirs = objectstore.get_subdirs(source_container, path)
     for subdir in subdirs:
@@ -91,8 +94,9 @@ def _check_and_process_recursively(source_container, path, increment, force_rebu
 
 
 def check_increments(increment=None, force_rebuild=False):
-    """Test all missions to see if the are still up to date, and if not, remove them recursively. Returning missions
-    to (re)build
+    """Test all missions to see if the are still up to date, and if not, remove them recursively.
+
+    Returning missions to (re)build.
 
     :param increment: specific increment to check: `increment='2017/'`, or `increment='2017/04/'` etc.
     :return: tuple of Boolean (True if all increments where up to date, and False if any have been removed) and a List
