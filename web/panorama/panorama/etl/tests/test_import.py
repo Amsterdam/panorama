@@ -2,11 +2,12 @@ import glob
 import logging
 import os
 from pathlib import Path
+from datetime import datetime
 
-from django.test import TransactionTestCase
 from unittest import mock, skipIf
+from django.test import TransactionTestCase
 
-from datasets.panoramas.models import Panoramas, Traject, Mission
+from datasets.panoramas.models import Panoramas, Mission
 from panorama.etl.batch_import import import_mission_metadata, rebuild_mission
 from panorama.etl.data_to_model import process_panorama_row
 
@@ -34,7 +35,8 @@ def mock_get_root_csvs(csv_type):
     files = []
     if csv_type == 'missiegegevens':
         files = glob.glob('/app/panoramas_test/**/missiegegevens.csv', recursive=True)
-    return [{'container': '1', 'name': f} for f in files]
+    last_modified_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%s")
+    return [{'container': '1', 'name': f, 'last_modified': last_modified_str} for f in files]
 
 
 def mock_get_csv(csv):
@@ -56,11 +58,11 @@ rendered_file_exists = False
 @skipIf(not os.path.exists('/app/panoramas_test'),
         'Import test skipped: no mounted directory found, run in docker container')
 class ImportPanoTest(TransactionTestCase):
-    """
-    This is more like an integration test than a unit test
-    Because it expects a mounted /app/panoramas_test folder, run these in the Docker container
+    """This is more like an integration test than a unit test.
 
-        docker exec -it panorama_web_1 ./manage.py test panorama.tests.test_batch
+    Because it expects a mounted /app/panoramas_test folder, run these in the Docker container.
+
+        docker compose -f web/deploy/test/docker-compose.yml run tests ./manage.py test panorama.etl.tests
     """
     allow_database_queries = True
 
