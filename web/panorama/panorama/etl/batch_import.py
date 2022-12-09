@@ -1,5 +1,6 @@
 import logging
 import csv
+from datetime import datetime
 
 from datasets.panoramas.models import Mission
 from datasets.panoramas.models import Panoramas
@@ -38,12 +39,13 @@ def process_csv(csv_file, generate_model):
 
 
 def import_mission_metadata():
-    """Get all missiegegevens.csv files and load the mission metadata into the database
+    """Get all missiegegevens.csv files and load the mission metadata into the database.
 
     :return: None
     """
     for csv_file in objectstore.get_containerroot_csvs('missiegegevens'):
-        log.info(f"READING missions: {csv_file['name']}")
+        last_modified_dt = datetime.strptime(csv_file['last_modified'][:19], "%Y-%m-%dT%H:%M:%S")
+        log.info(f"READING {csv_file['container']} {csv_file['name']} ({last_modified_dt})")
         Mission.objects.bulk_create(
             process_csv(csv_file, process_mission_row),
             batch_size=BATCH_SIZE
