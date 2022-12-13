@@ -1,5 +1,6 @@
+# syntax=docker/dockerfile:1
 FROM amsterdam/panorama_image_processing:full_image_processing
-MAINTAINER datapunt.ois@amsterdam.nl
+MAINTAINER datapunt@amsterdam.nl
 
 RUN apt-get update \
 	&& apt-get install -y \
@@ -23,6 +24,9 @@ COPY panorama /app/
 
 ARG OBJECTSTORE_PASSWORD
 ENV OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD
+
+ARG OBJECTSTORE_USER
+ENV OBJECTSTORE_USER=$OBJECTSTORE_USER
 
 USER datapunt
 
