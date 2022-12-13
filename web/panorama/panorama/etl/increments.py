@@ -128,11 +128,9 @@ def rebuild_increments_recursively(path=""):
             log.info(f"Recursing into {subdir}")
             rebuild_increments_recursively(subdir)
 
-    log.info("Clearing models (panoramas_panorama)")
+    log.info("Clearing database (panoramas_panorama table)")
     clear_database([Panoramas])
     for subdir in subdirs:
-        log.info(f"Restoring increment in {subdir}")
         restore_increment(subdir)
 
-    log.info(f"Dumping increment in /{path}")
     dump_increment(path)

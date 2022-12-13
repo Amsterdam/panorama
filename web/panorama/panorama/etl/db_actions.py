@@ -28,7 +28,7 @@ def _dump(filename, query, parameters=None):
         copy_command = f"COPY ({query_bytes.decode()}) TO STDOUT WITH (FORMAT binary)"
         cursor.copy_expert(copy_command, output_stream)
     output_stream.seek(0)
-    log.info(f"WRITING increment DB dump: {filename}")
+    log.info(f"Writing DB dump: {INCREMENTS_CONTAINER}/{filename}")
     objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream,
                                         "binary/octet-stream")
 
@@ -90,7 +90,7 @@ def restore_increment(increment_path):
     table_name = Panoramas._meta.db_table
 
     copy_command = f"COPY {table_name} ({', '.join(fields)}) FROM  STDIN (FORMAT binary)"
-    log.info(f"Restoring increment path '{increment_path}'")
+    log.info(f"Restoring from {INCREMENTS_CONTAINER}/{increment_path}{DUMP_FILENAME}")
     file = io.BytesIO(objectstore.get_panorama_store_object({'container': INCREMENTS_CONTAINER,
                                                              'name': f"{increment_path}{DUMP_FILENAME}"}))
     with connection.cursor() as cursor:
@@ -102,7 +102,6 @@ def clear_database(model_list):
 
     :return: None
     """
-    log.info("Clearing database")
     for model in model_list:
         model.objects.all().delete()
 
@@ -112,7 +111,7 @@ def reset_sequences(model_list):
 
     :return: None
     """
-    log.info("Resetting sequences")
+    log.info("Resetting DB sequences")
     sequence_sql = connection.ops.sequence_reset_sql(no_style(), model_list)
     with connection.cursor() as cursor:
         for sql in sequence_sql:
@@ -124,6 +123,7 @@ def restore_all():
 
     :return: None
     """
+    log.info("Clearing database (panoramas_panorama table)")
     clear_database([Panoramas])
     reset_sequences([Panoramas])
 
