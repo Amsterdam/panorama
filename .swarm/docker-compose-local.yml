@@ -28,10 +28,6 @@ services:
       DATABASE_NAME: panorama
       DATABASE_USER: panorama
       DATABASE_PASSWORD: insecure
-      OBJECTSTORE_USER:
-      OBJECTSTORE_PASSWORD:
-      PANORAMA_TENANT_ID:
-      DATAPUNT_TENANT_ID:
     deploy:
       restart_policy:
         condition: none
@@ -56,9 +52,5 @@ services:
       DATABASE_NAME: panorama
       DATABASE_USER: panorama
       DATABASE_PASSWORD: insecure
-      OBJECTSTORE_USER:
-      OBJECTSTORE_PASSWORD:
-      PANORAMA_TENANT_ID:
-      DATAPUNT_TENANT_ID:
     deploy:
       replicas: 2
