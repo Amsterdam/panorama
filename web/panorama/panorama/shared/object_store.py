@@ -1,5 +1,6 @@
 import logging
 from swiftclient import client
+from swiftclient.exceptions import ClientException
 import panorama.objectstore_settings as settings
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -33,7 +34,14 @@ class ObjectStore:
                                                os_options={'tenant_id': settings.PANORAMA_TENANT_ID, **base_options})
 
     def get_panorama_store_object(self, object_meta_data):
-        return self.panorama_conn.get_object(object_meta_data['container'], object_meta_data['name'])[1]
+        try:
+            return self.panorama_conn.get_object(
+                object_meta_data['container'], object_meta_data['name'])[1]
+        except ClientException as exc:
+            log.error(exc)
+            log.error(
+                'User: %s (%s)', settings.PANORAMA_OBJECTSTORE_USER, settings.PANORAMA_TENANT_NAME)
+            raise
 
     def get_panorama_store_objects(self, container, path):
         return self._get_full_container_list(self.panorama_conn, container, [], prefix=path)
@@ -52,7 +60,12 @@ class ObjectStore:
             else:
                 kwargs['marker'] = seed[-1]['name']
 
-        _, page = conn.get_container(container, **kwargs)
+        try:
+            _, page = conn.get_container(container, **kwargs)
+        except ClientException as exc:
+            log.error(exc)
+            log.error('container: %s', container)
+            raise
         seed.extend(page)
         return seed if len(page) < self.RESP_LIMIT else \
                self._get_full_container_list(conn, container, seed, **kwargs)
