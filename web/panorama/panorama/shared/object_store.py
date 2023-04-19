@@ -148,6 +148,9 @@ class ObjectStore:
             for key, value in response_dict.items():
                 log.error(f"{key}: {value}")
             raise
+        except (ConnectionError, OSError) as exc:
+            log.error(exc)
+            raise
 
     def get_containerroot_csvs(self, csv_identifier):
         csvs = []
