@@ -1,6 +1,5 @@
 import io
 import logging
-from os import path
 
 from django.core.management.color import no_style
 from django.db import connection
@@ -29,9 +28,6 @@ def _dump(filename, query, parameters=None):
         copy_command = f"COPY ({query_bytes.decode()}) TO STDOUT WITH (FORMAT binary)"
         cursor.copy_expert(copy_command, output_stream)
     output_stream.seek(0)
-    test_file = path.dirname(filename) + "/text.txt"
-    log.info(f"Writing test file: {INCREMENTS_CONTAINER}/{test_file}")
-    objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, test_file, "testing 1 2 3", "text/plain")
     log.info(f"Writing DB dump: {INCREMENTS_CONTAINER}/{filename}")
     objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream.getvalue(),
                                         "binary/octet-stream")

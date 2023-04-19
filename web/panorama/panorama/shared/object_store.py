@@ -140,6 +140,7 @@ class ObjectStore:
                                         object_name,
                                         contents=object_content,
                                         content_type=content_type,
+                                        chunk_size=10485760,
                                         response_dict=response_dict)
         except ClientException as exc:
             log.error(exc)
