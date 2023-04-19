@@ -122,16 +122,32 @@ class ObjectStore:
         return csvs
 
     def put_into_datapunt_store(self, object_name, object_content, content_type):
-        self.datapunt_conn.put_object(settings.DATAPUNT_CONTAINER,
-                                      object_name,
-                                      contents=object_content,
-                                      content_type=content_type)
+        try:
+            self.datapunt_conn.put_object(settings.DATAPUNT_CONTAINER,
+                                        object_name,
+                                        contents=object_content,
+                                        content_type=content_type)
+        except ClientException as exc:
+            log.error(exc)
+            log.error(
+                'User: %s (%s)', settings.DATAPUNT_OBJECTSTORE_USER, settings.DATAPUNT_TENANT_NAME)
+            raise
 
     def put_into_panorama_store(self, container, object_name, object_content, content_type):
-        self.panorama_conn.put_object(container,
-                                      object_name,
-                                      contents=object_content,
-                                      content_type=content_type)
+        try:
+            response_dict = {}
+            self.panorama_conn.put_object(container,
+                                        object_name,
+                                        contents=object_content,
+                                        content_type=content_type,
+                                        response_dict=response_dict)
+        except ClientException as exc:
+            log.error(exc)
+            log.error(
+                'User: %s (%s)', settings.PANORAMA_OBJECTSTORE_USER, settings.PANORAMA_TENANT_NAME)
+            for key, value in response_dict.items():
+                log.error(f"{key}: {value}")
+            raise
 
     def get_containerroot_csvs(self, csv_identifier):
         csvs = []
