@@ -15,7 +15,7 @@ objectstore = ObjectStore()
 
 
 def panorama_image_file_exists(container, path, filename):
-    """Check if the panorama  exists in container and path, directory listing is cached
+    """Check if the panorama exists in container and path, directory listing is cached
 
     :param container: the objectstore container to look in
     :param path: the path the filename is at
@@ -55,7 +55,7 @@ def panorama_rendered_file_exists(container, path, filename):
 def panorama_blurred_file_exists(container, path, filename):
     """Check if the blurred panorama exists in the datapunt public - facing container
 
-    :param container:  the panorama objectstore container the source for the rendered file is in
+    :param container: the panorama objectstore container the source for the rendered file is in
     :param path: the path the source panorama
     :param filename: the filename of the source panorama
     :return: True or False depending on if the file is found
@@ -127,6 +127,7 @@ def set_uptodate_info(container, path):
     """
     source_listing, intermediate_listing, blurred_listing = _object_listings_for(container, path)
 
+    log.info(f"Updating {SOURCE_LISTING_NAME}, {INTERMEDIATE_LISTING_NAME} and {BLURRED_LISTING_NAME} in {container}/{path}")
     objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, f"{container}/{path}{SOURCE_LISTING_NAME}",
                                         source_listing, "text/plain")
 
