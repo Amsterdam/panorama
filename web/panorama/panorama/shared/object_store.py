@@ -133,14 +133,14 @@ class ObjectStore:
                 'User: %s (%s)', settings.DATAPUNT_OBJECTSTORE_USER, settings.DATAPUNT_TENANT_NAME)
             raise
 
-    def put_into_panorama_store(self, container, object_name, object_content, content_type):
+    def put_into_panorama_store(self, container, object_name, object_content, content_type, chunk_size=None):
         try:
             response_dict = {}
             self.panorama_conn.put_object(container,
                                         object_name,
                                         contents=object_content,
                                         content_type=content_type,
-                                        chunk_size=10485760,
+                                        chunk_size=chunk_size,
                                         response_dict=response_dict)
         except ClientException as exc:
             log.error(exc)

@@ -29,8 +29,8 @@ def _dump(filename, query, parameters=None):
         cursor.copy_expert(copy_command, output_stream)
     output_stream.seek(0)
     log.info(f"Writing DB dump: {INCREMENTS_CONTAINER}/{filename}")
-    objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, filename, output_stream.getvalue(),
-                                        "binary/octet-stream")
+    objectstore.put_into_panorama_store(
+        INCREMENTS_CONTAINER, filename, output_stream, "binary/octet-stream", chunk_size=10_485_760)
 
 
 def dump_mission(container, mission_path):

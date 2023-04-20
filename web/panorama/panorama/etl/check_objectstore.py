@@ -127,7 +127,10 @@ def set_uptodate_info(container, path):
     """
     source_listing, intermediate_listing, blurred_listing = _object_listings_for(container, path)
 
-    log.info(f"Updating {SOURCE_LISTING_NAME}, {INTERMEDIATE_LISTING_NAME} and {BLURRED_LISTING_NAME} in {container}/{path}")
+    log.info(
+        f"Updating {SOURCE_LISTING_NAME}, {INTERMEDIATE_LISTING_NAME} and {BLURRED_LISTING_NAME} "
+        f"in {INCREMENTS_CONTAINER}/{container}/{path}"
+    )
     objectstore.put_into_panorama_store(INCREMENTS_CONTAINER, f"{container}/{path}{SOURCE_LISTING_NAME}",
                                         source_listing, "text/plain")
 
