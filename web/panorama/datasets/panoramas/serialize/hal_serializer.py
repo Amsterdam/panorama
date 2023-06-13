@@ -1,25 +1,11 @@
 from collections import OrderedDict
 
-from datapunt_api.pagination import HALPagination
 from rest_framework.fields import URLField
 from rest_framework.relations import HyperlinkedIdentityField, RelatedField, ManyRelatedField
 from rest_framework.serializers import HyperlinkedModelSerializer, ListSerializer
 from rest_framework.utils.serializer_helpers import ReturnList
 from rest_framework import response
 from rest_framework.utils.urls import replace_query_param
-
-
-def simple_hal_embed(data, request):
-    self_link = request.build_absolute_uri()
-    if self_link.endswith(".api"):
-        self_link = self_link[:-4]
-
-    return OrderedDict([
-        ('_links', OrderedDict([
-            ('self', dict(href=self_link)),
-        ])),
-        ('_embedded', data)
-    ])
 
 
 class IdentityLinksField(HyperlinkedIdentityField):
@@ -31,36 +17,6 @@ class IdentityLinksField(HyperlinkedIdentityField):
 class HyperLinksField(URLField):
     def to_representation(self, value):
         return dict(href=value)
-
-
-class HALPaginationEmbedded(HALPagination):
-    def get_paginated_response(self, data):
-        self_link = self.request.build_absolute_uri()
-        if self_link.endswith(".api"):
-            self_link = self_link[:-4]
-
-        if self.page.has_next():
-            next_link = replace_query_param(
-                self_link, self.page_query_param, self.page.next_page_number())
-        else:
-            next_link = None
-
-        if self.page.has_previous():
-            prev_link = replace_query_param(
-                self_link, self.page_query_param,
-                self.page.previous_page_number())
-        else:
-            prev_link = None
-
-        return response.Response(OrderedDict([
-            ('_links', OrderedDict([
-                ('self', dict(href=self_link)),
-                ('next', dict(href=next_link)),
-                ('previous', dict(href=prev_link)),
-            ])),
-            ('count', self.page.paginator.count),
-            ('_embedded', data)
-        ]))
 
 
 class HALListSerializer(ListSerializer):

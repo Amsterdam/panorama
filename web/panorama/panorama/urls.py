@@ -9,9 +9,6 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework_swagger.renderers import OpenAPIRenderer
 from rest_framework_swagger.renderers import SwaggerUIRenderer
 
-from .view_imgs import ThumbnailViewSet
-from .views import PanoramasViewSet
-
 
 class PanoramaView(routers.APIRootView):
     """
@@ -34,8 +31,6 @@ class PanoramaRouter(routers.DefaultRouter):
 
 
 panorama = PanoramaRouter()
-panorama.register("thumbnail", ThumbnailViewSet, basename="thumbnail")
-panorama.register("panoramas", PanoramasViewSet, basename="panoramas")
 
 APIS = [url(r"^panorama/", include(panorama.urls))]
 

@@ -37,15 +37,11 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "django_extensions",
     "django_filters",
-    "datapunt_api",
     "django.contrib.gis",
     "rest_framework",
     "rest_framework_gis",
     "rest_framework_swagger",
 ]
-
-if DEBUG:
-    INSTALLED_APPS += ("debug_toolbar",)
 
 
 MIDDLEWARE = [

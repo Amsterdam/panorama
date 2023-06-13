@@ -1,7 +1,5 @@
-# Packages
 import math
 
-from datapunt_api import rest
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.geos import GEOSGeometry, Polygon
 from django.contrib.gis.measure import D
@@ -9,17 +7,11 @@ from django.db import models
 from django.db.models import Q, Exists, OuterRef, Func, F, Expression, Value
 from django.db.models.expressions import CombinedExpression
 from django_filters import widgets
-from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import filters
 from django_filters.rest_framework.filterset import FilterSet
 from rest_framework import serializers as rest_serializers
-from rest_framework.decorators import action
-from rest_framework.response import Response
 
-# Project
-from datasets.panoramas.serialize.hal_serializer import HALPaginationEmbedded, simple_hal_embed
-from datasets.panoramas.models import Panoramas, Adjacencies
-from datasets.panoramas.serialize.serializers import PanoSerializer, AdjacentPanoSerializer
+from datasets.panoramas.models import Panoramas
 
 MISSION_TYPE_CHOICES = (
     ('bi', 'bi'),
@@ -309,46 +301,3 @@ class PanoramaFilterAdjacent(PanoramaFilter):
         return queryset.annotate(within=Func(F('from_geolocation_2d_rd'), F('_geolocation_2d_rd'),
                                 Value(radius), function='ST_DWithin', output_field=models.BooleanField())
                                 ).filter(within=True)
-
-
-class PanoramasViewSet(rest.DatapuntViewSet):
-    """
-    Parameters:
-
-    - newest_in_range: (boolean) only return photos that are the newest within their distance interval
-    - srid: (integer) projection of coordinates, either 4326 or 28992
-    - near: (string) two-dimensional point, separated by a comma; "<lon>,<lat>" when "srid=4326", "<x>,<y>" when "srid=28992"
-    - radius: (number) search radius in meters from point "near"
-    - bbox: (string) only return photos contained by bounding box, two two-dimensional points "<northwest>,<southeast>", same as point "near"
-    - timestamp_before: (string) ISO date format (yyyy-mm-dd)
-    - timestamp_after: (string) ISO date format (yyyy-mm-dd)
-    - tags: (string) a comma-seperated list of tags to filter on, for example: "mission-bi,mission2017"
-    - limit_results: (integer) limit on the returned results (impacts count and pagination: if more results are available, they don't show up in counts). Can be used for performance reasons
-    """
-
-    lookup_field = 'pano_id'
-    queryset = Panoramas.done.all()
-    serializer_detail_class = PanoSerializer
-    serializer_class = PanoSerializer
-    pagination_class = HALPaginationEmbedded
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = PanoramaFilter
-
-    @action(detail=True)
-    def adjacencies(self, request, pano_id):
-        queryset = Adjacencies.objects.filter(from_pano_id=pano_id)
-        adjacency_filter = PanoramaFilterAdjacent(request=request, queryset=queryset, data=request.query_params,
-                                                  pano_id=pano_id)
-
-        if adjacency_filter._is_filter_enabled('bbox'):
-            raise rest_serializers.ValidationError('bbox filter not allowed for adjacent panoramas')
-
-        if adjacency_filter._is_filter_enabled('near'):
-            raise rest_serializers.ValidationError('near filter not allowed for adjacent panoramas')
-
-        queryset = adjacency_filter.qs.extra(order_by=['relative_distance'])
-
-        serializer = AdjacentPanoSerializer(instance=queryset, many=True, context={'request': request})
-
-        return Response(simple_hal_embed(serializer.data, self.request))
