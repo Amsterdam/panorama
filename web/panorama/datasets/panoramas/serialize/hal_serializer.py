@@ -4,8 +4,6 @@ from rest_framework.fields import URLField
 from rest_framework.relations import HyperlinkedIdentityField, RelatedField, ManyRelatedField
 from rest_framework.serializers import HyperlinkedModelSerializer, ListSerializer
 from rest_framework.utils.serializer_helpers import ReturnList
-from rest_framework import response
-from rest_framework.utils.urls import replace_query_param
 
 
 class IdentityLinksField(HyperlinkedIdentityField):

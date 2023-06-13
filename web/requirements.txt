@@ -7,7 +7,6 @@ coreschema==0.0.4
 debtcollector==1.22.0
 defusedxml==0.7.1
 Django==3.2.19
-django-cors-headers==4.0.0
 django-extensions==2.1.4
 django-filter==2.4.0
 django-model-utils==4.3.1
@@ -16,7 +15,6 @@ djangorestframework==3.11.2
 djangorestframework-csv==2.1.1
 djangorestframework-gis==1.0
 djangorestframework-xml==1.4.0
-drf-amsterdam==0.1.4
 drf-hal-json==0.9.1
 drf-nested-fields==0.9.5
 factory-boy==2.11.1
