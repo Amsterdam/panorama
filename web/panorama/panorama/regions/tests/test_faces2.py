@@ -6,7 +6,6 @@ from random import randrange
 
 # Packages
 import cv2
-import dlib
 from numpy import array, int32
 
 # Project

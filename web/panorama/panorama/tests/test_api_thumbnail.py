@@ -1,14 +1,4 @@
-# Python
-import datetime
-# Packages
-from django.contrib.gis.geos import Point
-from django.utils.timezone import utc as UTC_TZ
-import factory
-import factory.fuzzy
-# Project
 from . test_api_base import PanoramaApiTest
-from datasets.panoramas.models import Panoramas
-from datasets.panoramas.tests import factories
 
 
 class ThumbnailApiTest(PanoramaApiTest):
