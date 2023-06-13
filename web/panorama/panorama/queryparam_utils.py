@@ -104,9 +104,9 @@ def get_int_value(request, param_name, default, lower=0, upper=None, strategy='c
         if lower is None or lower <= value:
             if upper is None or value <= upper:
                 return value
-            elif strategy is 'cutoff' and upper is not None:
+            elif strategy == 'cutoff' and upper is not None:
                 return upper
-            elif strategy is 'modulo' and upper is not None:
+            elif strategy == 'modulo' and upper is not None:
                 return value % upper
     except (ValueError, MultiValueDictKeyError):
         pass
