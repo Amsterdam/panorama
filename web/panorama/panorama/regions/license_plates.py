@@ -129,13 +129,13 @@ class LicensePlateDetector(object):
         alpr = OpenAlpr().alpr
         for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_H):
             for idx, y in enumerate(range(JUST_BELOW_HORIZON, PLATES_NEAR_BY, SAMPLE_DISTANCE_V)):
-                zoom = ZOOM1 if idx is 0 else ZOOM2
+                zoom = ZOOM1 if idx == 0 else ZOOM2
                 snippet = Img.sample_image(self.panorama_img, x, y)
                 zoomed_snippet = Img.prepare_img(snippet, zoom, for_cv=False)
                 results = alpr.recognize_array(Img.image2byte_array(zoomed_snippet))['results']
                 licenseplate_regions.extend(parse(results, x, y, zoom, 0, 1))
 
-                zoom = ZOOM2 if idx is 0 else ZOOM3
+                zoom = ZOOM2 if idx == 0 else ZOOM3
                 for angle in ANGLE_RANGE:
                     for direction in [1, -1]:
                         widen, size, affine_matrix = calculate_shear_data(angle*direction)
