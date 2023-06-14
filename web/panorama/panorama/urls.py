@@ -46,10 +46,3 @@ urlpatterns = APIS + [
     url(r"^status/", include("health.urls")),
     url("^panorama/docs/$", swagger_schema_view),
 ]
-
-if settings.DEBUG:
-    import debug_toolbar
-
-    urlpatterns += [
-        url(r"^__debug__/", include(debug_toolbar.urls)),
-    ]
