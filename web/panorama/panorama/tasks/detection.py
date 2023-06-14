@@ -4,7 +4,7 @@ import io
 
 from datasets.panoramas.models import Region
 from datasets.panoramas.models import Panoramas
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
 

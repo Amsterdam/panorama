@@ -8,7 +8,7 @@ from PIL import Image
 from scipy import misc
 from google.cloud import vision
 
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
 GOOGLE_VISION_MAX_SIZE = 4000000

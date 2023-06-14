@@ -3,7 +3,7 @@ import logging
 
 from datasets.panoramas.models import Region
 from datasets.panoramas.models import Panoramas
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 
 BATCH_SIZE = 1000
 log = logging.getLogger(__name__)

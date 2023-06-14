@@ -8,7 +8,7 @@ from panorama.etl.check_objectstore import is_increment_uptodate, increment_exis
 from panorama.etl.db_actions import restore_increment, clear_database, dump_increment
 from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
 from panorama.objectstore_settings import PANORAMA_CONTAINERS
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
 objectstore = ObjectStore()

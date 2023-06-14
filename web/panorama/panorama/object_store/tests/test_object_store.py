@@ -4,7 +4,7 @@ import logging
 
 # Project
 from django.conf import settings
-from .. import object_store
+from ... import object_store
 
 log = logging.getLogger(__name__)
 

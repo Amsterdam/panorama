@@ -6,7 +6,7 @@ from scipy.ndimage import map_coordinates
 from PIL import Image, ImageOps
 import cv2
 
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 
 PANORAMA_WIDTH = 8000
 PANORAMA_HEIGHT = 4000

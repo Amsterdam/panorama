@@ -6,7 +6,7 @@ from datasets.panoramas.models import Mission
 from datasets.panoramas.models import Panoramas
 from panorama.etl.data_to_model import process_mission_row, process_panorama_row
 from panorama.etl.etl_settings import BATCH_SIZE
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
 objectstore = ObjectStore()

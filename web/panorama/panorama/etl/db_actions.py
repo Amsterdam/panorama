@@ -7,7 +7,7 @@ from django.db import connection
 from datasets.panoramas.models import Panoramas
 import panorama.objectstore_settings as settings
 from panorama.etl.etl_settings import DUMP_FILENAME, INCREMENTS_CONTAINER
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
 objectstore = ObjectStore()

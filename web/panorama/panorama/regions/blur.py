@@ -4,7 +4,7 @@ import logging
 import cv2
 from scipy import misc
 
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 from panorama.regions.util import get_rectangle, do_split_regions
 

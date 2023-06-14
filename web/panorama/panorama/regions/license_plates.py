@@ -2,7 +2,7 @@ from math import tan, radians
 
 from PIL.Image import AFFINE, BICUBIC
 
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
 from .openalpr import OpenAlpr

@@ -2,7 +2,7 @@ from django.conf import settings
 from PIL.Image import BICUBIC
 
 from datasets.panoramas.models import Panoramas
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 from . transformer import PANO_FOV, PANO_HORIZON, PANO_ASPECT
 from . utils_img_file import get_panorama_image
 

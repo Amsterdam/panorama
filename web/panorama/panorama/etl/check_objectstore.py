@@ -4,7 +4,7 @@ from swiftclient import ClientException
 from datasets.panoramas.models import EQUIRECTANGULAR_SUBPATH, FULL_IMAGE_NAME
 from panorama.etl.etl_settings import DUMP_FILENAME, SOURCE_LISTING_NAME, INTERMEDIATE_LISTING_NAME, BLURRED_LISTING_NAME, \
     INCREMENTS_CONTAINER, INTERMEDIATE_CONTAINER
-from panorama.shared.object_store import ObjectStore
+from panorama.object_store import ObjectStore
 
 panorama_images = {}
 panorama_rendered = {}
