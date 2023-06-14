@@ -42,7 +42,7 @@ def get_out_of_range_region():
 class TestWrapAround(TestCase):
     def test_wrap_around_x(self):
         actual = wrap_around([((7990, 130), (8010, 130), (8010, 230), (7980, 230), '')])
-        self.assertEquals(len(actual), 2)
+        self.assertEqual(len(actual), 2)
 
         points_left, points_right = actual
 
@@ -58,7 +58,7 @@ class TestWrapAround(TestCase):
 
     def test_wrap_around_y(self):
         actual = wrap_around([((7990, 130), (8010, 140), (8010, 230), (7990, 250), '')])
-        self.assertEquals(len(actual), 2)
+        self.assertEqual(len(actual), 2)
 
         points_left, points_right = actual
 
@@ -74,7 +74,7 @@ class TestWrapAround(TestCase):
 
     def test_wrap_around_all_left(self):
         actual = wrap_around([((7980, 130), (7990, 140), (7995, 230), (7990, 250), '')])
-        self.assertEquals(len(actual), 1)
+        self.assertEqual(len(actual), 1)
 
         points = actual[0]
 
@@ -85,7 +85,7 @@ class TestWrapAround(TestCase):
 
     def test_wrap_around_all_right(self):
         actual = wrap_around([((8010, 130), (8020, 140), (8025, 230), (8015, 250), '')])
-        self.assertEquals(len(actual), 1)
+        self.assertEqual(len(actual), 1)
 
         points = actual[0]
 
@@ -96,7 +96,7 @@ class TestWrapAround(TestCase):
 
     def test_wrap_around_x_below_zero(self):
         actual = wrap_around([((-75, 2114), (67, 2126), (67, 2160), (-75, 2149), '')])
-        self.assertEquals(len(actual), 2)
+        self.assertEqual(len(actual), 2)
 
         self.assertEqual(actual[0][0], (7925, 2114))
         self.assertEqual(actual[0][1], (8000, 2120))

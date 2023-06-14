@@ -3,24 +3,25 @@ X, Y = 0, 1
 LEFT_TOP, RIGHT_TOP, RIGHT_BOTTOM, LEFT_BOTTOM = 0, 1, 2, 3
 
 
-def intersection(point_left, point_right, width):
+def _intersection_height(point_left, point_right, width):
     """
-    Utility method for calculating the point where a line crossing border of the image intersects with border
+    Given a point inside an image and a point to the right of it,
+    return the height where the line segment between the two points
+    crosses the border of the image.
 
-    :param point_left: set of x, y coordanates for the point left of the border
-    :param point_right: set of x, y coordanates for the point right of the border
+    :param point_left: x, y coordinates for the point left of the border
+    :param point_right: x, y coordinates for the point right of the border
     :param width: width of the image
-    :return: set of x, y coordinates where the line from left to right intersects with the border
+    :return: y coordinate where the line from left to right intersects with the border
     """
     part_left = width - point_left[X]
     part_right = point_right[X] - width
-    intersect_y = point_left[Y] + int((point_right[Y] - point_left[Y]) * part_left / (part_left + part_right))
-    return width, intersect_y
+    return point_left[Y] + int((point_right[Y] - point_left[Y]) * part_left / (part_left + part_right))
 
 
 def wrap_around(regions, width=WIDTH):
     """
-    Utility method to split regions that intersect with the border of the image into a region left to the
+    Split regions that intersect with the border of the image into a region left to the
     right border, and right to the left border (all within image).
 
     :param regions: array of coordinate-sets (left-top, right-top, right-bottom, leftbottom, description)
@@ -57,7 +58,7 @@ def wrap_around(regions, width=WIDTH):
                 elif curr_coords[X] < width:
                     points_left.append(curr_coords)
                     if next_coords[X] > width:
-                        intersect_to = intersection(curr_coords, next_coords, width)
+                        intersect_to = (width, _intersection_height(curr_coords, next_coords, width))
                         points_right.append(intersect_to)
                         if idx == RIGHT_TOP:
                             points_right.append(intersect_to)
@@ -66,7 +67,7 @@ def wrap_around(regions, width=WIDTH):
                 else:
                     points_right.append(curr_coords)
                     if next_coords[X] < width:
-                        intersect_back = intersection(next_coords, curr_coords, width)
+                        intersect_back = (width, _intersection_height(next_coords, curr_coords, width))
                         points_left.append(intersect_back)
                         if idx == LEFT_BOTTOM:
                             points_left.append(intersect_back)
@@ -91,17 +92,14 @@ def do_split_regions(region_dicts):
     return split_regions
 
 
-def get_rectangle(coordinates_list):
+def get_rectangle(points):
     """
-    Utility method to create rectangles that encompass the freeform described 3 or more points.
-
-    :param region_dict: a list of tuples with coordinates
-    :return: two coordinate sets, top-left, bottom-right
+    Returns the smallest axis-oriented rectangle that contains all the (x, y) points.
     """
-    top = min([value[Y] for value in coordinates_list])
-    left = min([value[X] for value in coordinates_list])
-    bottom = max([value[Y] for value in coordinates_list])
-    right = max([value[X] for value in coordinates_list])
+    top = min(p[Y] for p in points)
+    left = min(p[X] for p in points)
+    bottom = max(p[Y] for p in points)
+    right = max(p[X] for p in points)
 
     return (top, left), (bottom, right)
 
