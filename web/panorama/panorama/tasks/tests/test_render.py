@@ -1,4 +1,3 @@
-# Python
 import datetime
 import logging
 import os
@@ -12,7 +11,7 @@ from django.utils.timezone import utc as UTC_TZ
 from datasets.panoramas.models import Panoramas
 from datasets.panoramas.tests import factories
 from panorama.transform.tests.test_img_file import mock_get_raw_pano
-from .. workers.render_pano import PanoRenderer
+from ..worker import PanoRenderer
 
 log = logging.getLogger(__name__)
 

@@ -1,12 +1,17 @@
-# Python
 import logging
 import time
 
+from django.db import transaction
+
+from datasets.panoramas.models import Panoramas, Region
+from panorama.regions import blur, faces, license_plates
+from panorama.tasks.detection import save_regions, region_writer
 from panorama.tasks.mixins import PanoramaTableAware
 from panorama.tasks.utilities import reset_abandoned_work, call_for_close
-from panorama.tasks.workers.blur_regions import RegionBlurrer
-from panorama.tasks.workers.detect_all import AllRegionDetector
-from panorama.tasks.workers.render_pano import PanoRenderer
+from panorama.transform import utils_img_file_set as ImgSet
+from panorama.transform.utils_img_file import save_array_image
+from panorama.transform.equirectangular import EquirectangularTransformer
+
 
 log = logging.getLogger(__name__)
 
@@ -48,3 +53,106 @@ class Worker(PanoramaTableAware):
             or PanoRenderer().process() is True
 
         return still_working
+
+
+class _PanoProcessor:
+    status_queryset = None
+    status_in_progress = None
+    status_done = None
+
+    def process(self):
+        pano_to_process = self._get_next_pano()
+        if not pano_to_process:
+            return False
+
+        self.process_one(pano_to_process)
+        pano_to_process.status = self.status_done
+        pano_to_process.save()
+
+        return True
+
+    def process_one(self, panorama):
+        pass
+
+    def _get_next_pano(self):
+        try:
+            with transaction.atomic():
+                next_pano = self.status_queryset.select_for_update()[0]
+                next_pano.status = self.status_in_progress
+                next_pano.save()
+
+            return next_pano
+        except IndexError:
+            return None
+
+
+class RegionBlurrer(_PanoProcessor):
+    status_queryset = Panoramas.detected
+    status_in_progress = Panoramas.STATUS.blurring
+    status_done = Panoramas.STATUS.done
+
+    def process_one(self, panorama: Panoramas):
+        region_blurrer = blur.RegionBlurrer(panorama.get_intermediate_url())
+        regions = []
+        for region in Region.objects.filter(pano_id=panorama.pano_id).all():
+            regions.append(blur.dict_from(region))
+
+        if len(regions) > 0:
+            ImgSet.save_image_set(panorama.get_intermediate_url(), region_blurrer.get_blurred_image(regions))
+        else:
+            ImgSet.save_image_set(panorama.get_intermediate_url(), region_blurrer.get_unblurred_image())
+
+
+class AllRegionDetector(_PanoProcessor):
+    status_queryset = Panoramas.rendered
+    status_in_progress = Panoramas.STATUS.detecting_regions
+    status_done = Panoramas.STATUS.detected
+
+    def process_one(self, panorama: Panoramas):
+        start_time = time.time()
+        lp_detector = license_plates.LicensePlateDetector(panorama.get_intermediate_url())
+
+        regions = lp_detector.get_licenseplate_regions()
+        self.convert_and_save(panorama, regions, start_time, lp=True)
+
+        # detect faces 1
+        start_time = time.time()
+        face_detector = faces.FaceDetector(panorama.get_intermediate_url())
+        face_detector.panorama_img = lp_detector.panorama_img
+
+        regions = face_detector.get_opencv_face_regions()
+        self.convert_and_save(panorama, regions, start_time)
+
+        # detect faces 2
+        start_time = time.time()
+        regions = face_detector.get_dlib_face_regions()
+        self.convert_and_save(panorama, regions, start_time, dlib=True)
+
+        # detect faces 3
+        start_time = time.time()
+        regions = face_detector.get_vision_api_face_regions()
+        self.convert_and_save(panorama, regions, start_time, google=True)
+
+    def convert_and_save(self, panorama, regions, start_time, **kwargs):
+        for region in regions:
+            region[-1] += ', time={}ms'.format(int(round((time.time() - start_time) * 1000)))
+        save_regions(regions, panorama, region_type='N')
+        region_writer(panorama, **kwargs)
+
+
+class PanoRenderer(_PanoProcessor):
+    status_queryset = Panoramas.to_be_rendered
+    status_in_progress = Panoramas.STATUS.rendering
+    status_done = Panoramas.STATUS.rendered
+
+    def process_one(self, panorama: Panoramas):
+        panorama_path = panorama.path + panorama.filename
+        log.info('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_path))
+
+        equi_t = EquirectangularTransformer(panorama_path, panorama.heading, panorama.pitch, panorama.roll)
+        projection = equi_t.get_projection(target_width=8000)
+
+        intermediate_path = 'intermediate/{}'.format(panorama_path)
+        log.info("saving intermediate: {}".format(intermediate_path))
+
+        save_array_image(projection, intermediate_path, in_panorama_store=True)
