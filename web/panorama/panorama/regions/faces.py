@@ -1,12 +1,10 @@
 import logging
 
-# This dependency is available in the docker container, which also has the binaries installed
-import dlib
-
 import cv2
-from PIL import Image
-from scipy import misc
+import dlib
 from google.cloud import vision
+import numpy as np
+from PIL import Image
 
 from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
@@ -149,7 +147,7 @@ class FaceDetector(object):
             zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * 625))
             zoomed = strip.resize(zoomed_size, Image.BICUBIC)
 
-            detected_faces, _, _ = detector.run(misc.fromimage(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD)
+            detected_faces, _, _ = detector.run(np.asarray(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD)
             regions = []
             for d in detected_faces:
                 regions.append((d.left(), d.top(), d.right() - d.left(), d.bottom() - d.top()))

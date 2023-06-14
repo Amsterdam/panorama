@@ -1,8 +1,7 @@
 import logging
 
-# This dependency is only available in the docker container, which has the binaries and bindings installed
 import cv2
-from scipy import misc
+import numpy as np
 
 from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
@@ -43,7 +42,7 @@ class RegionBlurrer(object):
         :param regions: Regions to blur
         :return: PIL image of the panorama with blurred regions
         """
-        blurred_image = misc.fromimage(self.panorama_img)
+        blurred_image = np.asarray(self.panorama_img)
 
         # blur regions
         for region in do_split_regions(regions):
@@ -56,4 +55,4 @@ class RegionBlurrer(object):
         return blurred_image
 
     def get_unblurred_image(self):
-        return misc.fromimage(self.panorama_img)
+        return np.asarray(self.panorama_img)

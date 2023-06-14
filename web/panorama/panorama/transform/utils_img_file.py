@@ -1,7 +1,6 @@
 import io
 
-from numpy import squeeze, dsplit, dstack, array
-from scipy import misc
+from numpy import squeeze, dsplit, dstack, asarray
 from scipy.ndimage import map_coordinates
 from PIL import Image, ImageOps
 import cv2
@@ -108,7 +107,7 @@ def get_raw_panorama_as_rgb_array(panorama_path):
     :return: scipy image array, an array of three color channels
     """
     # read image as scipy rgb image array
-    panorama_array_image = misc.fromimage(get_raw_panorama_image(panorama_path))
+    panorama_array_image = asarray(get_raw_panorama_image(panorama_path))
     return get_rgb_channels_from_array_image(panorama_array_image)
 
 
@@ -222,5 +221,5 @@ def prepare_img(snippet, zoom, for_cv=True):
     if not for_cv:
         return ImageOps.equalize(zoomed_snippet)
     else:
-        gray_image = cv2.cvtColor(array(zoomed_snippet), cv2.COLOR_RGB2GRAY)
+        gray_image = cv2.cvtColor(asarray(zoomed_snippet), cv2.COLOR_RGB2GRAY)
         return cv2.equalizeHist(gray_image)
