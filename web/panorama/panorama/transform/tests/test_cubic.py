@@ -1,8 +1,10 @@
-# Python
 import os
 import logging
 from unittest import mock, skipIf
-# Project
+
+import numpy as np
+from PIL import Image
+
 from panorama.transform.cubic import CubicTransformer
 from . test_transformer import TestTransformer
 from . test_img_file import mock_get_raw_pano
@@ -29,3 +31,10 @@ class TestTransformImgCubic(TestTransformer):
         for img in self.images:
             image_tranformer = CubicTransformer(img.path + img.filename, img.heading, img.pitch, img.roll)
             image_tranformer.project(target_width=MAX_WIDTH)
+
+
+def test_cubic_random():
+    r = np.random.randint(0, 256, (4000, 8000, 3), dtype=np.uint8)
+    im = Image.fromarray(r, mode="RGB")
+    t = CubicTransformer(pano_rgb=r)
+    t.project()

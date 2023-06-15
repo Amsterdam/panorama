@@ -46,7 +46,8 @@ class CubicTransformer(BasePanoramaTransformer):
             cube_projections[direction] = Img.sample_rgb_array_image_as_array((x2, y2), self.pano_rgb)
         return cube_projections
 
-def _get_cube_side(self, side, width):
+
+def _get_cube_side(side, width):
     # create the target pixel sets expressed as coordinates of a cubic projection of given cube-size
     # u, d, f, b, l, r = up, down, front, back, left, right
 
