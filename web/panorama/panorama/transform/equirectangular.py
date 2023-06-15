@@ -12,7 +12,7 @@ class EquirectangularTransformer(BasePanoramaTransformer):
         x, y = _create_sample_set(target_width)
 
         # transform image coordinates in equirectangular projection to cartesian vectors with r=1
-        x1, y1, z1 = Math.cylindrical2cartesian((x, y), source_width=SOURCE_WIDTH, source_height=PANO_HEIGHT)
+        x1, y1, z1 = Math.cartesian_from_cylindrical(x, y)
 
         # rotate vectors according to rotation-matrix for pitch and roll
         x2, y2, z2 = Math.rotate_cartesian_vectors((x1, y1, z1), self.rotation_matrix)
@@ -32,5 +32,5 @@ def _create_sample_set(target_width):
 
     steps = SOURCE_WIDTH / target_width
 
-    return meshgrid(arange(left_top_x, right_bottom_x, steps, dtype=float64),
-                    arange(left_top_y, right_bottom_y, steps, dtype=float64))
+    return (arange(left_top_x, right_bottom_x, steps, dtype=float64),
+            arange(left_top_y, right_bottom_y, steps, dtype=float64))

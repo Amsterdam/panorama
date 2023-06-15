@@ -23,6 +23,20 @@ def cylindrical2cartesian(coordinates, source_width, source_height):
     return x1, y1, z1
 
 
+def cartesian_from_cylindrical(x, y):
+    mid = len(x) / 2
+
+    phi = (x - mid) * (np.pi / mid)
+    theta = y * (np.pi / len(y))
+
+    sin_theta = np.sin(theta).reshape(-1, 1)
+    x1 = sin_theta * np.cos(phi).reshape(1, -1)
+    y1 = sin_theta * np.sin(phi).reshape(1, -1)
+    z1 = np.cos(theta).repeat(len(x)).reshape(len(y), len(x))
+
+    return x1, y1, z1
+
+
 def rotate_cartesian_vectors(vector, matrix):
     # TODO rewrite as numpy.dot.
     x = vector[0]

@@ -1,6 +1,17 @@
 from math import sqrt
+import numpy as np
+
 import panorama.transform.utils_math_array as Math
+
 from numpy.testing import assert_allclose, assert_array_equal
+
+
+def test_cartesian_from_cylindrical():
+    # Cheap test: should do the same as the old function.
+    x = np.arange(800)
+    y = np.arange(200)
+    expect = Math.cylindrical2cartesian(np.meshgrid(x, y), len(x), len(y))
+    assert_allclose(Math.cartesian_from_cylindrical(x, y), expect, atol=1e-15)
 
 
 def test_cylindrical2cartesion():
