@@ -46,11 +46,13 @@ def cartesian2cylindrical(vector, source_width, source_height, r_is_1=True):
     y = vector[1]
     z = vector[2]
 
-    r = 1 if r_is_1 else np.linalg.norm([x, y, z])
-    theta = np.arccos(z / r)
+    if not r_is_1:
+        r = np.linalg.norm([x, y, z])
+        z = z / r
+    theta = np.arccos(z)
     phi = np.arctan2(y, x)
 
-    x1 = np.mod(middle + middle * phi / np.pi, source_width - 1)
-    y1 = source_height * theta / np.pi
+    x1 = np.mod((middle / np.pi) * (phi + np.pi), source_width - 1)
+    y1 = theta * (source_height / np.pi)
 
     return x1, y1
