@@ -92,6 +92,8 @@ def get_rgb_channels_from_array_image(array_img):
     :param array_img: image array
     :return: reordered image array
     """
+    if array_img.shape[2] != 3:
+        raise ValueError(f"want RGB in last channel, got {array_img.shape[3]}")
     return array_img.transpose([2, 0, 1])
 
 
