@@ -1,9 +1,6 @@
 import logging
 import time
 
-import logging
-import time
-
 from django.db import connection, transaction
 
 from datasets.panoramas.models import Panoramas, Region
@@ -33,7 +30,10 @@ class _wait_for_panorama_table(object):
     def _panorama_table_present(self):
         try:
             with connection.cursor() as cursor:
-                cursor.execute("select * from information_schema.tables where table_name=%s", ('panoramas_panorama',))
+                cursor.execute(
+                    "select * from information_schema.tables where table_name=%s",
+                    ("panoramas_panorama",),
+                )
                 return bool(cursor.rowcount)
         except Exception as e:
             log.error(e)
@@ -67,14 +67,15 @@ class Worker:
 
     def _still_work_to_do(self):
         """
-            The meat of the work is done in the process() method of the workers.
-            That method returns true if there was a panorama to process for that stage.
-            States are processed right to left (blurrer first), for maximum throughput
+        The meat of the work is done in the process() method of the workers.
+        That method returns true if there was a panorama to process for that stage.
+        States are processed right to left (blurrer first), for maximum throughput
         """
-        still_working = \
-            RegionBlurrer().process() is True \
-            or AllRegionDetector().process() is True \
+        still_working = (
+            RegionBlurrer().process() is True
+            or AllRegionDetector().process() is True
             or PanoRenderer().process() is True
+        )
 
         return still_working
 
@@ -122,9 +123,14 @@ class RegionBlurrer(_PanoProcessor):
             regions.append(blur.dict_from(region))
 
         if len(regions) > 0:
-            ImgSet.save_image_set(panorama.get_intermediate_url(), region_blurrer.get_blurred_image(regions))
+            ImgSet.save_image_set(
+                panorama.get_intermediate_url(),
+                region_blurrer.get_blurred_image(regions),
+            )
         else:
-            ImgSet.save_image_set(panorama.get_intermediate_url(), region_blurrer.get_unblurred_image())
+            ImgSet.save_image_set(
+                panorama.get_intermediate_url(), region_blurrer.get_unblurred_image()
+            )
 
 
 class AllRegionDetector(_PanoProcessor):
@@ -134,7 +140,9 @@ class AllRegionDetector(_PanoProcessor):
 
     def process_one(self, panorama: Panoramas):
         start_time = time.time()
-        lp_detector = license_plates.LicensePlateDetector(panorama.get_intermediate_url())
+        lp_detector = license_plates.LicensePlateDetector(
+            panorama.get_intermediate_url()
+        )
 
         regions = lp_detector.get_licenseplate_regions()
         self.convert_and_save(panorama, regions, start_time, lp=True)
@@ -159,8 +167,10 @@ class AllRegionDetector(_PanoProcessor):
 
     def convert_and_save(self, panorama, regions, start_time, **kwargs):
         for region in regions:
-            region[-1] += ', time={}ms'.format(int(round((time.time() - start_time) * 1000)))
-        save_regions(regions, panorama, region_type='N')
+            region[-1] += ", time={}ms".format(
+                int(round((time.time() - start_time) * 1000))
+            )
+        save_regions(regions, panorama, region_type="N")
         region_writer(panorama, **kwargs)
 
 
@@ -171,12 +181,18 @@ class PanoRenderer(_PanoProcessor):
 
     def process_one(self, panorama: Panoramas):
         panorama_path = panorama.path + panorama.filename
-        log.info('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_path))
+        log.info(
+            "START RENDERING panorama: {} in equirectangular projection.".format(
+                panorama_path
+            )
+        )
 
-        equi_t = EquirectangularTransformer(panorama_path, panorama.heading, panorama.pitch, panorama.roll)
+        equi_t = EquirectangularTransformer(
+            panorama_path, panorama.heading, panorama.pitch, panorama.roll
+        )
         projection = equi_t.project(target_width=8000)
 
-        intermediate_path = 'intermediate/{}'.format(panorama_path)
+        intermediate_path = "intermediate/{}".format(panorama_path)
         log.info("saving intermediate: {}".format(intermediate_path))
 
         save_array_image(projection, intermediate_path, in_panorama_store=True)
