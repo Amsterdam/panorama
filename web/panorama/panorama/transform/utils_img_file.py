@@ -1,6 +1,6 @@
 import io
 
-from numpy import squeeze, dsplit, dstack, asarray
+from numpy import asarray, dstack
 from scipy.ndimage import map_coordinates
 from PIL import Image, ImageOps
 import cv2
@@ -91,8 +91,7 @@ def get_rgb_channels_from_array_image(array_img):
     :param array_img: image array
     :return: reordered image array
     """
-    # split image in the 3 RGB channels
-    return squeeze(dsplit(array_img, 3))
+    return array_img.transpose([2, 0, 1])
 
 
 def get_raw_panorama_as_rgb_array(panorama_path):
