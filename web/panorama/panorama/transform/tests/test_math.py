@@ -79,20 +79,20 @@ def test_cartesian2cylindrical():
     assert_allclose(result, [6000, 3000], atol=1e-15)
 
 
-def test_get_rotation_matrix():
-    result = Math.get_rotation_matrix(0, 0, 0)
+def test_rotation_matrix():
+    result = Math.rotation_matrix(0, 0, 0)
     assert_array_equal(result, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
-    result = Math.get_rotation_matrix(90, 0, 0)
+    result = Math.rotation_matrix(90, 0, 0)
     assert_allclose(result, [[0, 1, 0], [-1, 0, 0], [0, 0, 1]], atol=1e-15)
 
-    result = Math.get_rotation_matrix(-90, 0, 0)
+    result = Math.rotation_matrix(-90, 0, 0)
     assert_allclose(result, [[0, -1, 0], [1, 0, 0], [0, 0, 1]], atol=1e-15)
 
-    result = Math.get_rotation_matrix(0, 90, 0)
+    result = Math.rotation_matrix(0, 90, 0)
     assert_allclose(result, [[0, 0, 1], [0, 1, 0], [-1, 0, 0]], atol=1e-15)
 
-    result = Math.get_rotation_matrix(0, 45, 45)
+    result = Math.rotation_matrix(0, 45, 45)
     assert_allclose(
         result,
         [

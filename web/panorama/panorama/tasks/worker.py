@@ -174,7 +174,7 @@ class PanoRenderer(_PanoProcessor):
         log.info('START RENDERING panorama: {} in equirectangular projection.'.format(panorama_path))
 
         equi_t = EquirectangularTransformer(panorama_path, panorama.heading, panorama.pitch, panorama.roll)
-        projection = equi_t.get_projection(target_width=8000)
+        projection = equi_t.project(target_width=8000)
 
         intermediate_path = 'intermediate/{}'.format(panorama_path)
         log.info("saving intermediate: {}".format(intermediate_path))

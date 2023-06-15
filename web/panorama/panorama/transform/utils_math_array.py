@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 
-def get_rotation_matrix(yaw, pitch, roll):
+def rotation_matrix(yaw, pitch, roll):
     r = Rotation.from_euler("zyx", [-yaw, pitch, roll], degrees=True)
     return r.as_matrix()
 

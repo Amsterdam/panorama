@@ -36,7 +36,7 @@ class TestTransformImgEquirectangular(TestTransformer):
                                                           img.heading, img.pitch, img.roll)
             output_path = "/app/test_output/"+img.filename[:-4]
 
-            img1 = image_tranformer.get_projection(target_width=8000)
+            img1 = image_tranformer.project(target_width=8000)
             transformed = Image.fromarray(img1)
             transformed.save(output_path+"_8000.jpg", optimize=True, progressive=True)
             half_size = transformed.resize((4000, 2000), Image.ANTIALIAS)

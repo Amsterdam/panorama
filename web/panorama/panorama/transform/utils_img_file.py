@@ -41,13 +41,9 @@ def image2byte_array_sized(image: Image, size=1000000):
     raise Exception('Could not create small enough image')
 
 
-def byte_array2image(byte_array):
-    """
-    Translate byte array to PIL image
-    :param byte_array:
-    :return: PIL image
-    """
-    return Image.open(io.BytesIO(byte_array))
+def _image_from_bytes(b):
+    """Open b as a Pillow image."""
+    return Image.open(io.BytesIO(b))
 
 
 def get_raw_panorama_image(panorama_path):
@@ -63,7 +59,7 @@ def get_raw_panorama_image(panorama_path):
     name = panorama_path.replace(container + '/', '')
     objectstore_id = {'container': container, 'name': name}
 
-    return byte_array2image(object_store.get_panorama_store_object(objectstore_id))
+    return _image_from_bytes(object_store.get_panorama_store_object(objectstore_id))
 
 
 def get_intermediate_panorama_image(panorama_path):
@@ -75,7 +71,7 @@ def get_intermediate_panorama_image(panorama_path):
     """
 
     objectstore_id = {'container': 'intermediate', 'name': panorama_path}
-    return byte_array2image(object_store.get_panorama_store_object(objectstore_id))
+    return _image_from_bytes(object_store.get_panorama_store_object(objectstore_id))
 
 
 def get_panorama_image(panorama_path):
@@ -85,7 +81,7 @@ def get_panorama_image(panorama_path):
     :param panorama_path: path of the image
     :return: PIL image
     """
-    return byte_array2image(object_store.get_datapunt_store_object(panorama_path))
+    return _image_from_bytes(object_store.get_datapunt_store_object(panorama_path))
 
 
 def get_rgb_channels_from_array_image(array_img):
