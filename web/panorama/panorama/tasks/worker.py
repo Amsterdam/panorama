@@ -7,6 +7,7 @@ from datasets.panoramas.models import Panoramas, Region
 from panorama.regions import blur, faces, license_plates
 from panorama.tasks.detection import save_regions, region_writer
 from panorama.tasks.utilities import reset_abandoned_work, call_for_close
+from panorama.transform import utils_img_file as Img
 from panorama.transform import utils_img_file_set as ImgSet
 from panorama.transform.utils_img_file import save_array_image
 from panorama.transform.equirectangular import EquirectangularTransformer
@@ -117,20 +118,17 @@ class RegionBlurrer(_PanoProcessor):
     status_done = Panoramas.STATUS.done
 
     def process_one(self, panorama: Panoramas):
-        region_blurrer = blur.RegionBlurrer(panorama.get_intermediate_url())
-        regions = []
-        for region in Region.objects.filter(pano_id=panorama.pano_id).all():
-            regions.append(blur.dict_from(region))
+        im = Img.get_intermediate_panorama_image(panorama.get_intermediate_url())
+        regions = [
+            blur.dict_from(region)
+            for region in Region.objects.filter(pano_id=panorama.pano_id).all()
+        ]
 
         if len(regions) > 0:
-            ImgSet.save_image_set(
-                panorama.get_intermediate_url(),
-                region_blurrer.get_blurred_image(regions),
-            )
+            im = blur.blur(im, regions)
+            ImgSet.save_image_set(panorama.get_intermediate_url(), im)
         else:
-            ImgSet.save_image_set(
-                panorama.get_intermediate_url(), region_blurrer.get_unblurred_image()
-            )
+            ImgSet.save_image_set(panorama.get_intermediate_url(), im)
 
 
 class AllRegionDetector(_PanoProcessor):

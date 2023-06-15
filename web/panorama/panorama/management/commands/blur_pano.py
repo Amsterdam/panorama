@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from datasets.panoramas.models import Region
 from datasets.panoramas.models import Panoramas
-from panorama.regions.blur import dict_from, RegionBlurrer
+from panorama.regions.blur import blur, dict_from
+from panorama.transform import utils_img_file as Img
 from panorama.transform import utils_img_file_set as ImgSet
 
 
@@ -9,25 +10,24 @@ class Command(BaseCommand):
     help = "Blur pano (do provide pano_id): ./manage.py blur_pano --pano_id TMX7316060226-000030_pano_0008_000650"
 
     def add_arguments(self, parser):
-        parser.add_argument('--pano_id', required=True)
+        parser.add_argument("--pano_id", required=True)
 
     def handle(self, *args, **options):
-        if 'pano_id' not in options:
+        if "pano_id" not in options:
             self.stderr.write("argument --pano_id is verplicht")
             self.stdout.write(self.help)
             return
 
-        pano_id = options['pano_id']
+        pano_id = options["pano_id"]
         pano = Panoramas.objects.filter(pano_id=pano_id).all()[0]
 
         if pano:
-            pano_path = pano.path+pano.filename
+            pano_path = pano.path + pano.filename
+            im = Img.get_intermediate_panorama_image(pano_path)
 
-            regions = []
-            for region in Region.objects.filter(pano_id=pano_id).all():
-                regions.append(dict_from(region))
+            regions = [
+                dict_from(region)
+                for region in Region.objects.filter(pano_id=pano_id).all()
+            ]
 
-            region_blurrer = RegionBlurrer(pano_path)
-            blurred_image = region_blurrer.get_blurred_image(regions)
-
-            ImgSet.save_image_set(pano_path, blurred_image)
+            ImgSet.save_image_set(pano_path, blur(im, regions))

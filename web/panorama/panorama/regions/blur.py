@@ -3,12 +3,9 @@ import logging
 import cv2
 import numpy as np
 
-from panorama.object_store import ObjectStore
-from panorama.transform import utils_img_file as Img
 from panorama.regions.util import get_rectangle, do_split_regions
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
 
 
 def dict_from(region):
@@ -24,35 +21,16 @@ def dict_from(region):
     }
 
 
-class RegionBlurrer(object):
-    """
-    Class to blur the regions of a panorama image
-    """
-    def __init__(self, panorama_path: str):
-        """
-        :param panorama_path: path of type
-                              "2016/08/18/TMX7316010203-000079/pano_0006_000054.jpg"
-        """
-        self.panorama_path = panorama_path
-        self.panorama_img = Img.get_intermediate_panorama_image(self.panorama_path)
+def blur(im, regions):
+    """Blur regions in the Image im. Acts in-place and returns im."""
+    blurred_image = np.asarray(im)
 
-    def get_blurred_image(self, regions):
-        """
-        Get the blurred image of a panoramas
-        :param regions: Regions to blur
-        :return: PIL image of the panorama with blurred regions
-        """
-        blurred_image = np.asarray(self.panorama_img)
+    # blur regions
+    for region in do_split_regions(regions):
+        (top, left), (bottom, right) = get_rectangle(region)
+        snippet = blurred_image[top:bottom, left:right]
+        blur_kernel_size = 2*int((bottom-top)/4)+1
+        snippet = cv2.GaussianBlur(snippet, (blur_kernel_size, blur_kernel_size), blur_kernel_size)
+        blurred_image[top:bottom, left:right] = snippet
 
-        # blur regions
-        for region in do_split_regions(regions):
-            (top, left), (bottom, right) = get_rectangle(region)
-            snippet = blurred_image[top:bottom, left:right]
-            blur_kernel_size = 2*int((bottom-top)/4)+1
-            snippet = cv2.GaussianBlur(snippet, (blur_kernel_size, blur_kernel_size), blur_kernel_size)
-            blurred_image[top:bottom, left:right] = snippet
-
-        return blurred_image
-
-    def get_unblurred_image(self):
-        return np.asarray(self.panorama_img)
+    return blurred_image
