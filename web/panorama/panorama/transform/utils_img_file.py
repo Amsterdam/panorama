@@ -106,18 +106,15 @@ def get_raw_panorama_as_rgb_array(panorama_path):
     return get_rgb_channels_from_array_image(panorama_array_image)
 
 
-def sample_rgb_array_image_as_array(coordinates, rgb_array):
+def sample_rgb_array_image_as_array(x, y, rgb_array):
     """
     Resampling of the source image
 
-    :param coordinates: meshgrid of numpy arrays where eacht target coordinate is mapped to a coordinateset
+    :param x, y: meshgrid of numpy arrays where each target coordinate is mapped to a coordinate set
     of the source
     :param rgb_array: the source image as a scipy rgb array representation
     :return: the sampled target image as a scipy rgb array representation
     """
-    x = coordinates[0]
-    y = coordinates[1]
-
     # resample each channel of the source image
     #   (this needs to be done 'per channel' because otherwise the map_coordinates method
     #    works on the wrong dimension: in rgb_array_images from scipy.misc.fromimage the

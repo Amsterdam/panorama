@@ -21,7 +21,7 @@ class EquirectangularTransformer(BasePanoramaTransformer):
         x3, y3 = Math.cartesian2cylindrical((x2, y2, z2), source_width=SOURCE_WIDTH, source_height=PANO_HEIGHT)
 
         # sample source image with output meshgrid
-        return Img.sample_rgb_array_image_as_array((x3, y3), self.pano_rgb)
+        return Img.sample_rgb_array_image_as_array(x3, y3, self.pano_rgb)
 
 
 def _create_sample_set(target_width):

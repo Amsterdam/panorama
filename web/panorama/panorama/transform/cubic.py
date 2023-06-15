@@ -32,7 +32,7 @@ class CubicTransformer(BasePanoramaTransformer):
                                                 r_is_1=False)
 
             # sample source image with output meshgrid
-            cube_projections[direction] = Img.sample_rgb_array_image_as_array((x2, y2), self.pano_rgb)
+            cube_projections[direction] = Img.sample_rgb_array_image_as_array(x2, y2, self.pano_rgb)
 
         return cube_projections
 
@@ -43,7 +43,7 @@ class CubicTransformer(BasePanoramaTransformer):
                                                 source_width=SOURCE_WIDTH,
                                                 source_height=PANO_HEIGHT,
                                                 r_is_1=False)
-            cube_projections[direction] = Img.sample_rgb_array_image_as_array((x2, y2), self.pano_rgb)
+            cube_projections[direction] = Img.sample_rgb_array_image_as_array(x2, y2, self.pano_rgb)
         return cube_projections
 
 
