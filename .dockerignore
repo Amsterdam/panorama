@@ -6,3 +6,4 @@ Dockerfile
 .idea
 *.iml
 passwords.env
+__pycache__
