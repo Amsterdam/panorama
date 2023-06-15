@@ -1,6 +1,7 @@
 import io
 
-from numpy import asarray, dstack
+from numpy import asarray
+import numpy as np
 from scipy.ndimage import map_coordinates
 from PIL import Image, ImageOps
 import cv2
@@ -115,20 +116,16 @@ def sample_rgb_array_image_as_array(x, y, rgb_array):
     :param rgb_array: the source image as a scipy rgb array representation
     :return: the sampled target image as a scipy rgb array representation
     """
-    # resample each channel of the source image
-    #   (this needs to be done 'per channel' because otherwise the map_coordinates method
-    #    works on the wrong dimension: in rgb_array_images from scipy.misc.fromimage the
-    #    first dimension is the channel (r, g and b), and 2nd and 3rd dimensions are y and x,
-    #    but map_coordinates expects the the coordinates to map to to be 1st and 2nd, therefore
-    #    we extract each channel, so that y and x become 1st and 2nd array), after resampling
-    #    we stack the three channels on top of each other, to restore the rgb image array
+    # Resample each channel of the source image.
+    # This needs to be done per channel, but we can allocate the output array
+    # up front.
 
-    r = map_coordinates(rgb_array[0], [y, x], order=1)
-    g = map_coordinates(rgb_array[1], [y, x], order=1)
-    b = map_coordinates(rgb_array[2], [y, x], order=1)
+    out = np.empty(x.shape + (3,))
+    map_coordinates(rgb_array[0], [y, x], order=1, output=out[:, :, 0])
+    map_coordinates(rgb_array[1], [y, x], order=1, output=out[:, :, 1])
+    map_coordinates(rgb_array[2], [y, x], order=1, output=out[:, :, 2])
 
-    # merge channels
-    return dstack((r, g, b))
+    return out
 
 
 def save_image(image, name, in_panorama_store=False):
