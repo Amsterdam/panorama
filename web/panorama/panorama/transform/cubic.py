@@ -2,7 +2,7 @@ from numpy import arange, meshgrid
 
 from . import utils_img_file as Img
 from . import utils_math_array as Math
-from . transformer import SOURCE_WIDTH, PANO_HEIGHT, BasePanoramaTransformer
+from . transformer import SOURCE_WIDTH, PANO_HEIGHT
 
 
 CUBE_FRONT, CUBE_BACK, CUBE_LEFT, CUBE_RIGHT, CUBE_UP, CUBE_DOWN = 'f', 'b', 'l', 'r', 'u', 'd'
@@ -12,39 +12,33 @@ CUBE_SIDES = [CUBE_BACK, CUBE_DOWN, CUBE_FRONT, CUBE_LEFT, CUBE_RIGHT, CUBE_UP]
 MAX_CUBIC_WIDTH = 2048  # width of cubic edges
 
 
-class CubicTransformer(BasePanoramaTransformer):
+def project_cubic(im, rot=None, target_width=MAX_CUBIC_WIDTH):
+    """Returns cubic projections of an image, optionally rotating it.
 
-    def project(self, target_width=MAX_CUBIC_WIDTH):
-        cube_projections = {}
+    :return: dictionary mapping CUBE_SIDES to NumPy arrays.
+    """
+    return {
+        side: _project_side(side, im, rot, target_width)
+        for side in CUBE_SIDES
+    }
 
-        # project to sides
-        for direction in CUBE_SIDES:
-            # get target pixel set of cube side (cartesian, where r =/= 1, but depends on cube form)
-            x, y, z = _get_cube_side(direction, target_width)
 
-            # rotate vectors according to rotation-matrix for pitch and roll
-            x1, y1, z1 = Math.rotate_cartesian_vectors((x, y, z), self.rotation_matrix)
+def _project_side(side, im, rot, width):
+    # get target pixel set of cube side (cartesian, where r =/= 1, but depends on cube form)
+    x, y, z = _get_cube_side(side, width)
 
-            # transform cartesion vectors back to image coordinates in a equirectangular projection
-            x2, y2 = Math.cartesian2cylindrical((x1, y1, z1),
-                                                source_width=SOURCE_WIDTH,
-                                                source_height=PANO_HEIGHT,
-                                                r_is_1=False)
+    # rotate vectors according to rotation-matrix for pitch and roll
+    if rot is not None:
+        x, y, z = Math.rotate_cartesian_vectors((x, y, z), rot)
 
-            # sample source image with output meshgrid
-            cube_projections[direction] = Img.sample_rgb_array_image_as_array(x2, y2, self.pano_rgb)
+    # transform cartesion vectors back to image coordinates in a equirectangular projection
+    x, y = Math.cartesian2cylindrical((x, y, z),
+                                      source_width=SOURCE_WIDTH,
+                                      source_height=PANO_HEIGHT,
+                                      r_is_1=False)
 
-        return cube_projections
-
-    def get_normalized_projection(self, target_width=MAX_CUBIC_WIDTH):
-        cube_projections = {}
-        for direction in CUBE_SIDES:
-            x2, y2 = Math.cartesian2cylindrical(_get_cube_side(direction, target_width),
-                                                source_width=SOURCE_WIDTH,
-                                                source_height=PANO_HEIGHT,
-                                                r_is_1=False)
-            cube_projections[direction] = Img.sample_rgb_array_image_as_array(x2, y2, self.pano_rgb)
-        return cube_projections
+    # sample source image with output meshgrid
+    return Img.sample_rgb_array_image_as_array(x, y, im)
 
 
 def _get_cube_side(side, width):

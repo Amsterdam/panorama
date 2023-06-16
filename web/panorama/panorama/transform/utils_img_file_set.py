@@ -2,7 +2,7 @@ from math import log
 
 from PIL import Image
 
-from panorama.transform.cubic import CubicTransformer
+from panorama.transform.cubic import project_cubic
 from panorama.transform import utils_img_file as Img
 from panorama.transform import utils_math_cubic as Cube
 
@@ -32,8 +32,8 @@ def save_image_set(panorama_path, array_image):
 
     # save cubic set
     cubic_dir = base_panorama_dir + '/cubic'
-    cubic_t = CubicTransformer(None, 0, 0, 0, pano_rgb=Img.get_rgb_channels_from_array_image(array_image))
-    projections = cubic_t.get_normalized_projection(target_width=MAX_WIDTH)
+    im = Img.get_rgb_channels_from_array_image(array_image)
+    projections = project_cubic(im, target_width=MAX_WIDTH)
     save_as_cubic_file_set(cubic_dir, projections)
 
 

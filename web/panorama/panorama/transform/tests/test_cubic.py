@@ -1,40 +1,21 @@
-import os
 import logging
-from unittest import mock, skipIf
+import os
+import os.path
 
 import numpy as np
 from PIL import Image
 
-from panorama.transform.cubic import CubicTransformer
-from . test_transformer import TestTransformer
+from panorama.transform.cubic import project_cubic
 from . test_img_file import mock_get_raw_pano
 
-log = logging.getLogger(__name__)
 
-MAX_WIDTH = 2048
+def test_cubic_no_rotation():
+    here = os.path.dirname(__file__)
+    datadir = here + "/../../../panoramas_test/2016/04/19/TMX7315120208-000033"
+    filename = datadir + "/pano_0000_006658.jpg"
+    im = Image.open(filename)
 
-
-@skipIf(not os.path.exists('/app/panoramas_test'),
-        'Render test skipped: no mounted directory found, run in docker container')
-class TestTransformImgCubic(TestTransformer):
-    """
-    This is more like an integration test than a unit test
-    Because it expects a mounted /app/panoramas_test folder, run these in the Docker container
-
-        docker exec -it panorama_web_1 ./manage.py test panorama.transform.tests.test_cubic
-
-    look into the .gitignore-ed directory PROJECT/panoramas_test/output for a visual check on the transformations
-    """
-    @mock.patch('panorama.transform.utils_img_file.get_raw_panorama_as_rgb_array',
-                side_effect=mock_get_raw_pano)
-    def test_transform_cubic_runs_without_errors(self, _):
-        for img in self.images:
-            image_tranformer = CubicTransformer(img.path + img.filename, img.heading, img.pitch, img.roll)
-            image_tranformer.project(target_width=MAX_WIDTH)
-
-
-def test_cubic_random():
-    r = np.random.randint(0, 256, (4000, 8000, 3), dtype=np.uint8)
-    im = Image.fromarray(r, mode="RGB")
-    t = CubicTransformer(pano_rgb=r)
-    t.project()
+    p = project_cubic(np.asarray(im).transpose([2, 0, 1]), target_width=1024)
+    for side, im in p.items():
+        expect = np.asarray(Image.open(f"{os.path.splitext(filename)[0]}_{side}.jpg"))
+        assert np.linalg.norm(im.ravel() - expect.ravel()) / im.size < .005
