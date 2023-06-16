@@ -18,8 +18,8 @@ def dict_from(region):
 
 
 def blur(im, regions):
-    """Blur regions in the Image im. Acts in-place and returns im."""
-    blurred_image = np.asarray(im)
+    """Blur regions in the Image im."""
+    blurred_image = np.array(im)
 
     # blur regions
     for region in _split_regions(regions):

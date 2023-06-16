@@ -1,11 +1,15 @@
 # Python
 import logging
 import os
+import os.path
 from random import randint
 from unittest import TestCase, skipIf
 
 import cv2
+import numpy as np
 from numpy import array
+from numpy.testing import assert_allclose
+from PIL import Image
 
 from . import test_util
 from .. import blur
@@ -78,6 +82,30 @@ class TestBlur(TestCase):
         image = rb.get_blurred_image([test_util.get_wrap_around_region()])
         image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
         cv2.imwrite("/app/test_output/blur_test_{}.jpg".format("wrap_around"), image)
+
+
+def test_blur():
+    here = os.path.dirname(__file__)
+    im = Image.open(os.path.join(here, "ppmsca_72874.png"))
+    expect = Image.open(os.path.join(here, "ppmsca_72874_blurred.png"))
+
+    blurred = blur.blur(
+        im,
+        [
+            {
+                # XXX This encoding is highly redundant.
+                "left_top_x": 520,
+                "left_bottom_x": 520,
+                "left_top_y": 290,
+                "right_top_y": 290,
+                "left_bottom_y": 452,
+                "right_bottom_y": 452,
+                "right_top_x": 644,
+                "right_bottom_x": 644,
+            }
+        ],
+    )
+    assert_allclose(np.asarray(blurred), np.asarray(expect))
 
 
 def test_make_rectangle():
