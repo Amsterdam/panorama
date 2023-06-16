@@ -78,29 +78,3 @@ def wrap_around(regions, width=WIDTH):
             split_regions.extend([points_left, points_right])
 
     return split_regions
-
-
-def do_split_regions(region_dicts):
-    split_regions = []
-    for region_dict in region_dicts:
-        for split_region in wrap_around([((region_dict['left_top_x'], region_dict['left_top_y']),
-                                          (region_dict['right_top_x'], region_dict['right_top_y']),
-                                          (region_dict['right_bottom_x'], region_dict['right_bottom_y']),
-                                          (region_dict['left_bottom_x'], region_dict['left_bottom_y']), '')]):
-            split_regions.append(split_region)
-
-    return split_regions
-
-
-def get_rectangle(points):
-    """
-    Returns the smallest axis-oriented rectangle that contains all the (x, y) points.
-    """
-    top = min(p[Y] for p in points)
-    left = min(p[X] for p in points)
-    bottom = max(p[Y] for p in points)
-    right = max(p[X] for p in points)
-
-    return (top, left), (bottom, right)
-
-
