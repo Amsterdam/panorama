@@ -24,6 +24,10 @@ def cylindrical2cartesian(coordinates, source_width, source_height):
 
 
 def cartesian_from_cylindrical(x, y):
+    """Convert cylindrical to cartesian coordinates.
+
+    Arguments are two aranges of coordinates along the x and y axes.
+    """
     mid = len(x) / 2
 
     phi = (x - mid) * (np.pi / mid)
