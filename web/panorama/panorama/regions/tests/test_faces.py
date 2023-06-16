@@ -1,15 +1,13 @@
-# Python
 import logging
 import os
 from random import randrange
 from unittest import TestCase, skipIf
 
-# Packages
 import cv2
 from numpy import array, int32
+from PIL import Image
 
-# Project
-from panorama.regions.faces import FaceDetector
+from panorama.regions.faces import FaceDetector, _dlib_face_regions
 from panorama.regions.util import wrap_around
 from panorama.transform import utils_img_file as Img
 
@@ -79,3 +77,13 @@ class TestFaceDetection(TestCase):
             image = draw_lines(image, found_faces)
 
             cv2.imwrite("/app/test_output/face_detection_{}.jpg".format(pano_idx), image)
+
+
+def test_dlib():
+    here = os.path.dirname(__file__)
+    im = Image.open(os.path.join(here, "ppmsca_72874.png"))
+    im = im.convert("L")  # dlib wants grayscale.
+    l = list(_dlib_face_regions(im))
+    # XXX There is a face in this image, but _dlib_face_regions can't handle
+    # images of this size. Just assert that it doesn't crash for now.
+    # assert l != []

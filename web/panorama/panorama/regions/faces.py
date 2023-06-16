@@ -138,24 +138,7 @@ class FaceDetector(object):
         :return: list of Regions
         """
         self._assert_image_loaded()
-
-        face_regions = []
-        detector = dlib.get_frontal_face_detector()
-
-        for zoom in DLIB_ZOOM:
-            strip = self.panorama_img.crop((0, 1975, PANORAMA_WIDTH, 2600))
-            zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * 625))
-            zoomed = strip.resize(zoomed_size, Image.BICUBIC)
-
-            detected_faces, _, _ = detector.run(np.asarray(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD)
-            regions = []
-            for d in detected_faces:
-                regions.append((d.left(), d.top(), d.right() - d.left(), d.bottom() - d.top()))
-
-            derived = derive(regions, 0, 1975, zoom, 'dlib', DLIB_UPSCALE, '>{}'.format(DLIB_THRESHOLD))
-            face_regions.extend(derived)
-
-        return face_regions
+        return list(_dlib_face_regions())
 
     def get_vision_api_face_regions(self):
         """
@@ -189,3 +172,24 @@ class FaceDetector(object):
             face_regions.extend(derived)
 
         return face_regions
+
+
+def _dlib_face_regions(im):
+    """Detect face regions with DLIB. Returns a generator of Regions."""
+    detector = dlib.get_frontal_face_detector()
+
+    for zoom in DLIB_ZOOM:
+        strip = im.crop((0, 1975, PANORAMA_WIDTH, 2600))
+        zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * 625))
+        zoomed = strip.resize(zoomed_size, Image.BICUBIC)
+
+        detected_faces, _, _ = detector.run(
+            np.asarray(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD
+        )
+        regions = (
+            (d.left(), d.top(), d.right() - d.left(), d.bottom() - d.top())
+            for d in detected_faces
+        )
+        yield from derive(
+            regions, 0, 1975, zoom, "dlib", DLIB_UPSCALE, ">{}".format(DLIB_THRESHOLD)
+        )
