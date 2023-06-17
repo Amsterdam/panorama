@@ -7,10 +7,10 @@ from datasets.panoramas.models import Panoramas, Region
 from panorama.regions import blur, faces, license_plates
 from panorama.tasks.detection import save_regions, region_writer
 from panorama.tasks.utilities import reset_abandoned_work, call_for_close
+from panorama.transform import equirectangular
 from panorama.transform import utils_img_file as Img
 from panorama.transform import utils_img_file_set as ImgSet
 from panorama.transform.utils_img_file import save_array_image
-from panorama.transform.equirectangular import EquirectangularTransformer
 
 
 log = logging.getLogger(__name__)
@@ -177,20 +177,19 @@ class PanoRenderer(_PanoProcessor):
     status_in_progress = Panoramas.STATUS.rendering
     status_done = Panoramas.STATUS.rendered
 
-    def process_one(self, panorama: Panoramas):
-        panorama_path = panorama.path + panorama.filename
+    def process_one(self, pano: Panoramas):
+        panorama_path = pano.path + pano.filename
         log.info(
             "START RENDERING panorama: {} in equirectangular projection.".format(
                 panorama_path
             )
         )
 
-        equi_t = EquirectangularTransformer(
-            panorama_path, panorama.heading, panorama.pitch, panorama.roll
-        )
-        projection = equi_t.project(target_width=8000)
+        im = Img.get_raw_panorama_as_rgb_array(panorama_path)
+        im = equirectangular.rotate(im, pano.heading, pano.pitch, pano.roll,
+                target_width=8000)
 
         intermediate_path = "intermediate/{}".format(panorama_path)
         log.info("saving intermediate: {}".format(intermediate_path))
 
-        save_array_image(projection, intermediate_path, in_panorama_store=True)
+        save_array_image(im, intermediate_path, in_panorama_store=True)

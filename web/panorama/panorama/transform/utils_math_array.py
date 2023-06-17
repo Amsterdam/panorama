@@ -80,7 +80,4 @@ def cartesian2cylindrical(vector, source_width, source_height, r_is_1=True):
     elif y1.shape[1] == 1:
         y1 = as_strided(y1, (y1.shape[0], y1.shape[0]), (y1.strides[0], 0))
 
-    assert x1.shape[0] == x1.shape[1]
-    assert y1.shape[0] == y1.shape[1]
-
     return x1, y1
