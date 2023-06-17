@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.lib.stride_tricks import as_strided
 from scipy.spatial.transform import Rotation
 
 
@@ -41,20 +42,15 @@ def cartesian_from_cylindrical(x, y):
     return x1, y1, z1
 
 
-def rotate_cartesian_vectors(vector, matrix):
-    # TODO rewrite as numpy.dot.
-    x = vector[0]
-    y = vector[1]
-    z = vector[2]
-
-    m = matrix
+def rotate_cartesian_vectors(vectors, r):
+    x, y, z = vectors
 
     # perform matrix multiplication
-    x1 = m[0][0] * x + m[0][1] * y + m[0][2] * z
-    y1 = m[1][0] * x + m[1][1] * y + m[1][2] * z
-    z1 = m[2][0] * x + m[2][1] * y + m[2][2] * z
+    xr = r[0][0] * x + r[0][1] * y + r[0][2] * z
+    yr = r[1][0] * x + r[1][1] * y + r[1][2] * z
+    zr = r[2][0] * x + r[2][1] * y + r[2][2] * z
 
-    return x1, y1, z1
+    return xr, yr, zr
 
 
 def cartesian2cylindrical(vector, source_width, source_height, r_is_1=True):
@@ -72,5 +68,19 @@ def cartesian2cylindrical(vector, source_width, source_height, r_is_1=True):
 
     x1 = np.mod((middle / np.pi) * (phi + np.pi), source_width - 1)
     y1 = theta * (source_height / np.pi)
+
+    # Correct shapes so x1 and y1 are both square and of the same size.
+    x1, y1 = np.atleast_2d(x1), np.atleast_2d(y1)
+    if x1.size == 1:
+        x1 = as_strided(x1, (y1.shape[1], y1.shape[1]), (0, 0))
+    elif x1.shape[0] == 1:
+        x1 = as_strided(x1, (x1.shape[1], x1.shape[1]), (0, x1.strides[1]))
+    if y1.size == 1:
+        y1 = as_strided(y1, (x1.shape[0], x1.shape[0]), (0, 0))
+    elif y1.shape[1] == 1:
+        y1 = as_strided(y1, (y1.shape[0], y1.shape[0]), (y1.strides[0], 0))
+
+    assert x1.shape[0] == x1.shape[1]
+    assert y1.shape[0] == y1.shape[1]
 
     return x1, y1

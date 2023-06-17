@@ -51,27 +51,27 @@ def _get_cube_side(side, width):
     if side == CUBE_FRONT:
         x = half_width
         y, z = meshgrid(arange(-half_width, half_width, 1),
-                        arange(half_width, -half_width, -1))
+                        arange(half_width, -half_width, -1), sparse=True)
     elif side == CUBE_BACK:
         x = -half_width
         y, z = meshgrid(arange(half_width, -half_width, -1),
-                        arange(half_width, -half_width, -1))
+                        arange(half_width, -half_width, -1), sparse=True)
     elif side == CUBE_LEFT:
         y = -half_width
         x, z = meshgrid(arange(-half_width, half_width, 1),
-                        arange(half_width, -half_width, -1))
+                        arange(half_width, -half_width, -1), sparse=True)
     elif side == CUBE_RIGHT:
         y = half_width
         x, z = meshgrid(arange(half_width, -half_width, -1),
-                        arange(half_width, -half_width, -1))
+                        arange(half_width, -half_width, -1), sparse=True)
     elif side == CUBE_UP:
         z = half_width
         y, x = meshgrid(arange(-half_width, half_width, 1),
-                        arange(-half_width, half_width, 1))
+                        arange(-half_width, half_width, 1), sparse=True)
     elif side == CUBE_DOWN:
         z = -half_width
         y, x = meshgrid(arange(-half_width, half_width, 1),
-                        arange(half_width, -half_width, -1))
+                        arange(half_width, -half_width, -1), sparse=True)
     else:
         raise ValueError("invalid side")
 

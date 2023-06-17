@@ -54,39 +54,51 @@ def test_cylindrical2cartesion():
 
 def test_cartesian2cylindrical():
     result = Math.cartesian2cylindrical((1, 0, 0), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [4000, 2000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((0, -1, 0), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [2000, 2000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((-1, 0, 0), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [1, 2000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((0, 1, 0), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [6000, 2000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((sqrt(1 / 2), 0, sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [4000, 1000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((sqrt(1 / 2), 0, -sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [4000, 3000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((0, -sqrt(1 / 2), sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [2000, 1000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((0, -sqrt(1 / 2), -sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [2000, 3000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((-sqrt(1 / 2), 0, sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [1, 1000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((-sqrt(1 / 2), 0, -sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [1, 3000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((0, sqrt(1 / 2), sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [6000, 1000], atol=1e-15)
 
     result = Math.cartesian2cylindrical((0, sqrt(1 / 2), -sqrt(1 / 2)), 8000, 4000)
+    result = [v.ravel()[0] for v in result]
     assert_allclose(result, [6000, 3000], atol=1e-15)
 
 
