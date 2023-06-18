@@ -158,7 +158,7 @@ def save_array_image(array_img, name, in_panorama_store=False):
     save_image(Image.fromarray(array_img), name, in_panorama_store)
 
 
-def roll_left(image, shift, width, height):
+def roll_left(image, shift):
     """
     Utility method to wrap an image around to the left
 
@@ -168,10 +168,9 @@ def roll_left(image, shift, width, height):
     :param height: height of the image
     :return: shifted PIL image
     """
+    width, height = image.size
     part1 = image.crop((0, 0, shift, height))
     part2 = image.crop((shift, 0, width, height))
-    part1.load()
-    part2.load()
     output = Image.new('RGB', (width, height))
     output.paste(part2, (0, 0, width-shift, height))
     output.paste(part1, (width-shift, 0, width, height))
@@ -190,8 +189,8 @@ def sample_image(image, x, y, sample_width=SAMPLE_WIDTH, sample_height=SAMPLE_HE
     :param sample_height: height of sample
     :return:
     """
-    if PANORAMA_WIDTH < x + sample_width:
-        intermediate = roll_left(image, sample_width, PANORAMA_WIDTH, PANORAMA_HEIGHT)
+    if image.width < x + sample_width:
+        intermediate = roll_left(image, sample_width)
         snippet = intermediate.crop((x - sample_width, y, x, y + sample_height))
     else:
         snippet = image.crop((x, y, x + sample_width, y + sample_height))
