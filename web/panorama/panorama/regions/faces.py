@@ -1,4 +1,5 @@
 import logging
+import os.path
 
 import cv2
 import dlib
@@ -21,24 +22,6 @@ SAMPLE_DISTANCE_X = 355
 SAMPLE_DISTANCE_Y = 200
 
 OPENCV_ZOOM = [1.41, 1.18, 1.09]
-
-NORMAL = 1
-FLIPPED = -1
-
-CASCADE_SETS = [
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml",
-     1.29, 7, NORMAL, 'default'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
-     1.22, 5, NORMAL, 'alt'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml",
-     1.22, 5, NORMAL, 'alt2'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-     1.11, 5, NORMAL, 'profile'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_profileface.xml",
-     1.11, 5, FLIPPED, 'profile_flip_correct'),
-    ("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml",
-     1.025, 2, NORMAL, 'alt_tree')
-]
 
 DLIB_ZOOM = [2, 1.83, 1.68, 1.54]
 DLIB_THRESHOLD = -0.05
@@ -89,48 +72,11 @@ class FaceDetector(object):
         :return: list of Regions
         """
         self._assert_image_loaded()
-        face_regions = []
-        for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_X):
-            for idx, y in enumerate(range(JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE, SAMPLE_DISTANCE_Y)):
-                zoom = OPENCV_ZOOM[idx]
-                snippet = Img.sample_image(self.panorama_img, x, y)
-                zoomed_snippet = Img.prepare_img(snippet, zoom)
-                for cascade_set in CASCADE_SETS:
-                    regions = self._detect_opencv_regions(zoomed_snippet, cascade_set)
-                    derived = derive(regions, x, y, zoom, cascade_set[-1], cascade_set[1], cascade_set[2])
-                    face_regions.extend(derived)
-
-        return face_regions
+        return list(from_opencv(self.panorama_img))
 
     def _assert_image_loaded(self):
         if self.panorama_img is None:
             self.panorama_img = Img.get_intermediate_panorama_image(self.panorama_path)
-
-    def _detect_opencv_regions(self, snippet, cascade_set):
-        regions = []
-
-        face_cascade = cv2.CascadeClassifier(cascade_set[0])
-        if cascade_set[3] is FLIPPED:
-            detect = cv2.flip(snippet, 1)
-        else:
-            detect = snippet
-
-        detected_faces = face_cascade.detectMultiScale(
-            detect, scaleFactor=cascade_set[1], minNeighbors=cascade_set[2], flags=cv2.CASCADE_DO_CANNY_PRUNING
-        )
-
-        if cascade_set[3] is FLIPPED:
-            for detected_face in detected_faces:
-                # comment: left_top_x = snippet_width - flipped_left_top_x - width_of_detected_face
-                detected_face[0] = detect.shape[1] - detected_face[0] - detected_face[2]
-
-        if len(detected_faces) > 0:
-            log.warning('Cascade {}-{} detected: {}.'.format(
-                cascade_set[1], cascade_set[0], detected_faces)
-            )
-            regions.extend(detected_faces)
-
-        return regions
 
     def get_dlib_face_regions(self):
         """
@@ -179,8 +125,8 @@ def _dlib_face_regions(im):
     detector = dlib.get_frontal_face_detector()
 
     for zoom in DLIB_ZOOM:
-        strip = im.crop((0, 1975, PANORAMA_WIDTH, 2600))
-        zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * 625))
+        strip = im.crop((0, 1975, im.width, 2600))
+        zoomed_size = (int(zoom * im.width), int(zoom * 625))
         zoomed = strip.resize(zoomed_size, Image.BICUBIC)
 
         detected_faces, _, _ = detector.run(
@@ -193,3 +139,68 @@ def _dlib_face_regions(im):
         yield from derive(
             regions, 0, 1975, zoom, "dlib", DLIB_UPSCALE, ">{}".format(DLIB_THRESHOLD)
         )
+
+
+_opencv_configs = [
+    ("haarcascade_frontalface_default.xml", 1.29, 7, False, "default"),
+    ("haarcascade_frontalface_alt.xml", 1.22, 5, False, "alt"),
+    ("haarcascade_frontalface_alt2.xml", 1.22, 5, False, "alt2"),
+    ("haarcascade_profileface.xml", 1.11, 5, False, "profile"),
+    ("haarcascade_profileface.xml", 1.11, 5, True, "profile_flip_correct"),
+    ("haarcascade_frontalface_alt_tree.xml", 1.025, 2, False, "alt_tree"),
+]
+
+__opencv_classifiers = None
+
+
+def _opencv_classifiers():
+    """Return our cached list of OpenCV Haar cascade classifiers."""
+    global __opencv_classifiers
+
+    if __opencv_classifiers is not None:
+        return __opencv_classifiers
+
+    __opencv_classifiers = [
+        (
+            cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, filename)),
+            scale,
+            min_neighb,
+            flip,
+            name,
+        )
+        for filename, scale, min_neighb, flip, name in _opencv_configs
+    ]
+    return __opencv_classifiers
+
+
+def from_opencv(im):
+    """Detect face regions with OpenCV.
+    :return: generator of Regions
+    """
+    for x in range(0, im.width, SAMPLE_DISTANCE_X):
+        for y, zoom in zip(range(JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE, SAMPLE_DISTANCE_Y), OPENCV_ZOOM):
+            snippet = Img.sample_image(im, x, y)
+            snippet = Img.prepare_img(snippet, zoom)
+            for classif, scale, min_neighb, flip, name in _opencv_classifiers():
+                regions = _opencv_faces(snippet, classif, scale, min_neighb, flip, name)
+                yield from derive(regions, x, y, zoom, name, scale, min_neighb)
+
+
+def _opencv_faces(snippet, classif, scale, min_neighb, flip, name):
+    if flip:
+        snippet = cv2.flip(snippet, 1)
+
+    faces = classif.detectMultiScale(
+        snippet, scaleFactor=scale, minNeighbors=min_neighb,
+        flags=cv2.CASCADE_DO_CANNY_PRUNING,
+    )
+
+    if flip:
+        for face in faces:
+            # left_top_x = snippet_width - flipped_left_top_x - width_of_face
+            face[0] = snippet.shape[1] - face[0] - face[2]
+
+    if len(faces) > 0:
+        log.warning('Cascade {}-{} detected: {}.'.format(scale, name, faces))
+
+    return faces
