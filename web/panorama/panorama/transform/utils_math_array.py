@@ -34,10 +34,12 @@ def cartesian_from_cylindrical(x, y):
     phi = (x - mid) * (np.pi / mid)
     theta = y * (np.pi / len(y))
 
-    sin_theta = np.sin(theta).reshape(-1, 1)
-    x1 = sin_theta * np.cos(phi).reshape(1, -1)
-    y1 = sin_theta * np.sin(phi).reshape(1, -1)
-    z1 = np.cos(theta).repeat(len(x)).reshape(len(y), len(x))
+    phi, theta = phi.reshape(1, -1), theta.reshape(-1, 1)
+
+    sin_theta = np.sin(theta)
+    x1 = sin_theta * np.cos(phi)
+    y1 = sin_theta * np.sin(phi)
+    z1 = np.cos(theta)
 
     return x1, y1, z1
 

@@ -11,7 +11,9 @@ def test_cartesian_from_cylindrical():
     x = np.arange(800)
     y = np.arange(200)
     expect = Math.cylindrical2cartesian(np.meshgrid(x, y), len(x), len(y))
-    assert_allclose(Math.cartesian_from_cylindrical(x, y), expect, atol=1e-15)
+    xc, yc, zc = Math.cartesian_from_cylindrical(x, y)
+    zc = np.repeat(zc, 800).reshape(200, 800)
+    assert_allclose((xc, yc, zc), expect, atol=1e-15)
 
 
 def test_cylindrical2cartesion():
