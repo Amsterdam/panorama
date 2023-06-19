@@ -1,50 +1,40 @@
-FROM python:3.11-slim
+FROM debian:bookworm-slim
 MAINTAINER datapunt@amsterdam.nl
 RUN apt-get update \
     && apt-get -y upgrade \
         && apt-get install -y \
                 build-essential \
-                gfortran \
-                git \
                 cmake \
                 gdal-bin \
+                git \
                 libatlas-base-dev \
-                libboost-python-dev \
                 libcurl3-dev \
                 libeigen3-dev \
                 libgeos-dev \
                 libjpeg62-turbo-dev \
                 libleptonica-dev \
                 liblog4cplus-dev \
+                libopencv-dev \
                 libtesseract-dev \
-                netcat \
-                pkg-config \
-                python3-dev
+                python3-dev \
+                python3-pip \
+                pkg-config
 
-# OpenALPR won't build against OpenCV 3.* or newer, so install the latest/last
-# OpenCV 2.x. https://github.com/openalpr/openalpr/issues/739
+# Install OpenALPR from source. We use our own fork to get a version
+# that will compile with OpenCV 4.x. Upstream supports that, but didn't
+# tag a release; see https://github.com/openalpr/openalpr/issues/915.
 WORKDIR /temp
 RUN git config --global advice.detachedHead false \
-    && git clone -b 2.4.13.6 --depth=1 https://github.com/opencv/opencv.git
-WORKDIR /temp/opencv/build
-RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
-    -D CMAKE_INSTALL_PREFIX=/usr \
-    -D CMAKE_INSTALL_SYSCONFDIR:PATH=/etc \
-    -D INSTALL_C_EXAMPLES=OFF \
-    -D INSTALL_PYTHON_EXAMPLES=OFF \
-    -D BUILD_EXAMPLES=OFF ..
-RUN make -j $(nproc) && make install
+    && git clone --depth=1 https://github.com/Amsterdam/openalpr.git
 
-# Install OpenALPR from source.
-WORKDIR /temp
-RUN git config --global advice.detachedHead false \
-    && git clone -b v2.3.0 --depth=1 https://github.com/openalpr/openalpr.git
+# Hack to make OpenALPR find Tesseract. Apparently, these files were removed
+# from Tesseract 5.x. OpenALPR doesn't actually need them to build.
+RUN touch /usr/include/tesseract/platform.h /usr/include/tesseract/thresholder.h
 
-WORKDIR /temp/openalpr/src/build
-RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_INSTALL_SYSCONFDIR:PATH=/etc ..
+WORKDIR /temp/openalpr/build
+RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_INSTALL_SYSCONFDIR:PATH=/etc ../src
 RUN make -j $(nproc)
 
-WORKDIR /temp/openalpr/src/build
 RUN make install
 
 WORKDIR /app
@@ -52,18 +42,17 @@ RUN mkdir openalpr
 RUN cp /temp/openalpr/src/bindings/python/openalpr/* /app/openalpr/
 RUN rm -rf /temp/openalpr
 
-RUN pip install --no-cache-dir dlib
+#RUN pip install --no-cache-dir dlib
 
 WORKDIR /app
 
 RUN adduser --system datapunt \
 	&& mkdir -p /static \
-	&& chown datapunt /static \
-	&& pip install uwsgi
+	&& chown datapunt /static
 
 WORKDIR /app
 COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --break-system-packages --no-cache-dir -r requirements.txt
 
 USER datapunt
 
@@ -73,6 +62,6 @@ COPY deploy /deploy/
 USER datapunt
 
 RUN export DJANGO_SETTINGS_MODULE=panorama.settings
-RUN python manage.py collectstatic --noinput
+RUN python3 manage.py collectstatic --noinput
 
 CMD uwsgi
