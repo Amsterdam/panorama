@@ -42,8 +42,6 @@ RUN mkdir openalpr
 RUN cp /temp/openalpr/src/bindings/python/openalpr/* /app/openalpr/
 RUN rm -rf /temp/openalpr
 
-#RUN pip install --no-cache-dir dlib
-
 WORKDIR /app
 
 RUN adduser --system datapunt \
