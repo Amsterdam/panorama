@@ -2,9 +2,8 @@ from math import log
 
 from PIL import Image
 
-from panorama.transform.cubic import project_cubic
+from panorama.transform import cubic
 from panorama.transform import utils_img_file as Img
-from panorama.transform import utils_math_cubic as Cube
 
 TILE_SIZE = 512
 PREVIEW_WIDTH = 256
@@ -33,7 +32,7 @@ def save_image_set(panorama_path, array_image):
     # save cubic set
     cubic_dir = base_panorama_dir + '/cubic'
     im = Img.get_rgb_channels_from_array_image(array_image)
-    projections = project_cubic(im, target_width=MAX_WIDTH)
+    projections = cubic.project(im, target_width=MAX_WIDTH)
     save_as_cubic_file_set(cubic_dir, projections)
 
 
@@ -62,7 +61,7 @@ def save_as_cubic_file_set(cubic_dir, projections, max_width=MAX_WIDTH):
                     Img.save_image(tile, "{}{}/{}.jpg".format(cubic_dir, tile_path, h_idx))
 
     preview_image = Image.new('RGB', (PREVIEW_WIDTH, 6 * PREVIEW_WIDTH))
-    for idx, side in enumerate(Cube.CUBE_SIDES):
+    for idx, side in enumerate(cubic.SIDES):
         preview_image.paste(previews[side], (0, PREVIEW_WIDTH*idx))
     Img.save_image(preview_image, cubic_dir+"/preview.jpg")
 

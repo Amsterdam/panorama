@@ -7,19 +7,19 @@ from . transformer import SOURCE_WIDTH, PANO_HEIGHT
 
 CUBE_FRONT, CUBE_BACK, CUBE_LEFT, CUBE_RIGHT, CUBE_UP, CUBE_DOWN = 'f', 'b', 'l', 'r', 'u', 'd'
 #   preserve order - the preview.jpg in utils_img_file_set depends on it:
-CUBE_SIDES = [CUBE_BACK, CUBE_DOWN, CUBE_FRONT, CUBE_LEFT, CUBE_RIGHT, CUBE_UP]
+SIDES = [CUBE_BACK, CUBE_DOWN, CUBE_FRONT, CUBE_LEFT, CUBE_RIGHT, CUBE_UP]
 
 MAX_CUBIC_WIDTH = 2048  # width of cubic edges
 
 
-def project_cubic(im, rot=None, target_width=MAX_CUBIC_WIDTH):
+def project(im, rot=None, target_width=MAX_CUBIC_WIDTH):
     """Returns cubic projections of an image, optionally rotating it.
 
-    :return: dictionary mapping CUBE_SIDES to NumPy arrays.
+    :return: dictionary mapping SIDES to NumPy arrays.
     """
     return {
         side: _project_side(side, im, rot, target_width)
-        for side in CUBE_SIDES
+        for side in SIDES
     }
 
 
