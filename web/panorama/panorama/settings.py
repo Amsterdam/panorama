@@ -19,7 +19,6 @@ PANO_IMAGE_URL = os.getenv('PANORAMA_IMAGE_URL', 'https://acc.panorama.data.amst
 INSTALLED_APPS += [
     'datasets.panoramas',
     'panorama',
-    'health',
 ]
 
 ROOT_URLCONF = 'panorama.urls'
