@@ -84,7 +84,7 @@ class FaceDetector(object):
         :return: list of Regions
         """
         self._assert_image_loaded()
-        return list(_dlib_face_regions())
+        return list(_dlib_face_regions(self.panorama_img))
 
     def get_vision_api_face_regions(self):
         """
