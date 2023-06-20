@@ -1,4 +1,3 @@
-# Python
 import logging
 import os
 import os.path
@@ -62,24 +61,24 @@ class TestBlur(TestCase):
             log.warning(
                 "blurring panorama {}: {}, please hold".format(pano_idx, panorama_path)
             )
-            rb = blur.RegionBlurrer(panorama_path)
-            image = rb.get_blurred_image(get_random_regions())
+            image = Img.get_intermediate_panorama_image(panorama_path)
+            image = blur.blur(image, get_random_regions())
             image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
             cv2.imwrite("/app/test_output/blur_test_{}.jpg".format(pano_idx), image)
 
     def test_blur_out_of_range(self):
         panorama_path = test_set[randint(0, len(test_set) - 1)]
         log.warning("blurring out of range: {}, please hold".format(panorama_path))
-        rb = blur.RegionBlurrer(panorama_path)
-        image = rb.get_blurred_image([test_util.get_out_of_range_region()])
+        image = Img.get_intermediate_panorama_image(panorama_path)
+        image = blur.blur(image, [test_util.get_out_of_range_region()])
         image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
         cv2.imwrite("/app/test_output/blur_test_{}.jpg".format("out_of_range"), image)
 
     def test_blur_wrap_around(self):
         panorama_path = test_set[randint(0, len(test_set) - 1)]
         log.warning("blurring wrap around: {}, please hold".format(panorama_path))
-        rb = blur.RegionBlurrer(panorama_path)
-        image = rb.get_blurred_image([test_util.get_wrap_around_region()])
+        image = Img.get_intermediate_panorama_image(panorama_path)
+        image = blur.blur(image, [test_util.get_wrap_around_region()])
         image = cv2.cvtColor(array(image), cv2.COLOR_RGB2BGR)
         cv2.imwrite("/app/test_output/blur_test_{}.jpg".format("wrap_around"), image)
 
