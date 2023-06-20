@@ -14,7 +14,7 @@ djangorestframework==3.11.2
 djangorestframework-csv==2.1.1
 djangorestframework-gis==1.0
 djangorestframework-xml==1.4.0
-dlib==19.24.2
+dlib-bin==19.24.2
 drf-hal-json==0.9.1
 drf-nested-fields==0.9.5
 factory-boy==2.11.1
