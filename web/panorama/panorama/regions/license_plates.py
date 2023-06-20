@@ -1,11 +1,14 @@
+import logging
 from math import tan, radians
 
-from PIL.Image import AFFINE, BICUBIC
+from PIL import Image
 
 from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
-from .openalpr import OpenAlpr
+import openalpr
+
+log = logging.getLogger(__name__)
 
 object_store = ObjectStore()
 
@@ -93,20 +96,19 @@ def parse(results, x, y, zoom, shear_angle, widen):
     return parsed
 
 
-def resize_sheared(sheared, size, widen, zoom):
+def _resize(im: Image.Image, size, widen, zoom):
     """
     Stretch and zoom a sheared image
 
-    :param sheared: PIL image to stretch
+    :param im: PIL image to stretch
     :param size: set of width and height of the image
     :param widen: the factor to widen the image
     :param zoom: the factor to zoom the image
     :return: PIL image that is resized.
     """
-    width = size[0] * zoom * widen
-    height = size[1] * zoom
-    resized = sheared.resize((int(width), int(height)), BICUBIC)
-    return resized
+    width = int(size[0] * zoom * widen)
+    height = int(size[1] * zoom)
+    return im.resize((width, height), Image.BICUBIC)
 
 
 class LicensePlateDetector(object):
@@ -125,23 +127,39 @@ class LicensePlateDetector(object):
         :return: array of sets for Region
         """
         self.panorama_img = Img.get_intermediate_panorama_image(self.panorama_path)
-        licenseplate_regions = []
-        alpr = OpenAlpr().alpr
-        for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_H):
-            for idx, y in enumerate(range(JUST_BELOW_HORIZON, PLATES_NEAR_BY, SAMPLE_DISTANCE_V)):
-                zoom = ZOOM1 if idx == 0 else ZOOM2
-                snippet = Img.sample_image(self.panorama_img, x, y)
-                zoomed_snippet = Img.prepare_img(snippet, zoom, for_cv=False)
-                results = alpr.recognize_array(Img.image2byte_array(zoomed_snippet))['results']
-                licenseplate_regions.extend(parse(results, x, y, zoom, 0, 1))
+        return list(from_openalpr(self.panorama_img))
 
-                zoom = ZOOM2 if idx == 0 else ZOOM3
-                for angle in ANGLE_RANGE:
-                    for direction in [1, -1]:
-                        widen, size, affine_matrix = calculate_shear_data(angle*direction)
-                        sheared = snippet.transform(size, AFFINE, affine_matrix, BICUBIC)
-                        resized = resize_sheared(sheared, size, widen, zoom)
-                        results = alpr.recognize_array(Img.image2byte_array(resized))['results']
-                        licenseplate_regions.extend(parse(results, x, y, zoom, angle*direction, widen))
 
-        return licenseplate_regions
+# Paths after installation of OpenALPR in the Docker image.
+OPENALPR_DATA = "/usr/share/openalpr/runtime_data"
+OPENALPR_CONF = "/etc/openalpr/openalpr.conf"
+LICENSEPLATE_REGION = "eu"
+
+
+
+def from_openalpr(im):
+    # Loading this takes only milliseconds after the first time,
+    # so don't bother caching it.
+    alpr = openalpr.Alpr(LICENSEPLATE_REGION, OPENALPR_CONF, OPENALPR_DATA)
+    if not alpr.is_loaded():
+        # OpenALPR doesn't raise, it just returns an invalid object.
+        msg = f"Error loading OpenALPR from {OPENALPR_CONF!r}, {OPENALPR_DATA!r}"
+        raise Exception(msg)
+    log.info("Using OpenALPR {}".format(alpr.get_version()))
+
+    for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_H):
+        for idx, y in enumerate(range(JUST_BELOW_HORIZON, PLATES_NEAR_BY, SAMPLE_DISTANCE_V)):
+            zoom = ZOOM1 if idx == 0 else ZOOM2
+            snippet = Img.sample_image(im, x, y)
+            zoomed_snippet = Img.prepare_img(snippet, zoom, for_cv=False)
+            results = alpr.recognize_array(Img.image2byte_array(zoomed_snippet))['results']
+            yield from parse(results, x, y, zoom, 0, 1)
+
+            zoom = ZOOM2 if idx == 0 else ZOOM3
+            for angle in ANGLE_RANGE:
+                for direction in [1, -1]:
+                    widen, size, affine_matrix = calculate_shear_data(angle*direction)
+                    sheared = snippet.transform(size, Image.AFFINE, affine_matrix, Image.BICUBIC)
+                    resized = _resize(sheared, size, widen, zoom)
+                    results = alpr.recognize_array(Img.image2byte_array(resized))['results']
+                    yield from parse(results, x, y, zoom, angle*direction, widen)
