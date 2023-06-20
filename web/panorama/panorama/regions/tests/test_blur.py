@@ -12,6 +12,7 @@ from PIL import Image
 
 from . import test_util
 from .. import blur
+from ...transform import utils_img_file as Img
 
 log = logging.getLogger(__name__)
 
