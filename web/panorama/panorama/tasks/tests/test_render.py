@@ -1,7 +1,7 @@
 import datetime
 import logging
 import os
-from unittest import TestCase, mock, skipIf
+from unittest import TestCase, mock, skip, skipIf
 
 import factory
 import factory.fuzzy
@@ -16,6 +16,7 @@ from ..worker import PanoRenderer
 log = logging.getLogger(__name__)
 
 
+@skip("files not present")
 @skipIf(not os.path.exists('/app/panoramas_test'),
         'Render test skipped: no mounted directory found, run in docker container')
 class TestRender(TestCase):

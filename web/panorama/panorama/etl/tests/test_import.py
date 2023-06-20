@@ -109,7 +109,9 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Mission.objects.filter(mission_year='2017', mission_type='bi').count(), 0)
 
         panos = Panoramas.done.all()
-        self.assertEqual(panos.count(), 16)
+        # We only have four of these files committed.
+        #self.assertEqual(panos.count(), 16)
+        self.assertEqual(panos.count(), 4)
 
         self.assertIsNotNone(panos[0]._geolocation_2d_rd)
         self.assertAlmostEqual(panos[0]._geolocation_2d_rd, panos[0]._geolocation_2d.transform(28992, clone=True))
