@@ -33,7 +33,7 @@ MarkupSafe==1.1.0
 msgpack==0.6.0
 netaddr==0.7.19
 netifaces==0.10.9
-numpy==1.24.3
+numpy==1.25.0
 opencv-python-headless==4.7.0.72
 os-service-types==1.4.0
 oslo.config==9.1.1
