@@ -22,4 +22,4 @@ services:
       PANORAMA_TENANT_ID:
       DATAPUNT_TENANT_ID:
     command: >
-      bash -c "python manage.py import_increments ${IMPORT_ARGS}"
+      bash -c "python3 manage.py import_increments ${IMPORT_ARGS}"

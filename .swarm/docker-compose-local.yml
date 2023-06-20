@@ -35,7 +35,7 @@ services:
         max_attempts: 1
       replicas: 1
     command: >
-      bash -c "sleep 60 && python manage.py migrate && python manage.py load_data"
+      bash -c "sleep 60 && python3 manage.py migrate && python3 manage.py load_data"
 
   worker:
     build:
