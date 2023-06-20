@@ -16,6 +16,7 @@ RUN apt-get update \
                 liblog4cplus-dev \
                 libopencv-dev \
                 libtesseract-dev \
+                netcat-openbsd \
                 python3-dev \
                 python3-pip \
                 pkg-config
