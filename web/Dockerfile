@@ -56,6 +56,7 @@ RUN pip install --break-system-packages --no-cache-dir -r requirements.txt
 USER datapunt
 
 COPY panorama /app/
+COPY deploy /deploy/
 
 USER datapunt
 
