@@ -19,7 +19,6 @@ services:
   dataloader:
     build:
       context: ../web
-      dockerfile: WorkerDockerfile
     image: master.swarm.data.amsterdam.nl:5000/v2/stackdataloader
     links:
       - database:database
@@ -46,7 +45,6 @@ services:
   worker:
     build:
       context: ../web
-      dockerfile: WorkerDockerfile
     image: master.swarm.data.amsterdam.nl:5000/v2/stackworker
     links:
       - database:database

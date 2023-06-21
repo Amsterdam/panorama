@@ -4,7 +4,6 @@ __pycache__
 reports
 *.iml
 *_dev_settings.py
-web/static/*
 .env
 .venv
 .jenkins/backups

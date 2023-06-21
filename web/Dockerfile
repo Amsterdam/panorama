@@ -56,11 +56,12 @@ RUN pip install --break-system-packages --no-cache-dir -r requirements.txt
 USER datapunt
 
 COPY panorama /app/
-COPY deploy /deploy/
 
 USER datapunt
 
-RUN export DJANGO_SETTINGS_MODULE=panorama.settings
-RUN python3 manage.py collectstatic --noinput
+ARG OBJECTSTORE_PASSWORD
+ENV OBJECTSTORE_PASSWORD=$OBJECTSTORE_PASSWORD
+ARG OBJECTSTORE_USER
+ENV OBJECTSTORE_USER=$OBJECTSTORE_USER
 
-CMD uwsgi
+CMD ["python3", "manage.py", "work"]

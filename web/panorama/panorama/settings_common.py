@@ -33,13 +33,8 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "django.contrib.humanize",
     "django_extensions",
-    "django_filters",
     "django.contrib.gis",
-    "rest_framework",
-    "rest_framework_gis",
 ]
 
 
@@ -84,26 +79,6 @@ USE_TZ = True
 DUMP_DIR = "mks-dump"
 
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
-
-REST_FRAMEWORK = dict(
-    PAGE_SIZE=25,
-    UNAUTHENTICATED_USER={},
-    UNAUTHENTICATED_TOKEN={},
-    DEFAULT_SCHEMA_CLASS="rest_framework.schemas.coreapi.AutoSchema",
-    MAX_PAGINATE_BY=100,
-    DEFAULT_AUTHENTICATION_CLASSES=(
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ),
-    DEFAULT_PAGINATION_CLASS="drf_hal_json.pagination.HalPageNumberPagination",
-    DEFAULT_PARSER_CLASSES=("drf_hal_json.parsers.JsonHalParser",),
-    DEFAULT_RENDERER_CLASSES=(
-        "drf_hal_json.renderers.JsonHalRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",
-    ),
-    COERCE_DECIMAL_TO_STRING=False,
-    DEFAULT_FILTER_BACKENDS=("django_filters.rest_framework.DjangoFilterBackend",),
-)
 
 CORS_ORIGIN_ALLOW_ALL = (
     True  # if True, the whitelist will not be used and all origins will be accepted
@@ -155,11 +130,6 @@ LOGGING = {
             "propagate": False,
         },
         "search": {
-            "handlers": ["console"],
-            "level": "ERROR",
-            "propagate": False,
-        },
-        "elasticsearch": {
             "handlers": ["console"],
             "level": "ERROR",
             "propagate": False,

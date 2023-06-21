@@ -16,7 +16,6 @@ services:
   dataloader:
     build:
       context: ../web
-      dockerfile: WorkerDockerfile
     image: 127.0.0.1:5000/stackdataloader
     links:
       - database:database
@@ -40,7 +39,6 @@ services:
   worker:
     build:
       context: ../web
-      dockerfile: WorkerDockerfile
     image: 127.0.0.1:5000/stackworker
     links:
       - database:database

@@ -1,11 +1,9 @@
-## Datapunt Panorama-API
+# Panoramaverwerking
 
-Project om beelden gemaakt in equirectangulaire projectie te importeren, en te ontsluiten via een API.
+Project om beelden gemaakt in equirectangulaire projectie te importeren en
+prepareren.
 
-De API-laag bestaat uit twee componenten:
-
-- Een OGC (WMS/WFS)-server die de opnamelocaties en de metadata serveert,
-- Een REST-API die aanvullende functionaliteiten biedt.
+De bijbehorende API woont op https://github.com/Amsterdam/panorama-api.
 
 ## Vereisten
 
@@ -34,15 +32,11 @@ Importeer de meest recente database van acceptatie:
 
 ## Unit tests lokaal draaien
 
-Roep de Django-applicatie expliciet aan, en zorg dat OBJECTSTORE_PASSWORD als omgevingsvariabele is gezet:
+Roep de Django-applicatie expliciet aan, en zorg dat ``OBJECTSTORE_PASSWORD``
+als omgevingsvariabele is ingesteld:
 
     export OBJECTSTORE_PASSWORD=XXXXXX
     web/panorama/manage.py test datapunt_api
-
-## Panorama demo lokaal
-
-Op [http://localhost:8088/demo](http://localhost:8088/demo) draaien de equidistante panorama's in Marzipano viewer.
-Op [http://localhost:8088/demo/cubic.html](http://localhost:8088/demo/cubic.html) draaien de kubische projecties van de panorama's in Marzipano viewer.
 
 ## Gedistribueerd beeldbewerking en beeldherkenning
 
