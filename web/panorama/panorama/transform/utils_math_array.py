@@ -1,3 +1,4 @@
+import numexpr as ne
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from scipy.spatial.transform import Rotation
@@ -48,9 +49,12 @@ def rotate_cartesian_vectors(vectors, r):
     x, y, z = vectors
 
     # perform matrix multiplication
-    xr = r[0][0] * x + r[0][1] * y + r[0][2] * z
-    yr = r[1][0] * x + r[1][1] * y + r[1][2] * z
-    zr = r[2][0] * x + r[2][1] * y + r[2][2] * z
+    r00, r01, r02 = r[0][0], r[0][1], r[0][2]
+    r10, r11, r12 = r[1][0], r[1][1], r[1][2]
+    r20, r21, r22 = r[2][0], r[2][1], r[2][2]
+    xr = ne.evaluate("r00 * x + r01 * y + r02 * z")
+    yr = ne.evaluate("r10 * x + r11 * y + r12 * z")
+    zr = ne.evaluate("r20 * x + r21 * y + r22 * z")
 
     return xr, yr, zr
 
@@ -63,13 +67,11 @@ def cartesian2cylindrical(vector, source_width, source_height, r_is_1=True):
     z = vector[2]
 
     if not r_is_1:
-        r = np.sqrt(np.square(x) + np.square(y) + np.square(z))
-        z = z / r
-    theta = np.arccos(z)
-    phi = np.arctan2(y, x)
+        z = ne.evaluate("z / sqrt(x ** 2 + y ** 2 + z ** 2)")
 
-    x1 = np.mod((middle / np.pi) * (phi + np.pi), source_width - 1)
-    y1 = theta * (source_height / np.pi)
+    pi = np.pi
+    x1 = ne.evaluate("(middle / pi * (arctan2(y, x) + pi)) % (source_width - 1)")
+    y1 = ne.evaluate("arccos(z) * (source_height / pi)")
 
     # Correct shapes so x1 and y1 are both square and of the same size.
     x1, y1 = np.atleast_2d(x1), np.atleast_2d(y1)
