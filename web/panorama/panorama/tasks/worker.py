@@ -126,9 +126,7 @@ class RegionBlurrer(_PanoProcessor):
 
         if len(regions) > 0:
             im = blur.blur(im, regions)
-            ImgSet.save_image_set(panorama.get_intermediate_url(), im)
-        else:
-            ImgSet.save_image_set(panorama.get_intermediate_url(), im)
+        ImgSet.save_image_set(panorama.get_intermediate_url(), im)
 
 
 class AllRegionDetector(_PanoProcessor):
@@ -143,7 +141,7 @@ class AllRegionDetector(_PanoProcessor):
         )
 
         regions = lp_detector.get_licenseplate_regions()
-        self.convert_and_save(panorama, regions, start_time, lp=True)
+        self.save_regions(panorama, regions, start_time, lp=True)
 
         # detect faces 1
         start_time = time.time()
@@ -151,23 +149,23 @@ class AllRegionDetector(_PanoProcessor):
         face_detector.panorama_img = lp_detector.panorama_img
 
         regions = face_detector.get_opencv_face_regions()
-        self.convert_and_save(panorama, regions, start_time)
+        self.save_regions(panorama, regions, start_time)
 
         # detect faces 2
         start_time = time.time()
         regions = face_detector.get_dlib_face_regions()
-        self.convert_and_save(panorama, regions, start_time, dlib=True)
+        self.save_regions(panorama, regions, start_time, dlib=True)
 
         # detect faces 3
         start_time = time.time()
         regions = face_detector.get_vision_api_face_regions()
-        self.convert_and_save(panorama, regions, start_time, google=True)
+        self.save_regions(panorama, regions, start_time, google=True)
 
-    def convert_and_save(self, panorama, regions, start_time, **kwargs):
+    def save_regions(self, panorama, regions, start_time, **kwargs):
+        """Saves a CSV file containing the regions in db and object store."""
         for region in regions:
-            region[-1] += ", time={}ms".format(
-                int(round((time.time() - start_time) * 1000))
-            )
+            millis = round((time.time() - start_time) * 1000)
+            region[-1] += f", time={millis}ms"
         save_regions(regions, panorama, region_type="N")
         region_writer(panorama, **kwargs)
 

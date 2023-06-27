@@ -47,7 +47,6 @@ def _make_rectangle(points):
 
 
 def _split_regions(region_dicts):
-    split_regions = []
     for region_dict in region_dicts:
         for split_region in wrap_around(
             [
@@ -60,6 +59,4 @@ def _split_regions(region_dicts):
                 )
             ]
         ):
-            split_regions.append(split_region)
-
-    return split_regions
+            yield split_region

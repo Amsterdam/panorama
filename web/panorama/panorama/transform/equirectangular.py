@@ -30,14 +30,12 @@ def _rotation_grid(rot, w: int):
 
 
 def _sample_grid(target_width):
-    left_top_x = 0
-    left_top_y = 0
     right_bottom_x = SOURCE_WIDTH
     right_bottom_y = PANO_HEIGHT
 
     steps = SOURCE_WIDTH / target_width
 
     return (
-        arange(left_top_x, right_bottom_x, steps, dtype=float64),
-        arange(left_top_y, right_bottom_y, steps, dtype=float64),
+        arange(0, right_bottom_x, steps, dtype=float64),
+        arange(0, right_bottom_y, steps, dtype=float64),
     )

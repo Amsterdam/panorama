@@ -44,10 +44,10 @@ def derive(faces, x, y, zoom, cascade, scale_factor, neighbours):
     :param cascade: the filter that has been used to detect faces
     :param scale_factor: the scale factor that has been used to detect faces
     :param neighbours: the amount of neighbours to detect faces
-    :return: a set consisting of 4 coordinate sets, and a description
+    :return: a list of 4 coordinate pairs and a description
     """
     derived = []
-    detected_by = "cascade={}, scaleFactor={}, neighbours={}, zoom={}".format(cascade, scale_factor, neighbours, zoom)
+    detected_by = f"cascade={cascade}, scaleFactor={scale_factor}, neighbours={neighbours}, zoom={zoom}"
     for (x0, y0, width, height) in faces:
         x1 = int(x0 / zoom) + x
         y1 = int(y0 / zoom) + y
