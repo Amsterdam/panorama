@@ -9,7 +9,7 @@ import cv2
 from numpy import array
 
 # Project
-from panorama.regions.license_plates import LicensePlateDetector
+from panorama.regions.license_plates import from_openalpr
 from panorama.transform import utils_img_file as Img
 from .test_faces import draw_lines
 
@@ -41,7 +41,7 @@ def get_subset():
 
 @skipIf(not os.path.exists('/app/test_output'),
         'LicensePlate detection test skipped: no mounted directory found, run in docker container')
-class TestLicensePlateDetector(TestCase):
+class TestOpenALPR(TestCase):
     """
     This is more an integration test than a unit test
     It requires an installed version of openalpr, and OpenCV which are (probably) only available in the container.
@@ -55,8 +55,8 @@ class TestLicensePlateDetector(TestCase):
     def test_detection_licenseplates_runs_without_errors(self):
         for pano_idx, panorama_path in enumerate(get_subset()):
             log.warning("detecting license plates in panorama {}: {}, please hold".format(pano_idx, panorama_path))
-            lpd = LicensePlateDetector(panorama_path)
-            found_licenseplates = lpd.get_licenseplate_regions()
+            im = Img.get_intermediate_panorama_image(panorama_path)
+            found_licenseplates = from_openalpr(im)
 
             full_image = Img.get_intermediate_panorama_image(panorama_path)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)

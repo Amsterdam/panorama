@@ -3,14 +3,11 @@ from math import tan, radians
 
 from PIL import Image
 
-from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
 import openalpr
 
 log = logging.getLogger(__name__)
-
-object_store = ObjectStore()
 
 JUST_BELOW_HORIZON = 2050
 PLATES_NEAR_BY = 2451
@@ -111,30 +108,10 @@ def _resize(im: Image.Image, size, widen, zoom):
     return im.resize((width, height), Image.BICUBIC)
 
 
-class LicensePlateDetector(object):
-    def __init__(self, panorama_path: str):
-        """
-        :param panorama_path: path of type
-                              "2016/08/18/TMX7316010203-000079/pano_0006_000054.jpg"
-        """
-        self.panorama_path = panorama_path
-        self.panorama_img = None
-
-    def get_licenseplate_regions(self):
-        """
-        Detect Regions in Panorama that are licenseplates
-
-        :return: array of sets for Region
-        """
-        self.panorama_img = Img.get_intermediate_panorama_image(self.panorama_path)
-        return list(from_openalpr(self.panorama_img))
-
-
 # Paths after installation of OpenALPR in the Docker image.
 OPENALPR_DATA = "/usr/share/openalpr/runtime_data"
 OPENALPR_CONF = "/etc/openalpr/openalpr.conf"
 LICENSEPLATE_REGION = "eu"
-
 
 
 def from_openalpr(im):
@@ -147,6 +124,9 @@ def from_openalpr(im):
         raise Exception(msg)
     log.info("Using OpenALPR {}".format(alpr.get_version()))
 
+    return list(_from_openalpr(im, alpr))
+
+def _from_openalpr(im, alpr):
     for x in range(0, Img.PANORAMA_WIDTH, SAMPLE_DISTANCE_H):
         for idx, y in enumerate(range(JUST_BELOW_HORIZON, PLATES_NEAR_BY, SAMPLE_DISTANCE_V)):
             zoom = ZOOM1 if idx == 0 else ZOOM2

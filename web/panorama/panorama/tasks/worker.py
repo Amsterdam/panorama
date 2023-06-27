@@ -136,17 +136,15 @@ class AllRegionDetector(_PanoProcessor):
 
     def process_one(self, panorama: Panoramas):
         start_time = time.time()
-        lp_detector = license_plates.LicensePlateDetector(
-            panorama.get_intermediate_url()
-        )
+        im = Img.get_intermediate_panorama_image(panorama.get_intermediate_url())
 
-        regions = lp_detector.get_licenseplate_regions()
+        regions = license_plates.from_openalpr(im)
         self.save_regions(panorama, regions, start_time, lp=True)
 
         # detect faces 1
         start_time = time.time()
         face_detector = faces.FaceDetector(panorama.get_intermediate_url())
-        face_detector.panorama_img = lp_detector.panorama_img
+        face_detector.panorama_img = im
 
         regions = face_detector.get_opencv_face_regions()
         self.save_regions(panorama, regions, start_time)
