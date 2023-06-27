@@ -6,19 +6,18 @@ from panorama.regions.util import wrap_around
 
 def blur(im, regions):
     """Blur regions in the Image im."""
-    blurred_image = np.array(im)
+    im = np.array(im)
 
-    # blur regions
     for region in _split_regions(regions):
-        (top, left), (bottom, right) = _make_rectangle(region)
-        snippet = blurred_image[top:bottom, left:right]
+        (top, left), (bottom, right) = _make_rectangle(region[:-1])
+        snippet = im[top:bottom, left:right]
         blur_kernel_size = 2 * int((bottom - top) / 4) + 1
         snippet = cv2.GaussianBlur(
-            snippet, (blur_kernel_size, blur_kernel_size), blur_kernel_size
+            snippet, (blur_kernel_size, blur_kernel_size), blur_kernel_size,
+            dst=snippet,
         )
-        blurred_image[top:bottom, left:right] = snippet
 
-    return blurred_image
+    return im
 
 
 def _make_rectangle(points):
@@ -33,17 +32,7 @@ def _make_rectangle(points):
     return (top, left), (bottom, right)
 
 
-def _split_regions(region_dicts):
-    for region_dict in region_dicts:
-        for split_region in wrap_around(
-            [
-                (
-                    (region_dict["left_top_x"], region_dict["left_top_y"]),
-                    (region_dict["right_top_x"], region_dict["right_top_y"]),
-                    (region_dict["right_bottom_x"], region_dict["right_bottom_y"]),
-                    (region_dict["left_bottom_x"], region_dict["left_bottom_y"]),
-                    "",
-                )
-            ]
-        ):
-            yield split_region
+def _split_regions(regions):
+    """Split regions that wrap around the image border."""
+    for region in regions:
+        yield from wrap_around(regions)

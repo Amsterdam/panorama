@@ -74,7 +74,6 @@ class Worker:
         """
         still_working = (
             RegionBlurrer().process() is True
-            or AllRegionDetector().process() is True
             or PanoRenderer().process() is True
         )
 
@@ -113,48 +112,45 @@ class _PanoProcessor:
 
 
 class RegionBlurrer(_PanoProcessor):
-    status_queryset = Panoramas.detected
+    status_queryset = Panoramas.rendered
     status_in_progress = Panoramas.STATUS.blurring
     status_done = Panoramas.STATUS.done
 
     def process_one(self, panorama: Panoramas):
-        im = Img.get_intermediate_panorama_image(panorama.get_intermediate_url())
-        regions = [
-            region.as_dict()
-            for region in Region.objects.filter(pano_id=panorama.pano_id).all()
-        ]
-
-        if len(regions) > 0:
-            im = blur.blur(im, regions)
-        ImgSet.save_image_set(panorama.get_intermediate_url(), im)
-
-
-class AllRegionDetector(_PanoProcessor):
-    status_queryset = Panoramas.rendered
-    status_in_progress = Panoramas.STATUS.detecting_regions
-    status_done = Panoramas.STATUS.detected
-
-    def process_one(self, panorama: Panoramas):
         start_time = time.time()
-        im = Img.get_intermediate_panorama_image(panorama.get_intermediate_url())
+        url = panorama.get_intermediate_url()
+        im = Img.get_intermediate_panorama_image(url)
 
         regions = license_plates.from_openalpr(im)
         self.save_regions(panorama, regions, start_time, lp=True)
+
+        all_regions = regions
 
         # detect faces 1
         start_time = time.time()
         regions = faces.from_opencv(im)
         self.save_regions(panorama, regions, start_time)
 
+        all_regions += regions
+
         # detect faces 2
         start_time = time.time()
         regions = faces.get_dlib_face_regions()
         self.save_regions(panorama, regions, start_time, dlib=True)
 
+        all_regions += regions
+
         # detect faces 3
         start_time = time.time()
         regions = faces.from_google(im)
         self.save_regions(panorama, regions, start_time, google=True)
+
+        all_regions += regions
+
+        # Blur any regions found.
+        if all_regions:
+            im = blur.blur(im, all_regions)
+            ImgSet.save_image_set(url, im)
 
     def save_regions(self, panorama, regions, start_time, **kwargs):
         """Saves a CSV file containing the regions in db and object store."""

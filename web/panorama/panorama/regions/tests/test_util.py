@@ -11,16 +11,13 @@ log = logging.getLogger(__name__)
 def get_random_region_for(start_x):
     start_y = randint(1000, 2500)
     width = randint(400, 700)
-    region = {
-        'left_top_x': start_x,
-        'left_top_y': start_y,
-        'right_top_x': start_x + width,
-        'right_top_y': start_y,
-        'right_bottom_x': start_x + width,
-        'right_bottom_y': start_y + width,
-        'left_bottom_x': start_x,
-        'left_bottom_y': start_y + width,
-    }
+    return [
+        (start_x, start_y),
+        (start_x + width, start_y),
+        (start_x + width, start_y + width),
+        (start_x, start_y + width),
+        "",
+    ]
     return region
 
 

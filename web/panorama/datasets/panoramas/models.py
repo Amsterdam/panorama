@@ -26,6 +26,7 @@ SURFACE_TYPE_CHOICES = (
 
 
 class AbstractPanoramas(StatusModel):
+    # XXX "detecting_regions" and "detected" are no longer used.
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
 
