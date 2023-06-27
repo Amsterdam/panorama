@@ -9,7 +9,7 @@ import cv2
 from numpy import array, int32
 
 # Project
-from panorama.regions.faces import FaceDetector
+from panorama.regions import faces
 from panorama.regions.util import wrap_around
 from panorama.transform import utils_img_file as Img
 
@@ -71,10 +71,8 @@ class TestFaceDetection2(TestCase):
     def test_detection_faces2_runs_without_errors(self):
         for pano_idx, panorama_path in enumerate(get_subset()):
             log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_path))
-            fd = FaceDetector(panorama_path)
-            found_faces = fd.get_dlib_face_regions()
-
             full_image = Img.get_intermediate_panorama_image(panorama_path)
+            found_faces = faces.from_dlib(full_image)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
 
             image = draw_lines(image, found_faces)

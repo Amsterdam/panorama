@@ -7,13 +7,11 @@ from google.cloud import vision
 import numpy as np
 from PIL import Image
 
-from panorama.object_store import ObjectStore
 from panorama.transform import utils_img_file as Img
 
 GOOGLE_VISION_MAX_SIZE = 4000000
 
 log = logging.getLogger(__name__)
-object_store = ObjectStore()
 
 PANORAMA_WIDTH = 8000
 JUST_ABOVE_HORIZON = 1975
@@ -57,79 +55,21 @@ def derive(faces, x, y, zoom, cascade, scale_factor, neighbours):
     return derived
 
 
-class FaceDetector(object):
-    def __init__(self, panorama_path: str):
-        """
-        :param panorama_path: path of type
-                              "2016/08/18/TMX7316010203-000079/pano_0006_000054/equirectangular/panorama_8000.jpg"
-        """
-        self.panorama_path = panorama_path
-        self.panorama_img = None
-
-    def get_opencv_face_regions(self):
-        """
-        Detect face regions with OpenCV
-        :return: list of Regions
-        """
-        self._assert_image_loaded()
-        return list(from_opencv(self.panorama_img))
-
-    def _assert_image_loaded(self):
-        if self.panorama_img is None:
-            self.panorama_img = Img.get_intermediate_panorama_image(self.panorama_path)
-
-    def get_dlib_face_regions(self):
-        """
-        Detect face regions with DLIB
-        :return: list of Regions
-        """
-        self._assert_image_loaded()
-        return list(_dlib_face_regions(self.panorama_img))
-
-    def get_vision_api_face_regions(self):
-        """
-        Detect face regions with Google Vision API
-        :return: list of Regions
-        """
-        self._assert_image_loaded()
-        face_regions = []
-
-        strip = self.panorama_img.crop((0, GOOGLE_VISION_START_HEIGHT, PANORAMA_WIDTH, GOOGLE_VISION_END_HEIGHT))
-        google_image_height = GOOGLE_VISION_END_HEIGHT - GOOGLE_VISION_START_HEIGHT
-
-        zoom = GOOGLE_VISION_ZOOM
-        zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * google_image_height))
-        zoomed = strip.resize(zoomed_size, Image.BICUBIC)
-
-        upload = Img.image2byte_array_sized(zoomed, size=GOOGLE_VISION_MAX_SIZE)
-
-        vision_client = vision.ImageAnnotatorClient()
-        image = vision.types.Image(content=upload)
-
-        response = vision_client.face_detection(image=image)
-
-        regions = []
-        for fa in response.face_annotations:
-            lt, _, rb, _ =  fa.bounding_poly.vertices
-            regions.append((lt.x, lt.y,
-                            rb.x - lt.x, rb.y - lt.y))
-
-            derived = derive(regions, 0, GOOGLE_VISION_START_HEIGHT, zoom, 'google_vision api', 1, 'no treshold')
-            face_regions.extend(derived)
-
-        return face_regions
+_dlib_detector = dlib.get_frontal_face_detector()
 
 
-def _dlib_face_regions(im):
-    """Detect face regions with DLIB. Returns a generator of Regions."""
-    detector = dlib.get_frontal_face_detector()
+def from_dlib(im):
+    """Detect face regions with DLIB. Returns a list of regions."""
+    return list(_from_dlib(im.convert("L")))  # dlib wants grayscale.
 
+
+def _from_dlib(im):
     for zoom in DLIB_ZOOM:
         strip = im.crop((0, 1975, im.width, 2600))
         zoomed_size = (int(zoom * im.width), int(zoom * 625))
         zoomed = strip.resize(zoomed_size, Image.BICUBIC)
 
-        detected_faces, _, _ = detector.run(
+        detected_faces, _, _ = _dlib_detector.run(
             np.asarray(zoomed), DLIB_UPSCALE, DLIB_THRESHOLD
         )
         regions = (
@@ -139,6 +79,37 @@ def _dlib_face_regions(im):
         yield from derive(
             regions, 0, 1975, zoom, "dlib", DLIB_UPSCALE, ">{}".format(DLIB_THRESHOLD)
         )
+
+
+def from_google(im):
+    """Detect faces with Google Vision API. Returns a list of regions."""
+    face_regions = []
+
+    strip = im.crop((0, GOOGLE_VISION_START_HEIGHT, PANORAMA_WIDTH, GOOGLE_VISION_END_HEIGHT))
+    google_image_height = GOOGLE_VISION_END_HEIGHT - GOOGLE_VISION_START_HEIGHT
+
+    zoom = GOOGLE_VISION_ZOOM
+    zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * google_image_height))
+    zoomed = strip.resize(zoomed_size, Image.BICUBIC)
+
+    upload = Img.image2byte_array_sized(zoomed, size=GOOGLE_VISION_MAX_SIZE)
+
+    vision_client = vision.ImageAnnotatorClient()
+    image = vision.types.Image(content=upload)
+
+    response = vision_client.face_detection(image=image)
+
+    # XXX Regions is never reset. Is that on purpose?
+    regions = []
+    for fa in response.face_annotations:
+        lt, _, rb, _ =  fa.bounding_poly.vertices
+        regions.append((lt.x, lt.y,
+                        rb.x - lt.x, rb.y - lt.y))
+
+        derived = derive(regions, 0, GOOGLE_VISION_START_HEIGHT, zoom, 'google_vision api', 1, 'no treshold')
+        face_regions.extend(derived)
+
+    return face_regions
 
 
 _opencv_configs = [
@@ -174,9 +145,11 @@ def _opencv_classifiers():
 
 
 def from_opencv(im):
-    """Detect face regions with OpenCV.
-    :return: generator of Regions
-    """
+    """Detect face regions with OpenCV. Returns a list of regions."""
+    return list(_from_opencv(im))
+
+
+def _from_opencv(im):
     for x in range(0, im.width, SAMPLE_DISTANCE_X):
         for y, zoom in zip(range(JUST_ABOVE_HORIZON, LOWEST_EXPECTED_FACE, SAMPLE_DISTANCE_Y), OPENCV_ZOOM):
             snippet = Img.sample_image(im, x, y)

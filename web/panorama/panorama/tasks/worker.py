@@ -143,20 +143,17 @@ class AllRegionDetector(_PanoProcessor):
 
         # detect faces 1
         start_time = time.time()
-        face_detector = faces.FaceDetector(panorama.get_intermediate_url())
-        face_detector.panorama_img = im
-
-        regions = face_detector.get_opencv_face_regions()
+        regions = faces.from_opencv(im)
         self.save_regions(panorama, regions, start_time)
 
         # detect faces 2
         start_time = time.time()
-        regions = face_detector.get_dlib_face_regions()
+        regions = faces.get_dlib_face_regions()
         self.save_regions(panorama, regions, start_time, dlib=True)
 
         # detect faces 3
         start_time = time.time()
-        regions = face_detector.get_vision_api_face_regions()
+        regions = faces.from_google(im)
         self.save_regions(panorama, regions, start_time, google=True)
 
     def save_regions(self, panorama, regions, start_time, **kwargs):
@@ -182,8 +179,9 @@ class PanoRenderer(_PanoProcessor):
         )
 
         im = Img.get_raw_panorama_as_rgb_array(panorama_path)
-        im = equirectangular.rotate(im, pano.heading, pano.pitch, pano.roll,
-                target_width=8000)
+        im = equirectangular.rotate(
+            im, pano.heading, pano.pitch, pano.roll, target_width=8000
+        )
 
         intermediate_path = "intermediate/{}".format(panorama_path)
         log.info("saving intermediate: {}".format(intermediate_path))

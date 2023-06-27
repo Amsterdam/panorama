@@ -8,7 +8,6 @@ from numpy import array, int32
 from PIL import Image
 
 from panorama.regions import faces
-from panorama.regions.faces import FaceDetector, _dlib_face_regions
 from panorama.regions.util import wrap_around
 from panorama.transform import utils_img_file as Img
 
@@ -70,10 +69,8 @@ class TestFaceDetection(TestCase):
     def test_detection_faces_runs_without_errors(self):
         for pano_idx, panorama_path in enumerate(get_subset()):
             log.warning("Detecting faces in panorama nr. {}: {}".format(pano_idx, panorama_path))
-            fd = FaceDetector(panorama_path)
-            found_faces = fd.get_opencv_face_regions()
-
             full_image = Img.get_intermediate_panorama_image(panorama_path)
+            found_faces = faces.from_opencv(full_image)
             image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
             image = draw_lines(image, found_faces)
 
@@ -83,8 +80,7 @@ class TestFaceDetection(TestCase):
 def test_dlib():
     here = os.path.dirname(__file__)
     im = Image.open(os.path.join(here, "ppmsca_72874.png"))
-    im = im.convert("L")  # dlib wants grayscale.
-    l = list(_dlib_face_regions(im))
+    l = faces.from_dlib(im)
     # XXX There is a face in this image, but _dlib_face_regions can't handle
     # images of this size. Just assert that it doesn't crash for now.
     # assert l != []
@@ -93,6 +89,6 @@ def test_dlib():
 def test_opencv():
     here = os.path.dirname(__file__)
     im = Image.open(os.path.join(here, "ppmsca_72874.png"))
-    l = list(faces.from_opencv(im))
+    l = faces.from_opencv(im)
     # XXX Same story here.
     # assert l != []

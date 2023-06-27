@@ -7,7 +7,7 @@ from unittest import TestCase, skipIf
 import cv2
 from numpy import array, int32
 
-from panorama.regions.faces import FaceDetector
+from panorama.regions import faces
 from panorama.regions.util import wrap_around
 from panorama.transform import utils_img_file as Img
 
@@ -94,6 +94,7 @@ class TestFaceDetection3(TestCase):
         #     found_faces = fd.get_vision_api_face_regions()
         #
         #     full_image = Img.get_intermediate_panorama_image(panorama_path)
+        #     found_faces = faces.from_google(full_image)
         #     image = cv2.cvtColor(array(full_image), cv2.COLOR_RGB2BGR)
         #
         #     image = draw_lines(image, found_faces)
