@@ -28,7 +28,7 @@ def process_mission_row(headers, row, _):
     date_format = '%d-%m-%Y'
     mission_date = datetime.strptime(data['datum'], date_format).date()
     mission_year = data['woz-jaargang'] if 'woz-jaargang' in data else None
-    if mission_year is None or mission_year is "":
+    if mission_year is None or mission_year == "":
         mission_year = mission_date.year
 
     return Mission(
