@@ -145,6 +145,19 @@ class Region(models.Model):
     def __str__(self):
         return f"<Region {self.id} of Panorama {self.panorama.pano_id}>"
 
+    def as_dict(self):
+        return {
+            "left_top_x": self.left_top_x,
+            "left_top_y": self.left_top_y,
+            "right_top_x": self.right_top_x,
+            "right_top_y": self.right_top_y,
+            "right_bottom_x": self.right_bottom_x,
+            "right_bottom_y": self.right_bottom_y,
+            "left_bottom_x": self.left_bottom_x,
+            "left_bottom_y": self.left_bottom_y,
+        }
+
+
 
 class Traject(models.Model):
     timestamp = models.DateTimeField()

@@ -4,19 +4,6 @@ import numpy as np
 from panorama.regions.util import wrap_around
 
 
-def dict_from(region):
-    return {
-        "left_top_x": region.left_top_x,
-        "left_top_y": region.left_top_y,
-        "right_top_x": region.right_top_x,
-        "right_top_y": region.right_top_y,
-        "right_bottom_x": region.right_bottom_x,
-        "right_bottom_y": region.right_bottom_y,
-        "left_bottom_x": region.left_bottom_x,
-        "left_bottom_y": region.left_bottom_y,
-    }
-
-
 def blur(im, regions):
     """Blur regions in the Image im."""
     blurred_image = np.array(im)

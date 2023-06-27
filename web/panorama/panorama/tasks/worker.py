@@ -120,7 +120,7 @@ class RegionBlurrer(_PanoProcessor):
     def process_one(self, panorama: Panoramas):
         im = Img.get_intermediate_panorama_image(panorama.get_intermediate_url())
         regions = [
-            blur.dict_from(region)
+            region.as_dict()
             for region in Region.objects.filter(pano_id=panorama.pano_id).all()
         ]
 

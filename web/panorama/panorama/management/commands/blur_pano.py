@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from datasets.panoramas.models import Region
 from datasets.panoramas.models import Panoramas
-from panorama.regions.blur import blur, dict_from
+from panorama.regions.blur import blur
 from panorama.transform import utils_img_file as Img
 from panorama.transform import utils_img_file_set as ImgSet
 
@@ -26,7 +26,7 @@ class Command(BaseCommand):
             im = Img.get_intermediate_panorama_image(pano_path)
 
             regions = [
-                dict_from(region)
+                region.as_dict()
                 for region in Region.objects.filter(pano_id=pano_id).all()
             ]
 
