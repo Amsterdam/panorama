@@ -34,9 +34,7 @@ RUN touch /usr/include/tesseract/platform.h /usr/include/tesseract/thresholder.h
 
 WORKDIR /temp/openalpr/build
 RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_INSTALL_SYSCONFDIR:PATH=/etc ../src
-RUN make -j $(nproc)
-
-RUN make install
+RUN make -j $(nproc) && make install && make clean
 
 WORKDIR /app
 RUN mkdir openalpr
