@@ -1,11 +1,10 @@
 import logging
 from math import tan, radians
 
+import openalpr
 from PIL import Image
 
 from panorama.transform import utils_img_file as Img
-
-import openalpr
 
 log = logging.getLogger(__name__)
 
