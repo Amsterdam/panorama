@@ -2,13 +2,13 @@ import csv
 import logging
 import io
 
-from datasets.panoramas.models import Panoramas
+from datasets.panoramas.models import Panorama
 from panorama.object_store import ObjectStore
 
 log = logging.getLogger(__name__)
 
 
-def save_region_csv(panorama: Panoramas, regions: list, suffix: str):
+def save_region_csv(panorama: Panorama, regions: list, suffix: str):
     """
     Save detected regions to the objectstore.
 

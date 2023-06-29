@@ -3,7 +3,7 @@ import time
 
 from django.db import connection, transaction
 
-from datasets.panoramas.models import Panoramas
+from datasets.panoramas.models import Panorama
 from panorama.regions import blur, faces, license_plates
 from panorama.tasks.detection import save_region_csv
 from panorama.tasks.utilities import reset_abandoned_work, call_for_close
@@ -110,11 +110,11 @@ class _PanoProcessor:
 
 
 class RegionBlurrer(_PanoProcessor):
-    status_queryset = Panoramas.rendered
-    status_in_progress = Panoramas.STATUS.blurring
-    status_done = Panoramas.STATUS.done
+    status_queryset = Panorama.rendered
+    status_in_progress = Panorama.STATUS.blurring
+    status_done = Panorama.STATUS.done
 
-    def process_one(self, panorama: Panoramas):
+    def process_one(self, panorama: Panorama):
         start_time = time.time()
         url = panorama.get_intermediate_url()
         im = Img.get_intermediate_panorama_image(url)
@@ -159,11 +159,11 @@ class RegionBlurrer(_PanoProcessor):
 
 
 class PanoRenderer(_PanoProcessor):
-    status_queryset = Panoramas.to_be_rendered
-    status_in_progress = Panoramas.STATUS.rendering
-    status_done = Panoramas.STATUS.rendered
+    status_queryset = Panorama.to_be_rendered
+    status_in_progress = Panorama.STATUS.rendering
+    status_done = Panorama.STATUS.rendered
 
-    def process_one(self, pano: Panoramas):
+    def process_one(self, pano: Panorama):
         panorama_path = pano.path + pano.filename
         log.info(
             "START RENDERING panorama: {} in equirectangular projection.".format(

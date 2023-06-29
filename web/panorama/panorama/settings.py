@@ -71,7 +71,7 @@ USE_TZ = True
 STATIC_URL = '/panorama/static/'
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..', 'static'))
 
-HEALTH_MODEL = 'panoramas.Panoramas'
+HEALTH_MODEL = 'panoramas.Panorama'
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 if SENTRY_DSN:

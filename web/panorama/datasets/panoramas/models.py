@@ -25,7 +25,7 @@ SURFACE_TYPE_CHOICES = (
 )
 
 
-class AbstractPanoramas(StatusModel):
+class AbstractPanorama(StatusModel):
     # XXX "detecting_regions" and "detected" are no longer used.
     STATUS = Choices(
         'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
@@ -150,17 +150,17 @@ class Mission(models.Model):
     date = models.DateField(null=True)
 
 
-class Panoramas(AbstractPanoramas):
+class Panorama(AbstractPanorama):
     roll = models.FloatField()
     pitch = models.FloatField()
     heading = models.FloatField()
 
-    class Meta(AbstractPanoramas.Meta):
+    class Meta(AbstractPanorama.Meta):
         abstract = False
         db_table = 'panoramas_panorama'
 
 
-class Adjacencies(AbstractPanoramas):
+class Adjacencies(AbstractPanorama):
     from_pano_id = models.CharField(max_length=37)
     from_geolocation_2d_rd = geo.PointField(dim=2, srid=28992, spatial_index=True)
 
@@ -169,7 +169,7 @@ class Adjacencies(AbstractPanoramas):
     relative_heading = models.FloatField()
     relative_elevation = models.FloatField()
 
-    class Meta(AbstractPanoramas.Meta):
+    class Meta(AbstractPanorama.Meta):
         abstract = False
         managed = False
         db_table = "panoramas_adjacencies_new"

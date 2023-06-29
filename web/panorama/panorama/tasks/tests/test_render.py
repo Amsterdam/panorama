@@ -8,7 +8,7 @@ import factory.fuzzy
 from django.contrib.gis.geos import Point
 from django.utils.timezone import utc as UTC_TZ
 
-from datasets.panoramas.models import Panoramas
+from datasets.panoramas.models import Panorama
 from datasets.panoramas.tests import factories
 from panorama.transform.tests.test_img_file import mock_get_raw_pano
 from ..worker import PanoRenderer
@@ -33,13 +33,13 @@ class TestRender(TestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        for pano in Panoramas.objects.all():
-            pano.status = Panoramas.STATUS.rendered
+        for pano in Panorama.objects.all():
+            pano.status = Panorama.STATUS.rendered
             pano.save()
 
         try:
-            pano = Panoramas.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
-            pano.status = Panoramas.STATUS.to_be_rendered
+            pano = Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0]
+            pano.status = Panorama.STATUS.to_be_rendered
             pano.save()
         except IndexError:
             factories.PanoramaFactory.create(
@@ -64,10 +64,10 @@ class TestRender(TestCase):
     @mock.patch('panorama.transform.utils_img_file.get_raw_panorama_as_rgb_array',
                 side_effect=mock_get_raw_pano)
     def test_create_and_render_batch(self, mock_read_raw, mock_write_transformed):
-        to_render = Panoramas.to_be_rendered.all()[0]
+        to_render = Panorama.to_be_rendered.all()[0]
         self.assertEquals('TMX7315120208-000073_pano_0004_000087', to_render.pano_id)
 
         PanoRenderer().process()
-        self.assertEquals(0, len(Panoramas.to_be_rendered.all()))
+        self.assertEquals(0, len(Panorama.to_be_rendered.all()))
         self.assertTrue(mock_read_raw.called, msg='Read Raw was not called')
         self.assertTrue(mock_write_transformed.called, msg='Write transformed was not called')

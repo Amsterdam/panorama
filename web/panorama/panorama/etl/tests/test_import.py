@@ -7,7 +7,7 @@ from datetime import datetime
 from unittest import mock, skipIf
 from django.test import TransactionTestCase
 
-from datasets.panoramas.models import Panoramas, Mission
+from datasets.panoramas.models import Panorama, Mission
 from panorama.etl.batch_import import import_mission_metadata, rebuild_mission
 from panorama.etl.data_to_model import process_panorama_row
 
@@ -90,8 +90,8 @@ class ImportPanoTest(TransactionTestCase):
                                           ('2017', '03/21/TMX7315120208-100021/')]:
             rebuild_mission(container, mission_path)
 
-        for pano in Panoramas.objects.all():
-            pano.status = Panoramas.STATUS.done
+        for pano in Panorama.objects.all():
+            pano.status = Panorama.STATUS.done
             pano.save()
 
         missies = Mission.objects.all()
@@ -108,7 +108,7 @@ class ImportPanoTest(TransactionTestCase):
         self.assertEqual(Mission.objects.filter(mission_year='2017').count(), 1)
         self.assertEqual(Mission.objects.filter(mission_year='2017', mission_type='bi').count(), 0)
 
-        panos = Panoramas.done.all()
+        panos = Panorama.done.all()
         # We only have four of these files committed.
         #self.assertEqual(panos.count(), 16)
         self.assertEqual(panos.count(), 4)
@@ -120,38 +120,38 @@ class ImportPanoTest(TransactionTestCase):
         # self.assertEqual(trajecten.count(), 16)
 
         # test old-style attributes
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].surface_type, 'L')
-        self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].surface_type, 'W')
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].surface_type, 'L')
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].surface_type, 'L')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].surface_type, 'W')
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].surface_type, 'L')
 
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_distance, 5)
-        self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_distance, 10)
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_distance, 5)
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_distance, 5)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_distance, 10)
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_distance, 5)
 
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_type, 'bi')
-        self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'bi')
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'woz')
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_type, 'bi')
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].mission_type, 'bi')
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'woz')
 
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_year, 2016)
-        self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, 2016)
-        #self.assertEqual(Panoramas.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].mission_year, 2017)
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_year, 2016)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, 2016)
+        #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].mission_year, 2017)
 
         # test new-style attributes
-        #self.assertIn('surface-land', Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
-        self.assertIn('surface-water', Panoramas.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
-        #self.assertIn('surface-land', Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+        #self.assertIn('surface-land', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        self.assertIn('surface-water', Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
+        #self.assertIn('surface-land', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
 
-        #self.assertIn('mission-distance-5', Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
-        self.assertIn('mission-distance-10', Panoramas.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
-        #self.assertIn('mission-distance-5', Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+        #self.assertIn('mission-distance-5', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        self.assertIn('mission-distance-10', Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
+        #self.assertIn('mission-distance-5', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
 
-        #self.assertIn('mission-bi', Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
-        self.assertIn('mission-bi', Panoramas.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
-        #self.assertIn('mission-woz', Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+        #self.assertIn('mission-bi', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        self.assertIn('mission-bi', Panorama.objects.filter(pano_id='TMX7315120208-000033_pano_0000_006658')[0].tags)
+        #self.assertIn('mission-woz', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
 
-        #self.assertIn('mission-2016', Panoramas.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
-        #self.assertIn('mission-2016', Panoramas.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
-        #self.assertIn('mission-2017', Panoramas.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].tags)
+        #self.assertIn('mission-2016', Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].tags)
+        #self.assertIn('mission-2016', Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].tags)
+        #self.assertIn('mission-2017', Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].tags)
 
     @mock.patch("panorama.etl.data_to_model.panorama_image_file_exists",
                 side_effect=lambda a, b, c: file_exists)
@@ -177,18 +177,18 @@ class ImportPanoTest(TransactionTestCase):
         actual = process_panorama_row(row_to_be_rendered.keys(),
                                       row_to_be_rendered.values(),
                                       {'container': 'container', 'name': 'path/mission'})
-        self.assertEqual(actual.status, Panoramas.STATUS.to_be_rendered)
+        self.assertEqual(actual.status, Panorama.STATUS.to_be_rendered)
 
         file_exists, blurred_file_exists, rendered_file_exists = True, False, True
         row_rendered = {'panorama_file_name': 'row_rendered', **basic_row_fields}
         actual = process_panorama_row(row_rendered.keys(),
                                       row_rendered.values(),
                                       {'container': 'container', 'name': 'path/mission'})
-        self.assertEqual(actual.status, Panoramas.STATUS.rendered)
+        self.assertEqual(actual.status, Panorama.STATUS.rendered)
 
         file_exists, blurred_file_exists, rendered_file_exists = True, True, True
         row_done = {'panorama_file_name': 'row_done', **basic_row_fields}
         actual = process_panorama_row(row_done.keys(),
                                       row_done.values(),
                                       {'container': 'container', 'name': 'path/mission'})
-        self.assertEqual(actual.status, Panoramas.STATUS.done)
+        self.assertEqual(actual.status, Panorama.STATUS.done)

@@ -4,7 +4,7 @@ import logging
 from django.contrib.gis.geos import Point
 
 from datasets.panoramas.models import Mission
-from datasets.panoramas.models import Panoramas
+from datasets.panoramas.models import Panorama
 from panorama.etl.check_objectstore import panorama_image_file_exists, panorama_blurred_file_exists, \
     panorama_rendered_file_exists
 from panorama.etl.date_util import _convert_gps_time
@@ -120,11 +120,11 @@ def process_panorama_row(headers, row, csv_file):
         return None
 
     # determine panorama_status based on presence of images
-    panorama_status = Panoramas.STATUS.to_be_rendered
+    panorama_status = Panorama.STATUS.to_be_rendered
     if panorama_blurred_file_exists(container, path, filename):
-        panorama_status = Panoramas.STATUS.done
+        panorama_status = Panorama.STATUS.done
     elif panorama_rendered_file_exists(container, path, filename):
-        panorama_status = Panoramas.STATUS.rendered
+        panorama_status = Panorama.STATUS.rendered
 
     # Creating unique id from mission name and base filename
     pano_id = f"{mission.name}_{base_filename}"
@@ -133,7 +133,7 @@ def process_panorama_row(headers, row, csv_file):
     mission_year = pano_timestamp.year if mission.mission_year == EMPTY_FALLBACK_YEAR else mission.mission_year
     tags = _create_panorama_tags(mission, mission_year)
 
-    return Panoramas(
+    return Panorama(
         pano_id=pano_id,
         status=panorama_status,
         timestamp=pano_timestamp,
