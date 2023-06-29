@@ -118,48 +118,6 @@ class AbstractPanoramas(StatusModel):
         return self.img_baseurl + EQUIRECTANGULAR_SUBPATH + SMALL_IMAGE_NAME
 
 
-class Region(models.Model):
-    REGION_TYPES = (
-        ('N', 'Nummerbord'),
-        ('G', 'Gezicht')
-    )
-    id = models.AutoField(primary_key=True)
-    pano_id = models.CharField(max_length=37, default='', db_index=True)
-    region_type = models.CharField(max_length=1, choices=REGION_TYPES)
-    detected_by = models.CharField(max_length=255)
-
-    # coordinates from left top, clockwise
-    left_top_x = models.IntegerField()
-    left_top_y = models.IntegerField()
-    right_top_x = models.IntegerField()
-    right_top_y = models.IntegerField()
-    right_bottom_x = models.IntegerField()
-    right_bottom_y = models.IntegerField()
-    left_bottom_x = models.IntegerField()
-    left_bottom_y = models.IntegerField()
-
-    objects = Manager()
-
-    class Meta:
-        ordering = ('id',)
-
-    def __str__(self):
-        return f"<Region {self.id} of Panorama {self.panorama.pano_id}>"
-
-    def as_dict(self):
-        return {
-            "left_top_x": self.left_top_x,
-            "left_top_y": self.left_top_y,
-            "right_top_x": self.right_top_x,
-            "right_top_y": self.right_top_y,
-            "right_bottom_x": self.right_bottom_x,
-            "right_bottom_y": self.right_bottom_y,
-            "left_bottom_x": self.left_bottom_x,
-            "left_bottom_y": self.left_bottom_y,
-        }
-
-
-
 class Traject(models.Model):
     timestamp = models.DateTimeField()
     geolocation = geo.PointField(dim=3, spatial_index=True)

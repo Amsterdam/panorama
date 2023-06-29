@@ -5,7 +5,7 @@ from django.db import connection, transaction
 
 from datasets.panoramas.models import Panoramas
 from panorama.regions import blur, faces, license_plates
-from panorama.tasks.detection import save_regions, region_writer
+from panorama.tasks.detection import save_region_csv
 from panorama.tasks.utilities import reset_abandoned_work, call_for_close
 from panorama.transform import equirectangular
 from panorama.transform import utils_img_file as Img
@@ -120,28 +120,28 @@ class RegionBlurrer(_PanoProcessor):
         im = Img.get_intermediate_panorama_image(url)
 
         regions = license_plates.from_openalpr(im)
-        self.save_regions(panorama, regions, start_time, lp=True)
+        self.save_regions(panorama, regions, start_time, "lp")
 
         all_regions = regions
 
         # detect faces 1
         start_time = time.time()
         regions = faces.from_opencv(im)
-        self.save_regions(panorama, regions, start_time)
+        self.save_regions(panorama, regions, start_time, "f")
 
         all_regions += regions
 
         # detect faces 2
         start_time = time.time()
         regions = faces.get_dlib_face_regions()
-        self.save_regions(panorama, regions, start_time, dlib=True)
+        self.save_regions(panorama, regions, start_time, "fd")
 
         all_regions += regions
 
         # detect faces 3
         start_time = time.time()
         regions = faces.from_google(im)
-        self.save_regions(panorama, regions, start_time, google=True)
+        self.save_regions(panorama, regions, start_time, "fg")
 
         all_regions += regions
 
@@ -150,13 +150,12 @@ class RegionBlurrer(_PanoProcessor):
             im = blur.blur(im, all_regions)
             ImgSet.save_image_set(url, im)
 
-    def save_regions(self, panorama, regions, start_time, **kwargs):
+    def save_regions(self, panorama, regions, start_time, suffix: str):
         """Saves a CSV file containing the regions in db and object store."""
         for region in regions:
             millis = round((time.time() - start_time) * 1000)
             region[-1] += f", time={millis}ms"
-        save_regions(regions, panorama, region_type="N")
-        region_writer(panorama, **kwargs)
+        save_region_csv(panorama, regions, suffix)
 
 
 class PanoRenderer(_PanoProcessor):
