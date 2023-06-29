@@ -1,8 +1,8 @@
 from django.core.management import BaseCommand
 
-from panorama.tasks.worker import Worker
+from panorama.tasks import worker
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        Worker().do_work()
+        worker.run()
