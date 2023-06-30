@@ -27,8 +27,6 @@ docker-compose push
 docker stack deploy --compose-file docker-compose.yml panoswarm
 ```
 
-Let op! De naam van het cluster is belangrijk (wordt gebruikt in `save-db.sh`).
-
 En als het cluster succesvol is opgestart - uitgaande van 6 CPU's, en > 16GB memory per node:
 
 ```bash
@@ -51,13 +49,7 @@ docker service scale panoswarm_worker=160
 docker service scale panoswarm_worker=196
 ```
 
-Stel de gegevens - de resultaten van detectie - in de database veilig, wannneer de swarm klaar is:
-
-```bash
-./save-db.sh
-```
-
-Stop swarm - *zorg ervoor dat de gegevens uit de database zijn veiliggesteld!* zie stap hierboven - met het volgende commando:
+Stop swarm met het volgende commando:
 
 ```bash
 docker stack rm panoswarm
