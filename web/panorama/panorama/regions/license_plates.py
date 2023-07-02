@@ -131,7 +131,7 @@ def _from_openalpr(im, alpr):
             zoom = ZOOM1 if idx == 0 else ZOOM2
             snippet = Img.sample_image(im, x, y)
             zoomed_snippet = Img.prepare_img(snippet, zoom, for_cv=False)
-            results = alpr.recognize_array(Img.image2byte_array(zoomed_snippet))['results']
+            results = alpr.recognize_array(Img.as_jpeg(zoomed_snippet))['results']
             yield from parse(results, x, y, zoom, 0, 1)
 
             zoom = ZOOM2 if idx == 0 else ZOOM3
@@ -140,5 +140,5 @@ def _from_openalpr(im, alpr):
                     widen, size, affine_matrix = calculate_shear_data(angle*direction)
                     sheared = snippet.transform(size, Image.AFFINE, affine_matrix, Image.BICUBIC)
                     resized = _resize(sheared, size, widen, zoom)
-                    results = alpr.recognize_array(Img.image2byte_array(resized))['results']
+                    results = alpr.recognize_array(Img.as_jpeg(resized))['results']
                     yield from parse(results, x, y, zoom, angle*direction, widen)

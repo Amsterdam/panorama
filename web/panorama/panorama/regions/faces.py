@@ -92,7 +92,7 @@ def from_google(im):
     zoomed_size = (int(zoom * PANORAMA_WIDTH), int(zoom * google_image_height))
     zoomed = strip.resize(zoomed_size, Image.BICUBIC)
 
-    upload = Img.image2byte_array_sized(zoomed, size=GOOGLE_VISION_MAX_SIZE)
+    upload = Img.as_jpeg_sized(zoomed, size=GOOGLE_VISION_MAX_SIZE)
 
     vision_client = vision.ImageAnnotatorClient()
     image = vision.types.Image(content=upload)

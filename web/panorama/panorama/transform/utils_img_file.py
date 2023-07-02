@@ -16,9 +16,9 @@ SAMPLE_HEIGHT = 320
 object_store = ObjectStore()
 
 
-def image2byte_array(image: Image, quality=80):
-    """
-    Translate PIL image to byte array
+def as_jpeg(image: Image.Image, quality=80) -> bytes:
+    """Store image as JPEG in a bytes.
+
     :param image: PIL image
     :return: bytearray
     """
@@ -27,15 +27,15 @@ def image2byte_array(image: Image, quality=80):
     return img_byte_array.getvalue()
 
 
-def image2byte_array_sized(image: Image, size=1000000):
-    """
-    Translate PIL image to byte array with maximum file size (deault 1MB)
+def as_jpeg_sized(image: Image.Image, size=1000000) -> bytes:
+    """Store image as JPEG in a bytes.
+
     :param image: the PIL image
     :param size: maximum file size
     :return:
     """
     for quality in range(80, 0, -10):
-        byte_array = image2byte_array(image, quality=quality)
+        byte_array = as_jpeg(image, quality=quality)
         if len(byte_array) < size:
             return byte_array
 
