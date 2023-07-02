@@ -6,7 +6,6 @@ from django.db import connection, transaction
 from datasets.panoramas.models import Panorama
 from panorama.regions import blur, faces, license_plates
 from panorama.tasks.detection import save_region_csv
-from panorama.tasks.utilities import reset_abandoned_work, call_for_close
 from panorama.transform import equirectangular
 from panorama.transform import utils_img_file as Img
 from panorama.transform import utils_img_file_set as ImgSet
@@ -52,9 +51,6 @@ def run():
     reset_abandoned_work()
     take_available_work()
 
-    # Notify Jenkins that job is done
-    call_for_close()
-
     # back off of swarm when done (if this time = 0, each node will
     #   restart continuously when work is done)
     time.sleep(600)
@@ -62,20 +58,19 @@ def run():
 
 def take_available_work():
     with _wait_for_panorama_table():
-        while _still_work_to_do():
-            # work is done in _still_work_to_do
+        # The meat of the work is done in the process() method of the workers.
+        # That method returns true if there was a panorama to process for its
+        # stage. States are processed right to left (blurrer first), for
+        # maximum throughput.
+        while RegionBlurrer().process() or PanoRenderer().process():
             pass
 
 
-def _still_work_to_do():
-    """
-    The meat of the work is done in the process() method of the workers.
-    That method returns true if there was a panorama to process for that stage.
-    States are processed right to left (blurrer first), for maximum throughput
-    """
-    still_working = RegionBlurrer().process() or PanoRenderer().process()
-
-    return still_working
+def reset_abandoned_work():
+    with transaction.atomic():
+        Panorama.blurring.all().update(status=Panorama.STATUS.detected)
+        Panorama.detecting_regions.all().update(status=Panorama.STATUS.rendered)
+        Panorama.rendering.all().update(status=Panorama.STATUS.to_be_rendered)
 
 
 class _PanoProcessor:
