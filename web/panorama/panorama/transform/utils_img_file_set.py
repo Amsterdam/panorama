@@ -22,9 +22,9 @@ def make_equirectangular(panorama_path, array_image) -> Iterator[tuple[str, Imag
 
     image = Image.fromarray(array_image)
     yield equirectangular_dir + "panorama_8000.jpg", image
-    medium_img = image.resize((4000, 2000), Image.ANTIALIAS)
+    medium_img = image.resize((4000, 2000), Image.LANCZOS)
     yield equirectangular_dir + "panorama_4000.jpg", medium_img
-    small_img = image.resize((2000, 1000), Image.ANTIALIAS)
+    small_img = image.resize((2000, 1000), Image.LANCZOS)
     yield equirectangular_dir + "panorama_2000.jpg", small_img
 
 
@@ -43,11 +43,11 @@ def make_cubic(panorama_path, array_image, max_width=MAX_WIDTH) -> Iterator[tupl
     previews = {}
     for side, img_array in projections.items():
         cube_face = Image.fromarray(img_array)
-        preview = cube_face.resize((PREVIEW_WIDTH, PREVIEW_WIDTH), Image.ANTIALIAS)
+        preview = cube_face.resize((PREVIEW_WIDTH, PREVIEW_WIDTH), Image.LANCZOS)
         previews[side] = preview
         for zoomlevel in range(0, 1+int(log(max_width/TILE_SIZE, 2))):
             zoom_size = 2 ** zoomlevel * TILE_SIZE
-            zoomed_img = cube_face.resize((zoom_size, zoom_size), Image.ANTIALIAS)
+            zoomed_img = cube_face.resize((zoom_size, zoom_size), Image.LANCZOS)
             for h_idx, h_start in enumerate(range(0, zoom_size, TILE_SIZE)):
                 for v_idx, v_start in enumerate(range(0, zoom_size, TILE_SIZE)):
                     tile = zoomed_img.crop((h_start, v_start, h_start+TILE_SIZE, v_start+TILE_SIZE))
