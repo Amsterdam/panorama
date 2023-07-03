@@ -143,7 +143,11 @@ class RegionBlurrer(_PanoProcessor):
         # Blur any regions found.
         if all_regions:
             im = blur.blur(im, all_regions)
-        ImgSet.save_image_set(url, im)
+
+        for path, im in ImgSet.make_equirectangular(url, im):
+            Img.save_image(im, path)
+        for path, im in ImgSet.make_cubic(url, im):
+            Img.save_image(im, path)
 
     def save_regions(self, panorama, regions, start_time, suffix: str):
         """Saves a CSV file containing the regions in db and object store."""
