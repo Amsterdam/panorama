@@ -48,7 +48,7 @@ def run():
 
     # When running in the 100.000 tasks some fail (we're a bit too marginal on memory), reset status
     # and retry doing work on them
-    reset_abandoned_work()
+    #reset_abandoned_work()
     take_available_work()
 
     # back off of swarm when done (if this time = 0, each node will
@@ -83,8 +83,14 @@ class _PanoProcessor:
         if not pano_to_process:
             return False
 
-        self.process_one(pano_to_process)
-        pano_to_process.status = self.status_done
+        try:
+            self.process_one(pano_to_process)
+        except Exception as e:
+            log.warning(e)
+            _write_exception(pano_to_process, e)
+            pano_to_process.status = Panorama.STATUS.error
+        else:
+            pano_to_process.status = self.status_done
         pano_to_process.save()
 
         return True
@@ -179,3 +185,10 @@ class PanoRenderer(_PanoProcessor):
         log.info("saving intermediate: {}".format(intermediate_path))
 
         save_array_image(im, intermediate_path, in_panorama_store=True)
+
+
+def _write_exception(panorama, exc):
+    objs = ObjectStore()
+    log.info("saving exception")
+    path = f"results/panorama.path}{panorama.filename[:-4]}/error.txt"
+    objs.put_into_datapunt_store(path, repr(exc), "text/plain")

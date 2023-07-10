@@ -28,7 +28,15 @@ SURFACE_TYPE_CHOICES = (
 class AbstractPanorama(StatusModel):
     # XXX "detecting_regions" and "detected" are no longer used.
     STATUS = Choices(
-        'to_be_rendered', 'rendering', 'rendered', 'detecting_regions', 'detected', 'blurring', 'done')
+        "to_be_rendered",
+        "rendering",
+        "rendered",
+        "detecting_regions",
+        "detected",
+        "blurring",
+        "done",
+        "error",
+    )
 
     id = models.AutoField(primary_key=True)
     pano_id = models.CharField(max_length=37, unique=True, db_index=True)
