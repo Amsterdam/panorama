@@ -5,7 +5,7 @@ cachetools==4.2.4
 certifi==2022.12.7
 charset-normalizer==3.1.0
 debtcollector==2.5.0
-Django==3.2.19
+Django==3.2.20
 django-extensions==2.1.4
 django-model-utils==4.3.1
 dlib-bin==19.24.2
