@@ -25,7 +25,7 @@ def save_region_csv(panorama: Panorama, regions: list, suffix: str):
     object_store.put_into_datapunt_store(csv_name, as_csv, "text/csv")
 
 
-def _region_csv(regions) -> bytes:
+def _region_csv(regions) -> str:
     """Produce CSV of regions as a bytes."""
     out = io.StringIO()
     w = csv.writer(out)
