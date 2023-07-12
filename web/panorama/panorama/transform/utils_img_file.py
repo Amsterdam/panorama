@@ -122,7 +122,8 @@ def sample_rgb_array_image_as_array(x, y, rgb_array):
     # This needs to be done per channel, but we can allocate the output array
     # up front.
 
-    out = np.empty(x.shape + (3,))
+    assert x.shape == y.shape
+    out = np.empty(x.shape + (3,), dtype=rgb_array.dtype)
     map_coordinates(rgb_array[0], [y, x], order=1, output=out[:, :, 0])
     map_coordinates(rgb_array[1], [y, x], order=1, output=out[:, :, 1])
     map_coordinates(rgb_array[2], [y, x], order=1, output=out[:, :, 2])
