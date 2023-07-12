@@ -191,7 +191,7 @@ class PanoRenderer(_PanoProcessor):
 
 def _write_exception(panorama, exc):
     log.info(f"saving exception {exc}")
-    path = f"results/{panorama.path}{panorama.filename[:-4]}/error.txt"
+    path = f"errors/{panorama.path}{panorama.filename[:-4]}.txt"
     exc = "".join(traceback.format_exception(exc))
     objs = ObjectStore()
     objs.put_into_datapunt_store(path, exc, "text/plain")
