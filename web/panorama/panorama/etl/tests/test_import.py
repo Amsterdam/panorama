@@ -133,7 +133,7 @@ class ImportPanoTest(TransactionTestCase):
         #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_type, 'woz')
 
         #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000032_pano_0000_007572')[0].mission_year, 2016)
-        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, 2016)
+        self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000067_pano_0011_000463')[0].mission_year, '2016')
         #self.assertEqual(Panorama.objects.filter(pano_id='TMX7315120208-000073_pano_0004_000087')[0].mission_year, 2017)
 
         # test new-style attributes
