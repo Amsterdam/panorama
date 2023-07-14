@@ -90,10 +90,12 @@ class _PanoProcessor:
         except Exception as e:
             log.warning(e)
             _write_exception(pano_to_process, e)
-            pano_to_process.status = Panorama.STATUS.error
+            status = Panorama.STATUS.error
         else:
-            pano_to_process.status = self.status_done
+            status = self.status_done
+        pano_to_process.status = status
         pano_to_process.save()
+        log.warning("set %s to %s", pano_to_process.id, status)
 
         return True
 
@@ -106,6 +108,7 @@ class _PanoProcessor:
                 next_pano = self.status_queryset.select_for_update()[0]
                 next_pano.status = self.status_in_progress
                 next_pano.save()
+                log.warning("set %s to %s", pano_to_process.id, self.status_in_progress)
 
             return next_pano
         except IndexError:
@@ -153,8 +156,10 @@ class RegionBlurrer(_PanoProcessor):
             im = blur.blur(im, all_regions)
 
         for path, im in ImgSet.make_equirectangular(url, im):
+            log.info(f"saving image of size {im.size} at {path}")
             Img.save_image(im, path)
         for path, im in ImgSet.make_cubic(url, im):
+            log.info(f"saving image of size {im.size} at {path}")
             Img.save_image(im, path)
 
     def save_regions(self, panorama, regions, start_time, suffix: str):
@@ -186,6 +191,7 @@ class PanoRenderer(_PanoProcessor):
         intermediate_path = "intermediate/{}".format(panorama_path)
         log.info("saving intermediate: {}".format(intermediate_path))
 
+        log.info(f"saving image of size {im.size}")
         save_array_image(im, intermediate_path, in_panorama_store=True)
 
 
