@@ -36,14 +36,13 @@ def _is_mission(subdir):
     """Does the given subdir contain mission information (used to end recursion in `_check_and_process_recursively`
 
         _is_mission('05/07/') --> False
-        _is_mission('05/07/TMX000002013-000030/' --> True
+        _is_mission('05/07/TMX7316010203-002369/') --> True
 
     :param subdir: the path of the subdir
     :return: True or False if the subdir is a mission dir or not
     """
 
-    pattern = re.compile(r'\d\d/\d\d/\S\S\S\d\d\d\d\d\d\d\d\d\d\S\d\d\d\d\d\d/')
-    return pattern.match(subdir)
+    return bool(re.match(r"\d{2}/\d{2}/\S{3}\d{10}\S\d{6}/", subdir))
 
 
 def _check_and_process_recursively(source_container, path, increment, force_rebuild, missions_to_rebuild):
