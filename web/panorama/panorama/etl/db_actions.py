@@ -25,7 +25,7 @@ def _dump(filename, query, parameters=None):
     with connection.cursor() as cursor:
         # cursor.mogrify encodes parameters and outputs byte-array
         query_bytes = cursor.mogrify(query) if parameters is None else cursor.mogrify(query, parameters)
-        copy_command = f"COPY ({query_bytes.decode()}) TO STDOUT"
+        copy_command = f"COPY ({query_bytes.decode()}) TO STDOUT WITH (FORMAT binary)"
         cursor.copy_expert(copy_command, output_stream)
     output_stream.seek(0)
     log.info(f"Writing DB dump: {INCREMENTS_CONTAINER}/{filename}")
@@ -89,7 +89,7 @@ def restore_increment(increment_path):
     fields = [field.name for field in Panorama._meta.get_fields() if field.name != 'id']
     table_name = Panorama._meta.db_table
 
-    copy_command = f"COPY {table_name} ({', '.join(fields)}) FROM STDIN"
+    copy_command = f"COPY {table_name} ({', '.join(fields)}) FROM  STDIN (FORMAT binary)"
     log.info(f"Restoring from {INCREMENTS_CONTAINER}/{increment_path}{DUMP_FILENAME}")
     file = io.BytesIO(objectstore.get_panorama_store_object({'container': INCREMENTS_CONTAINER,
                                                              'name': f"{increment_path}{DUMP_FILENAME}"}))
