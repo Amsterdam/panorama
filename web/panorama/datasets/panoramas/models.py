@@ -50,7 +50,7 @@ class AbstractPanorama(StatusModel):
     surface_type = models.CharField(max_length=1, choices=SURFACE_TYPE_CHOICES, default='L')
     mission_distance = models.IntegerField()
     mission_type = models.TextField(max_length=16, default='bi')
-    mission_year = models.TextField(max_length=4, null=True)
+    mission_year = models.IntegerField(max_length=4, null=True)
     tags = ArrayField(models.CharField(max_length=32), db_index=True, blank=True)
 
     objects = Manager()
