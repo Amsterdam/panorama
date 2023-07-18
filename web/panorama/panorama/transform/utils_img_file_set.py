@@ -52,7 +52,7 @@ def make_cubic(panorama_path, array_image, max_width=MAX_WIDTH) -> Iterator[tupl
                 for v_idx, v_start in enumerate(range(0, zoom_size, TILE_SIZE)):
                     tile = zoomed_img.crop((h_start, v_start, h_start+TILE_SIZE, v_start+TILE_SIZE))
                     tile_path = "/{}/{}/{}".format(zoomlevel+1, side, v_idx)
-                    yield "{cubic_dir}{tile_path}/{h_idx}.jpg", tile
+                    yield f"{cubic_dir}{tile_path}/{h_idx}.jpg", tile
 
     preview_image = Image.new('RGB', (PREVIEW_WIDTH, 6 * PREVIEW_WIDTH))
     for idx, side in enumerate(cubic.SIDES):

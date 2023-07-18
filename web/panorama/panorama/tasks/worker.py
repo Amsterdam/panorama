@@ -139,7 +139,7 @@ class RegionBlurrer(_PanoProcessor):
 
         # detect faces 2
         start_time = time.time()
-        regions = faces.get_dlib_face_regions()
+        regions = faces.from_dlib()
         self.save_regions(panorama, regions, start_time, "fd")
 
         all_regions += regions
