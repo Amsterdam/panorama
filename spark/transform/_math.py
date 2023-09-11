@@ -1,8 +1,8 @@
 # Common math utilities.
 
-from kornia.geometry.transform import remap
 from scipy.spatial.transform import Rotation
 import torch
+import torch.nn.functional as F
 from torch import pi
 
 
@@ -98,20 +98,24 @@ def sample(im: torch.Tensor, x: torch.Tensor, y: torch.Tensor):
 
     Returns a tensor of shape 3×H×W.
     """
-    # Kornia (actually torch.nn.functional.grid_sample) wants a batch of images,
-    # B×C×H×W. Since our rotation matrix is different for each image, we process
-    # batches of one.
+    # F.grid_sample wants a batch of images, B×C×H×W. Since our rotation
+    # matrix is different for each image, we process batches of one.
     im = im.reshape(1, *im.shape)
-    x = x.reshape(1, *x.shape)
-    y = y.reshape(1, *y.shape)
+
+    xy = torch.stack((x, y), dim=-1)
+    xy = xy.to(torch.float32)  # Just in case.
+    xy = xy.reshape(1, *xy.shape)  # Add batch dimension.
+
+    # Normalize pixel coordinates to the range [-1, 1].
+    # The -1 ensures that the max. index (say, 7999) gets mapped to 1.
+    norm = 2 / (torch.as_tensor([im.shape[3], im.shape[2]], dtype=xy.dtype) - 1)
+    norm = norm.to(xy.device)
+    xy = xy.mul_(norm).sub_(1)
 
     # Prevent "RuntimeError: grid_sampler_2d_cpu not implemented for Byte".
     # XXX Is torch.uint8 supported on CUDA?
     im = im.to(torch.float32)
-    # These should be float32, but convert just in case.
-    x = x.to(torch.float32)
-    y = y.to(torch.float32)
 
-    im = remap(im, x, y, padding_mode="reflection")[0]
+    im = F.grid_sample(im, xy, align_corners=True, padding_mode="reflection")[0]
     im = im.round_().to(torch.uint8)
     return im
