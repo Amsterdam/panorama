@@ -1,1 +1,0 @@
-from panorama.settings import *

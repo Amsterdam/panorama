@@ -1,43 +1,12 @@
-# Panoramaverwerking
+Panorama processing
+===================
 
-Project om beelden gemaakt in equirectangulaire projectie te importeren en
-prepareren.
+This project contains code for processing panorama images for display in the
+web-based viewer at https://data.amsterdam.nl, and for preparing a database of
+metadata served by the [Panorama API](https://github.com/Amsterdam/panorama-api).
+Images are oriented and cubically projected.
 
-De bijbehorende API woont op https://github.com/Amsterdam/panorama-api.
-
-## Vereisten
-
-- Docker en Docker Compose
-
-## Ontwikkelen
-
-Gebruik `docker-compose` om een lokale versie op te starten
-(Wanneer je gebruik maakt van Google Vision API is een bestand
-`google-application-credentials.json` nodig in de web/panorama map
-met daarin geldige credentials voor Google Vision API):
-
-    (sudo) docker-compose start
-
-Of:
-
-    docker-compose up -d
-
-Je kunt ook het project lokaal op poort 8000 draaien, maar dat vereist op zijn minst de database-container:
-
-    docker-compose up -d database
-
-Importeer de meest recente database van acceptatie:
-
-    docker-compose exec database update-db.sh panorama <your_username>
-
-## Unit tests lokaal draaien
-
-Roep de Django-applicatie expliciet aan, en zorg dat ``OBJECTSTORE_PASSWORD``
-als omgevingsvariabele is ingesteld:
-
-    export OBJECTSTORE_PASSWORD=XXXXXX
-    web/panorama/manage.py test datapunt_api
-
-## Gedistribueerd beeldbewerking en beeldherkenning
-
-Zie `.swarm/readme.md` in dit project voor meer informatie
+All the code in this repo is written to run on the Databricks platform.
+Its expected input is panorama images in JPEG format + CSV files containing
+metadata. Blurring of faces and license plates is assumed to have already been
+done (by the Computer Vision Team).
