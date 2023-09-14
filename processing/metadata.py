@@ -12,7 +12,7 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from _metadata import timeconv
+from ._metadata import timeconv
 
 spark = SparkSession.builder.getOrCreate()
 

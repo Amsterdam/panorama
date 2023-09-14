@@ -1,5 +1,5 @@
 # Databricks notebook source
-import metadata
+from processing import metadata
 
 # COMMAND ----------
 
