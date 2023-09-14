@@ -1,7 +1,7 @@
-from typing import Union
+from typing import Iterator
 
+import pandas as pd
 from pyspark.sql import SparkSession
-from pyspark.sql.column import Column
 from pyspark.sql.dataframe import DataFrame
 import pyspark.sql.functions as F
 from pyspark.sql.types import (
@@ -11,6 +11,8 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
+
+from _metadata import timeconv
 
 spark = SparkSession.builder.getOrCreate()
 
@@ -223,22 +225,6 @@ def _parse_dates_from_filenames(df: DataFrame) -> DataFrame:
     return df.drop("_filename")
 
 
-def _from_gps_time(col: Union[str, Column]) -> Column:
-    """Returns an expression that converts col from GPS time to timestamp.
-
-    This only works for dates past 2015-07-01.
-    """
-    # UTC offset for dates after 2015-07-01, including the 17 leap seconds
-    # since the GPS epoch (1980).
-    UTC_FROM_GPS = 315964800 - 17
-    # UTC timestamps of leap seconds after 2015-07-01.
-    LEAP_SECONDS_INTRODUCED = [1483228800]
-
-    if isinstance(col, str):
-        col = F.col(col)
-
-    col = col + F.lit(UTC_FROM_GPS).cast("double")
-    for leap in sorted(LEAP_SECONDS_INTRODUCED, reverse=True):
-        col = col - (col > F.lit(leap)).cast("double")
-
-    return F.timestamp_seconds(col)
+@F.pandas_udf("timestamp")
+def _from_gps_time(it: Iterator[pd.Series]) -> Iterator[pd.Series]:
+    return timeconv.from_gps_time(it)
