@@ -1,4 +1,5 @@
 import io
+import warnings
 
 import numpy as np
 from PIL import Image
@@ -24,4 +25,8 @@ def tensor_from_jpeg(b: bytearray | bytes, device="cpu") -> torch.Tensor:
     """
     im = Image.open(io.BytesIO(b))
     im = np.asarray(im).transpose(2, 0, 1)
-    return torch.as_tensor(im, device=device)
+    with warnings.catch_warnings():
+        # On device="cpu", we don't want to copy the array.
+        # We'll be careful to treat it as read-only.
+        warnings.filterwarnings("ignore", "non-writable tensors")
+        return torch.as_tensor(im, device=device)
