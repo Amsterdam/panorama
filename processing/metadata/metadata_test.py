@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from . import timeconv
+from . import _from_gps_time
 
 
 @pytest.mark.parametrize(
@@ -14,5 +14,5 @@ from . import timeconv
     ],
 )
 def test_from_gps_time(gps, utc):
-    from_gps = next(timeconv.from_gps_time([pd.Series([gps])]))
+    from_gps = next(_from_gps_time([pd.Series([gps])]))
     assert from_gps[0].isoformat() == utc

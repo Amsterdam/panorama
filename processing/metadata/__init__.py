@@ -12,10 +12,6 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from ._metadata import timeconv
-
-spark = SparkSession.builder.getOrCreate()
-
 
 def make_api_table_missions(df: DataFrame) -> DataFrame:
     """Convert result of read_missiegegevens to the table panoramas_missions."""
@@ -84,8 +80,13 @@ def make_api_table_panoramas(panos: DataFrame, missions: DataFrame) -> DataFrame
 
 def _prepare_panos_for_join(df: DataFrame) -> DataFrame:
     """Prepare panos DataFrame for joining with missions."""
+
+    @F.pandas_udf("timestamp")
+    def from_gps_time(it: Iterator[pd.Series]) -> Iterator[pd.Series]:
+        return _from_gps_time(it)
+
     df = df.withColumn("pano_id", F.concat_ws("_", "mission", "panorama_file_name"))
-    df = df.withColumn("timestamp", _from_gps_time("gps_seconds[s]"))
+    df = df.withColumn("timestamp", from_gps_time("gps_seconds[s]"))
     df = df.withColumn("filename", F.concat("panorama_file_name", F.lit(".jpg")))
 
     space = F.lit(" ")
@@ -120,7 +121,10 @@ def _prepare_panos_for_join(df: DataFrame) -> DataFrame:
     return df
 
 
-def read_missiegegevens(path="/tmp/testdata/*/missiegegevens.csv") -> DataFrame:
+def read_missiegegevens(
+    spark: SparkSession,
+    path: str = "/tmp/testdata/*/missiegegevens.csv",
+) -> DataFrame:
     schema = StructType(
         [
             StructField("Missienaam", StringType(), False),
@@ -156,7 +160,10 @@ def read_missiegegevens(path="/tmp/testdata/*/missiegegevens.csv") -> DataFrame:
     return df
 
 
-def read_panos(path="/tmp/testdata/*/*/*/*/panorama1.csv") -> DataFrame:
+def read_panos(
+    spark: SparkSession,
+    path: str = "/tmp/testdata/*/*/*/*/panorama1.csv",
+) -> DataFrame:
     """Reads all the panorama1.csv files from path.
 
     The path should be a glob pattern, say "somewhere/*/*/*/*/panorama1.csv".
@@ -180,7 +187,10 @@ def read_panos(path="/tmp/testdata/*/*/*/*/panorama1.csv") -> DataFrame:
     return df
 
 
-def read_trajectories(path="/tmp/testdata/*/*/*/*/trajectory.csv") -> DataFrame:
+def read_trajectories(
+    spark: SparkSession,
+    path: str = "/tmp/testdata/*/*/*/*/trajectory.csv",
+) -> DataFrame:
     schema = StructType(
         [
             StructField("gps_seconds[s]", DoubleType(), False),
@@ -225,6 +235,20 @@ def _parse_dates_from_filenames(df: DataFrame) -> DataFrame:
     return df.drop("_filename")
 
 
-@F.pandas_udf("timestamp")
 def _from_gps_time(it: Iterator[pd.Series]) -> Iterator[pd.Series]:
-    return timeconv.from_gps_time(it)
+    """Convert GPS timestamps to datetimes.
+
+    Only valid for timestamps after 2015-07-01. Earlier times will be off by
+    a few seconds due to lack of leap seconds.
+    """
+    # UTC offset for dates after 2015-07-01, including the 17 leap seconds
+    # since the GPS epoch (1980).
+    UTC_FROM_GPS = 315964800 - 17
+    # UTC timestamps of leap seconds after 2015-07-01.
+    leap_seconds = sorted([1483228800], reverse=True)
+
+    for t in it:
+        t = t + UTC_FROM_GPS
+        for leap in leap_seconds:
+            t -= (t > leap)
+        yield pd.to_datetime(t, unit="s", utc=True)
