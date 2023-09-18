@@ -3,7 +3,7 @@ from pyspark.sql import functions as F
 
 # COMMAND ----------
 
-images = spark.read.format("binaryFile").load("dbfs:/FileStore/tables/panorama/*/*/*/*/pano_????_??????.jpg").cache()
+images = spark.read.format("binaryFile").load("dbfs:/FileStore/tables/panorama/*/*/*/*/pano_????_??????.jpg")
 
 # COMMAND ----------
 
@@ -15,9 +15,8 @@ images = images.selectExpr("format_string('%s_%s', pid1, split(pid2, '.jpg')[0])
 # COMMAND ----------
 
 meta = spark.read.table("dpbk_dev.panorama.silver_panoramas")
-meta = meta.select("pano_id", "roll", "pitch", "heading")
 
 # COMMAND ----------
 
 # Should produce a DF with pano_id, content, roll, pitch, heading.
-images = images.join(meta, "pano_id")
+images = images.join(meta, "pano_id").select("pano_id", "content", "roll", "pitch", "heading")
