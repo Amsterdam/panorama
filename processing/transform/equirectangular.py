@@ -11,7 +11,7 @@ def rotate(
     heading: float,
     pitch: float,
     roll: float,
-    target_width=None,
+    target_width: int,
     device=None,
 ):
     im = torch.as_tensor(im, device=device)
@@ -20,9 +20,6 @@ def rotate(
         raise ValueError(f"expected RGB along dim 0, got shape {im.shape}")
     if im.shape[2] != 2 * im.shape[1]:
         raise ValueError(f"wrong shape {im.shape}")
-
-    if target_width is None:
-        target_width = im.width
 
     r = _math.rotation_matrix(heading, pitch, roll)
     x, y = _rotation_grid(r, im, target_width, device=device)
