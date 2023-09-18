@@ -20,3 +20,19 @@ meta = spark.read.table("dpbk_dev.panorama.silver_panoramas")
 
 # Should produce a DF with pano_id, content, roll, pitch, heading.
 images = images.join(meta, "pano_id").select("pano_id", "content", "roll", "pitch", "heading")
+
+# COMMAND ----------
+
+from pyspark.sql.types import Row
+
+from processing.transform import equirectangular, _images
+
+
+def rot(row):
+    im = _images.tensor_from_jpeg(row["content"])
+    im = equirectangular.rotate(im, row["heading"], row["pitch"], row["roll"], target_width=8000)
+    im = _images.jpeg_from_tensor(im)
+    return row["pano_id"], im
+
+
+images = images.rdd.map(rot).toDF(["pano_id", "content"])
