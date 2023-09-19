@@ -15,6 +15,12 @@ def test_jpeg_from_tensor():
     assert im.size == (800, 400)
 
 
+def test_resize():
+    im = torch.rand(3, 400, 800).to(torch.uint8)
+    assert _images._image_from_tensor(_images.resize(im, 400)).size == (400, 200)
+    assert _images._image_from_tensor(_images.resize(im, 200)).size == (200, 100)
+
+
 def test_tensor_from_jpeg():
     here = os.path.dirname(__file__)
     datadir = here + "/testdata/2016/04/19/TMX7315120208-000033"
@@ -28,4 +34,4 @@ def test_tensor_from_jpeg():
 
     # Test conversion round trip.
     im = _images.jpeg_from_tensor(im)
-    #Image.open(io.BytesIO(im)).show()
+    # Image.open(io.BytesIO(im)).show()
