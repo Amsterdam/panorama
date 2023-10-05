@@ -39,7 +39,7 @@ oslo.utils==3.39.1
 packaging==23.1
 pluggy==1.0.0
 pbr==5.1.1
-Pillow==9.5.0
+Pillow==10.0.1
 protobuf==3.20.3
 psycopg2-binary==2.9.6
 pyasn1==0.4.8
