@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=requirements.txt requirements_common.in requirements_prod.in
 #
+cffi==1.16.0
+    # via mozjpeg-lossless-optimization
 cmake==3.27.4.1
     # via triton
 filelock==3.12.4
@@ -18,6 +20,8 @@ lit==16.0.6
     # via triton
 markupsafe==2.1.3
     # via jinja2
+mozjpeg-lossless-optimization==1.1.3
+    # via -r requirements_common.in
 mpmath==1.3.0
     # via sympy
 networkx==3.1
@@ -60,6 +64,8 @@ pillow==9.3.0
     # via -r requirements_common.in
 py4j==0.10.9.7
     # via pyspark
+pycparser==2.21
+    # via cffi
 pyspark==3.4.1
     # via -r requirements_common.in
 python-dateutil==2.8.2

@@ -1,8 +1,9 @@
 import io
 import os.path
 
-from PIL import Image
+import pytest
 import torch
+from PIL import Image
 
 from . import _images
 
@@ -13,6 +14,33 @@ def test_jpeg_from_tensor():
     im = Image.open(io.BytesIO(im))
 
     assert im.size == (800, 400)
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "pano_0000_006658.jpg",
+        "pano_0000_006658_d.jpg",
+    ],
+)
+def test_optimize_jpeg(filename: str):
+    here = os.path.dirname(__file__)
+    datadir = os.path.join(here, "testdata/2016/04/19/TMX7315120208-000033")
+    filename = os.path.join(datadir, filename)
+
+    with open(filename, "rb") as f:
+        b = f.read()
+
+    size = len(b)
+    im = Image.open(io.BytesIO(b))
+    width, height = im.size
+    t = _images._tensor_from_image(im)
+
+    im = _images._optimize_jpeg(b)
+    assert len(im) < size  # Our test images are unoptimized.
+
+    equal = (_images.tensor_from_jpeg(b) == t).all()
+    assert equal, f"optimizing changed the image {filename}"
 
 
 def test_resize():

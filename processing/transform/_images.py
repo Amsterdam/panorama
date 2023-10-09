@@ -2,6 +2,7 @@ import io
 import warnings
 
 import kornia
+import mozjpeg_lossless_optimization
 import numpy as np
 from PIL import Image
 import torch
@@ -20,7 +21,21 @@ def jpeg_from_tensor(im: torch.Tensor, quality=80) -> bytes:
     im = _image_from_tensor(im)
     out = io.BytesIO()
     im.save(out, format="JPEG", optimize=True, quality=quality)
-    return out.getvalue()
+    return _optimize_jpeg(out.getvalue())
+
+
+def _optimize_jpeg(im: bytes) -> bytes:
+    """Optimize a JPEG image, in-memory."""
+    return mozjpeg_lossless_optimization.optimize(im)
+    # Instead of mozjpeg_lossless_optimization, we could use jpegoptim,
+    # which is between 2× and 10× faster, but it needs to be installed
+    # separately and produces slightly larger images. Storage costs matter.
+    # In case we ever need to switch:
+    # opt = subprocess.check_output(
+    #     ["jpegoptim", "-q", "--stdin", "--stdout"],
+    #     input=im,
+    #     stderr=subprocess.DEVNULL,
+    # )
 
 
 def resize(im: torch.Tensor, width: int) -> torch.Tensor:
@@ -30,15 +45,19 @@ def resize(im: torch.Tensor, width: int) -> torch.Tensor:
     return kornia.geometry.transform.resize(im, size=width, side="long", antialias=True)
 
 
+def _tensor_from_image(im: Image.Image, device="cpu") -> torch.Tensor:
+    im = np.asarray(im).transpose(2, 0, 1)
+    with warnings.catch_warnings():
+        # On device="cpu", we don't want to copy the array.
+        # We'll be careful to treat it as read-only.
+        warnings.filterwarnings(action="ignore", message=".*non-writable ")
+        return torch.as_tensor(im, device=device)
+
+
 def tensor_from_jpeg(b: bytearray | bytes, device="cpu") -> torch.Tensor:
     """Load a tensor from a JPEG image in memory.
 
     The returned tensor will have dtype=torch.uint8 and shape 3×H×W.
     """
     im = Image.open(io.BytesIO(b))
-    im = np.asarray(im).transpose(2, 0, 1)
-    with warnings.catch_warnings():
-        # On device="cpu", we don't want to copy the array.
-        # We'll be careful to treat it as read-only.
-        warnings.filterwarnings("ignore", "non-writable tensors")
-        return torch.as_tensor(im, device=device)
+    return _tensor_from_image(im)
