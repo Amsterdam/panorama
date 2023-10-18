@@ -89,15 +89,10 @@ def _prepare_panos_for_join(df: DataFrame) -> DataFrame:
     df = df.withColumn("timestamp", from_gps_time("gps_seconds[s]"))
     df = df.withColumn("filename", F.concat("panorama_file_name", F.lit(".jpg")))
 
-    space = F.lit(" ")
-    geolocation = F.concat(
-        F.lit("POINT Z("),
+    geolocation = _make_pointz(
         "longitude[deg]",
-        space,
         "latitude[deg]",
-        space,
         "altitude_ellipsoidal[m]",
-        F.lit(")"),
     )
     df = df.withColumn("geolocation", geolocation)
     geolocation = F.concat(
@@ -187,6 +182,79 @@ def read_panos(
     return df
 
 
+def read_panos_kavel10(
+    spark: SparkSession,
+    path: str = "/tmp/testdata/*_MOSAIC_*.*",
+) -> DataFrame:
+    """Read Kavel 10's metadata files."""
+    schema = StructType(
+        [
+            StructField("ImageName", StringType(), True),
+            StructField("UTC_Date_Time", StringType(), True),
+            StructField("GPS_Week_Seconds", DoubleType(), True),
+            StructField("X", DoubleType(), True),
+            StructField("Y", DoubleType(), True),
+            StructField("Z", DoubleType(), True),
+            StructField("Time", StringType(), True),
+            StructField("Date", StringType(), True),
+            StructField("Roll", DoubleType(), True),
+            StructField("Pitch", DoubleType(), True),
+            StructField("Heading", DoubleType(), True),
+            StructField("Vel_North", DoubleType(), True),
+            StructField("Vel_East", DoubleType(), True),
+            StructField("Vel_Up", DoubleType(), True),
+            StructField("Vel_Down", DoubleType(), True),
+            StructField("RMS_North", DoubleType(), True),
+            StructField("RMS East", DoubleType(), True),
+            StructField("RMS_Elevation", DoubleType(), True),
+            StructField("RMS_Roll", DoubleType(), True),
+            StructField("RMS_Pitch", DoubleType(), True),
+            StructField("RMS_Heading", DoubleType(), True),
+        ]
+    )
+
+    # The extension is .mxeo, but these are plain CSVs.
+    df = spark.read.csv(path, schema=schema, header=True)
+
+    # ImageName is the base filename, including ".jpg".
+    df = df.withColumnRenamed("ImageName", "filename")
+
+    df = df.withColumn("pano_id", F.expr("substring(filename, 1, len(filename) - 4)"))
+
+    # UTC_Date_Time is ${date}_${time}, but with the leading digits
+    # of the year missing. Assume it's the 21st, century for now.
+    df = df.withColumn(
+        "timestamp",
+        F.expr(
+            """from_utc_timestamp(
+                concat('20', replace(UTC_Date_Time, '_', 'T')),
+                'Europe/Amsterdam'
+            )
+            """
+        ),
+    )
+
+    # TODO X and Y are RD coordinates. Convert.
+    df = df.withColumn("geolocation", _make_pointz("X", "Y", "Z"))
+
+    df = df.withColumnsRenamed(
+        {
+            "Roll": "roll",
+            "Pitch": "pitch",
+            "Heading": "heading",
+        }
+    )
+
+    return df.select(
+        "filename",
+        # "path",
+        "geolocation",
+        "roll",
+        "pitch",
+        "heading",
+    )
+
+
 def read_trajectories(
     spark: SparkSession,
     path: str = "/tmp/testdata/*/*/*/*/trajectory.csv",
@@ -250,5 +318,10 @@ def _from_gps_time(it: Iterator[pd.Series]) -> Iterator[pd.Series]:
     for t in it:
         t = t + UTC_FROM_GPS
         for leap in leap_seconds:
-            t -= (t > leap)
+            t -= t > leap
         yield pd.to_datetime(t, unit="s", utc=True)
+
+
+def _make_pointz(x, y, z):
+    space = F.lit(" ")
+    return F.concat(F.lit("POINT Z("), x, space, y, space, z, F.lit(")"))
