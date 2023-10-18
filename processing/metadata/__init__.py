@@ -103,9 +103,8 @@ def _prepare_panos_for_join(df: DataFrame) -> DataFrame:
     # We'll compute this in Postgres, so leave it null for now.
     df = df.withColumn("_geolocation_2d_rd", F.lit(None))
 
-    df = df.withColumnsRenamed(
-        {col + "[deg]": col for col in ["roll", "pitch", "heading"]}
-    )
+    for col in ["roll", "pitch", "heading"]:
+        df = df.withColumnRenamed(col + "[deg]", col)
 
     # The status and status_changed columns refer to a previous version
     # where the database was used as a work queue. They're meaningless,
@@ -136,14 +135,13 @@ def read_missiegegevens(
 
     df = spark.read.csv(path, schema=schema, sep="\t", header=True)
 
-    df = df.withColumnsRenamed(
-        {
-            "Gebied": "neighbourhood",
-            "Missienaam": "mission",  # For join with panos.
-            "missietype": "mission_type",
-            "rijafstand": "mission_distance",
-        }
-    )
+    for old, new in [
+        ("Gebied", "neighbourhood"),
+        ("Missienaam", "mission"),  # For join with panos.
+        ("missietype", "mission_type"),
+        ("rijafstand", "mission_distance"),
+    ]:
+        df = df.withColumnRenamed(old, new)
 
     df = df.withColumn("surface_type", F.upper(F.substring("water/land", 1, 1)))
 
@@ -237,13 +235,8 @@ def read_panos_kavel10(
     # TODO X and Y are RD coordinates. Convert.
     df = df.withColumn("geolocation", _make_pointz("X", "Y", "Z"))
 
-    df = df.withColumnsRenamed(
-        {
-            "Roll": "roll",
-            "Pitch": "pitch",
-            "Heading": "heading",
-        }
-    )
+    for col in ["Roll", "Pitch", "Heading"]:
+        df = df.withColumnRenamed(col, col.lower())
 
     return df.select(
         "filename",
