@@ -60,7 +60,7 @@ packaging==23.1
     # via kornia
 pandas==2.0.3
     # via -r requirements_common.in
-pillow==9.3.0
+pillow==10.1.0
     # via -r requirements_common.in
 py4j==0.10.9.7
     # via pyspark
