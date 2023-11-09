@@ -95,6 +95,7 @@ def _prepare_panos_for_join(df: DataFrame) -> DataFrame:
         "altitude_ellipsoidal[m]",
     )
     df = df.withColumn("geolocation", geolocation)
+    space = F.lit(" ")
     geolocation = F.concat(
         F.lit("POINT("), "longitude[deg]", space, "latitude[deg]", F.lit(")")
     )
@@ -119,6 +120,11 @@ def read_missiegegevens(
     spark: SparkSession,
     path: str = "/tmp/testdata/*/missiegegevens.csv",
 ) -> DataFrame:
+    """Read the missiegegevens file.
+
+    This file contains information about missions. It is constructed by
+    DataOffice.
+    """
     schema = StructType(
         [
             StructField("Missienaam", StringType(), False),
