@@ -159,7 +159,7 @@ def read_missiegegevens(
     return df
 
 
-def read_panos(
+def read_panos_old(
     spark: SparkSession,
     path: str = "/tmp/testdata/*/*/*/*/panorama1.csv",
 ) -> DataFrame:
