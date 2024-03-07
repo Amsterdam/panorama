@@ -37,7 +37,7 @@ packaging==23.1
     #   pytest
 pandas==2.0.3
     # via -r requirements_common.in
-pillow==10.1.0
+pillow==10.2.0
     # via -r requirements_common.in
 pluggy==1.3.0
     # via pytest
