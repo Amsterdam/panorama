@@ -1,3 +1,7 @@
+from math import log
+from typing import Iterator
+
+import kornia
 import torch
 
 from . import _math
@@ -11,13 +15,47 @@ CUBE_FRONT, CUBE_BACK, CUBE_LEFT, CUBE_RIGHT, CUBE_UP, CUBE_DOWN = (
     "u",
     "d",
 )
-#   preserve order - the preview.jpg in utils_img_file_set depends on it:
+
 SIDES = [CUBE_BACK, CUBE_DOWN, CUBE_FRONT, CUBE_LEFT, CUBE_RIGHT, CUBE_UP]
 
 MAX_CUBIC_WIDTH = 2048  # width of cubic edges
 
+_MAX_WIDTH = 2048
+_PREVIEW_WIDTH = 256
+_TILE_SIZE = 512
 
-def project(im: torch.Tensor, target_width=MAX_CUBIC_WIDTH):
+
+def make_fileset(proj: dict[str, torch.Tensor]) -> Iterator[tuple[str, torch.Tensor]]:
+    for side, im in proj.items():
+        for zoomlevel in range(1 + int(log(_MAX_WIDTH / _TILE_SIZE, 2))):
+            zoom_size = 2**zoomlevel * _TILE_SIZE
+            zoomed = kornia.geometry.transform.resize(
+                im, zoom_size, side="long", antialias=True
+            )
+            zoomed = zoomed.round_().to(torch.uint8)
+
+            for h_idx, h_start in enumerate(range(0, zoom_size, _TILE_SIZE)):
+                for v_idx, v_start in enumerate(range(0, zoom_size, _TILE_SIZE)):
+                    tile = zoomed[:, v_start:, h_start:][:, :_TILE_SIZE, :_TILE_SIZE]
+                    yield f"{zoomlevel+1}/{side}/{v_idx}/{h_idx}.jpg", tile
+
+    # The preview image is the six sides stacked vertically,
+    # in the fixed order given by SIDES and at width _PREVIEW_WIDTH.
+    preview = torch.cat(
+        [
+            kornia.geometry.transform.resize(
+                proj[side], size=_PREVIEW_WIDTH, side="long", antialias=True
+            )
+            .round_()
+            .to(torch.uint8)
+            for side in SIDES
+        ],
+        dim=1,
+    )
+    yield "preview.jpg", preview
+
+
+def project(im: torch.Tensor, target_width=MAX_CUBIC_WIDTH) -> dict[str, torch.Tensor]:
     """Returns cubic projections of an image.
 
     The image im must be of shape 3×H×W.

@@ -24,7 +24,7 @@ def rotate(
     r = _math.rotation_matrix(heading, pitch, roll)
     x, y = _rotation_grid(r, im, target_width, device=device)
 
-    return _math.sample(im, x, y)
+    return _math.sample(im, x, y).round_().to(torch.uint8)
 
 
 def _rotation_grid(rot: torch.Tensor, im: torch.Tensor, target_width: int, device=None):
