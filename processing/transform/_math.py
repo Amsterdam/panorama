@@ -117,5 +117,4 @@ def sample(im: torch.Tensor, x: torch.Tensor, y: torch.Tensor):
     im = im.to(torch.float32)
 
     im = F.grid_sample(im, xy, align_corners=True, padding_mode="reflection")[0]
-    im = im.round_().to(torch.uint8)
     return im
