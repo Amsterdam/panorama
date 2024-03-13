@@ -4,7 +4,7 @@ from typing import Iterator
 import kornia
 import torch
 
-from . import _math
+from . import _images, _math
 
 
 CUBE_FRONT, CUBE_BACK, CUBE_LEFT, CUBE_RIGHT, CUBE_UP, CUBE_DOWN = (
@@ -29,10 +29,7 @@ def make_fileset(proj: dict[str, torch.Tensor]) -> Iterator[tuple[str, torch.Ten
     for side, im in proj.items():
         for zoomlevel in range(1 + int(log(_MAX_WIDTH / _TILE_SIZE, 2))):
             zoom_size = 2**zoomlevel * _TILE_SIZE
-            zoomed = kornia.geometry.transform.resize(
-                im, zoom_size, side="long", antialias=True
-            )
-            zoomed = zoomed.round_().to(torch.uint8)
+            zoomed = _images.resize(im, zoom_size).round_().to(torch.uint8)
 
             for h_idx, h_start in enumerate(range(0, zoom_size, _TILE_SIZE)):
                 for v_idx, v_start in enumerate(range(0, zoom_size, _TILE_SIZE)):
@@ -43,11 +40,7 @@ def make_fileset(proj: dict[str, torch.Tensor]) -> Iterator[tuple[str, torch.Ten
     # in the fixed order given by SIDES and at width _PREVIEW_WIDTH.
     preview = torch.cat(
         [
-            kornia.geometry.transform.resize(
-                proj[side], size=_PREVIEW_WIDTH, side="long", antialias=True
-            )
-            .round_()
-            .to(torch.uint8)
+            _images.resize(proj[side], _PREVIEW_WIDTH).round_().to(torch.uint8)
             for side in SIDES
         ],
         dim=1,
