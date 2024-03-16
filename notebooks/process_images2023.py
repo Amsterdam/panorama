@@ -88,13 +88,13 @@ len(todo)
 
 # COMMAND ----------
 
-# Process images.
+# Process images. Calling collect forces a wait for the result.
 r = sc.parallelize(todo).map(run).collect()
 
 # Check which images were successfully processed and add those to the delta table.
 ok = spark.createDataFrame([(filename,) for filename, exc in r if exc is None], schema=["filename"])
 ok.write.mode("append").saveAsTable("dpbk_dev.panorama.silver_pictures_processed")
-len(ok)
+ok.count()
 
 # COMMAND ----------
 
