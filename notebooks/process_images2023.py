@@ -35,10 +35,17 @@ def process(filename: str, out_dir: str):
     out_dir = os.path.join(out_dir, _parse_filename(filename))
     im = _images.tensor_from_jpeg(open(filename, "rb").read())
 
+    dirs_made = set()  # Directories that we made (or found out exist).
+
     for filename, im in _process(im):
         jpg = _images.jpeg_from_tensor(im)
         filename = os.path.join(out_dir, filename)
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+        d = os.path.dirname(filename)
+        if d not in dirs_made:
+            os.makedirs(d, exist_ok=True)
+            dirs_made.add(d)
+
         with open(filename, "wb") as f:
             f.write(jpg)
 
@@ -75,9 +82,11 @@ def _process(im):
 
 from glob import glob
 
-input_dir = "/Volumes/DPBK_DEV/default/panoramas_input/2023-11-29_17_42_40/intermediate/"
+# Find all input pictures.
+todo = glob("/Volumes/DPBK_DEV/default/panoramas_input/2023-11-29_17_42_40/intermediate/2023/01/*/*/*.jpg")
+len(todo)
 
-todo = glob(input_dir + "2023/01/*/*/*.jpg")
+# COMMAND ----------
 
 # Remove panoramas that are listed as done. We need to update this table later.
 done = sql("select * from dpbk_dev.panorama.silver_pictures_processed")
