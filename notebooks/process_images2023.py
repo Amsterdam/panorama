@@ -16,6 +16,7 @@ dbutils.library.restartPython()
 import kornia
 import torch
 
+from datetime import datetime
 import os
 import os.path
 
@@ -23,12 +24,11 @@ from processing.transform import cubic, _images
 
 
 def run(filename):
-    """Returns (filename, exception), or None if no exception was raised."""
     try:
         process(filename, out_dir="/Volumes/DPBK_PRD/default/panorama")
     except Exception as e:
-        return (filename, e)
-    return (filename, None)
+        return (filename, e, datetime.now())
+    return (filename, None, datetime.now())
 
 
 def process(filename: str, out_dir: str):
