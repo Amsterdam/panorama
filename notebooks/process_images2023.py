@@ -44,7 +44,11 @@ def process(filename: str, out_dir: str):
         d = os.path.dirname(filename)
         if d not in dirs_made:
             os.makedirs(d, exist_ok=True)
-            dirs_made.add(d)
+            while True:
+                dirs_made.add(d)
+                d = os.path.dirname(d)
+                if d in dirs_made:
+                    break
 
         with open(filename, "wb") as f:
             f.write(jpg)
