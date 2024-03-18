@@ -87,8 +87,8 @@ def _process(im):
 from glob import glob
 
 # Find all input pictures.
-todo = glob("/Volumes/DPBK_DEV/default/panoramas_input/2023-11-29_17_42_40/intermediate/2023/01/*/*/*.jpg")
-len(todo)
+all_files = glob("/Volumes/DPBK_DEV/default/landingzone_panoramas/2023-11-29_17_42_40/intermediate/2023/*/*/*/*.jpg")
+len(all_files)
 
 # COMMAND ----------
 
@@ -96,22 +96,32 @@ len(todo)
 done = sql("select * from dpbk_dev.panorama.silver_pictures_processed")
 done = {row["filename"] for row in done.collect()}
 
-todo = [f for f in todo if f not in done]
-len(todo)
+todo = [f for f in all_files if f not in done]
+len(todo)  # Should eventually become 0.
+
+# COMMAND ----------
+
+# Smaller batch, for testing changes etc.
+# todo = todo[:5000]
 
 # COMMAND ----------
 
 # Process images. Calling collect forces a wait for the result.
-r = sc.parallelize(todo).map(run).collect()
+#
+# Use the maximum number of partitions. The work per picture is multiple seconds and
+# the transient EACCESS errors greatly skew the distribution of work across partitions.
+r = sc.parallelize(todo, len(todo)).map(run).collect()
 
 # Check which images were successfully processed and add those to the delta table.
-ok = spark.createDataFrame([(filename,) for filename, exc in r if exc is None], schema=["filename"])
+# (Trying to convert an RDD to a DataFrame directly runs into some permission issue,
+# so do this on the master node.)
+ok = spark.createDataFrame([(filename, t) for filename, exc, t in r if exc is None], schema=["filename"])
 ok.write.mode("append").saveAsTable("dpbk_dev.panorama.silver_pictures_processed")
 ok.count()
 
 # COMMAND ----------
 
 # We tend to get lots of "permission denied" errors, which are apparently all transient,
-# so keep retrying the previous cell until everything's done.
-todo = [filename for filename, exc in r if exc is not None]
-len(todo)  # Should eventually become zero.
+# so keep retrying the few cells above until everything's done.
+failed = [filename for filename, exc, _ in r if exc is not None]
+len(failed)  # Should eventually become zero.
