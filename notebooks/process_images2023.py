@@ -20,6 +20,7 @@ from datetime import datetime
 import os
 import os.path
 
+from processing.metadata import strip_filename
 from processing.transform import cubic, _images
 
 
@@ -32,7 +33,7 @@ def run(filename):
 
 
 def process(filename: str, out_dir: str):
-    out_dir = os.path.join(out_dir, _parse_filename(filename))
+    out_dir = os.path.join(out_dir, strip_filename(filename))
     im = _images.tensor_from_jpeg(open(filename, "rb").read())
 
     dirs_made = set()  # Directories that we made (or found out exist).
@@ -53,22 +54,6 @@ def process(filename: str, out_dir: str):
         with open(filename, "wb") as f:
             f.write(jpg)
 
-
-def _parse_filename(filename: str) -> str:
-    orig = filename
-    dirname, filename = os.path.split(filename)
-    filename, jpg = os.path.splitext(filename)
-    if jpg.lower() != ".jpg":
-        raise ValueError(f"expected a filename ending in .jpg, got {filename!r}")
-
-    dirname, mission = os.path.split(dirname)
-    dirname, day = os.path.split(dirname)
-    dirname, month = os.path.split(dirname)
-    dirname, year = os.path.split(dirname)
-    if not all([day, dirname, filename, month, mission, year]):
-        raise ValueError(f"unexpected path {orig!r}")
-
-    return os.path.join(year, month, day, mission, filename)
 
 
 def _process(im):
