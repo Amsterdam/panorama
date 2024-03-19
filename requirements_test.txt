@@ -12,6 +12,8 @@ exceptiongroup==1.1.3
     # via pytest
 filelock==3.12.3
     # via torch
+fsspec==2024.3.1
+    # via torch
 iniconfig==2.0.0
     # via pytest
 jinja2==3.1.2
@@ -45,7 +47,7 @@ py4j==0.10.9.7
     # via pyspark
 pycparser==2.21
     # via cffi
-pyspark==3.4.1
+pyspark==3.5.0
     # via -r requirements_common.in
 pytest==7.4.0
     # via -r requirements_test.in
@@ -61,11 +63,11 @@ sympy==1.12
     # via torch
 tomli==2.0.1
     # via pytest
-torch==2.0.1+cpu
+torch==2.2.1+cpu
     # via
     #   -r requirements_test.in
     #   kornia
-typing-extensions==4.7.1
+typing-extensions==4.10.0
     # via
     #   filelock
     #   torch
