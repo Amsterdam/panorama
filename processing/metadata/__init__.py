@@ -12,6 +12,8 @@ from pyspark.sql.types import (
     StructType,
 )
 
+from ._filenames import strip_filename
+
 
 def make_api_table_missions(df: DataFrame) -> DataFrame:
     """Convert result of read_missiegegevens to the table panoramas_missions."""
