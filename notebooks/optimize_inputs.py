@@ -39,7 +39,7 @@ def optimize(d):
 
 # COMMAND ----------
 
-dirs = glob.glob(pattern)
+dirs = glob(pattern)
 dirs = sc.parallelize(dirs, len(dirs))
 dirs.foreach(optimize)
 
