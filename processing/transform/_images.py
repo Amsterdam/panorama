@@ -13,7 +13,7 @@ def _image_from_tensor(im: torch.Tensor) -> Image.Image:
     return Image.fromarray(im.transpose(1, 2, 0), "RGB")
 
 
-def jpeg_from_tensor(im: torch.Tensor, quality=80) -> bytes:
+def jpeg_from_tensor(im: torch.Tensor, quality=80, optimize=False) -> bytes:
     """Save a tensor as a JPEG, in-memory.
 
     The tensor im should have shape 3×H×W.
@@ -21,7 +21,10 @@ def jpeg_from_tensor(im: torch.Tensor, quality=80) -> bytes:
     im = _image_from_tensor(im)
     out = io.BytesIO()
     im.save(out, format="JPEG", optimize=True, quality=quality)
-    return _optimize_jpeg(out.getvalue())
+    jpg = out.getvalue()
+    if optimize:
+        jpg = _optimize_jpeg(jpg)
+    return jpg
 
 
 def _optimize_jpeg(im: bytes) -> bytes:
