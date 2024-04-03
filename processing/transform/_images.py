@@ -39,10 +39,18 @@ def _optimize_jpeg(im: bytes) -> bytes:
 
 
 def resize(im: torch.Tensor, width: int) -> torch.Tensor:
-    # Kornia's resize w/ antialias produces results similar to PIL.
-    if not im.dtype.is_floating_point:
-        im = im.to(dtype=torch.float32)
-    return kornia.geometry.transform.resize(im, size=width, side="long", antialias=True)
+    if im.device != torch.device("cpu"):
+        # Kornia's resize w/ antialias produces results similar to PIL.
+        if not im.dtype.is_floating_point:
+            im = im.to(dtype=torch.float32)
+        return kornia.geometry.transform.resize(im, size=width, side="long", antialias=True)
+
+    # But PIL is much faster in the single-threaded case, which is effectively
+    # the case on Databricks.
+    im = _image_from_tensor(im)
+    height = int(round(im.height * (width / im.width)))
+    im = im.resize((width, height), Image.BICUBIC)
+    return _tensor_from_image(im)
 
 
 def _tensor_from_image(im: Image.Image, device="cpu") -> torch.Tensor:
