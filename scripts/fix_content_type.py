@@ -25,12 +25,14 @@ bsc = bsc = BlobServiceClient.from_connection_string(connstr)
 cc = bsc.get_container_client("panorama")
 cs = ContentSettings(content_type="image/jpeg")
 
+changed = 0
 for i, b in enumerate(cc.list_blobs(name_starts_with=prefix)):
     n = b["name"]
     if i % 1000 == 0:
-        print(i, datetime.now(), n)
+        print(i, changed, datetime.now(), n)
     if not n.endswith(".jpg") or b["content_settings"]["content_type"] == "image/jpeg":
         continue
 
     bc = cc.get_blob_client(n)
     bc.set_http_headers(ContentSettings(content_type="image/jpeg"))
+    changed += 1
