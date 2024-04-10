@@ -31,11 +31,11 @@ async def main():
     async with BlobServiceClient.from_connection_string(connstr) as bsc:
         cc = bsc.get_container_client("panorama")
 
-        changed, i = 0, 0
+        changed, total = 0, 0
         async for page in cc.list_blobs(name_starts_with=prefix).by_page():
             tasks = []
             async for b in page:
-                i += 1
+                total += 1
                 n = b["name"]
                 if (
                     not n.endswith(".jpg")
@@ -48,7 +48,7 @@ async def main():
 
             await asyncio.gather(*tasks)
             changed += len(tasks)
-            print(prefix, i, changed, datetime.now())
+            print(prefix, total, changed, datetime.now())
             continue
 
 
