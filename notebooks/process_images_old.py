@@ -71,7 +71,11 @@ def _process(im, heading, pitch, roll):
 
 from glob import glob
 
-all_files = glob("/Volumes/DPBK_DEV/default/landingzone_panoramas/*/2022/*/*/*/*.jpg")
+all_files = glob("/Volumes/DPBK_DEV/default/landingzone_panoramas/*/2020/*/*/*/*.jpg")
+
+# COMMAND ----------
+
+len(all_files)
 
 # COMMAND ----------
 
@@ -108,9 +112,36 @@ r = todo.rdd.map(process_row)
 
 # COMMAND ----------
 
-r.collect()
+from datetime import datetime
+import time
+
+
+batch_size = 5200
+max_failures = 5
+
+failures = 0
+
+while failures < max_failures:
+    n = todo.count()
+    if n == 0:
+        break
+    print(datetime.now(), "|", n, "left")
+
+    batch = todo.limit(batch_size)
+    r = batch.rdd.repartition(batch_size).map(process_row).collect()
+
+    ok = [(filename, t) for filename, exc, t in r if exc is None]
+    if len(ok) == 0:
+        failures += 1
+        print("no progress, first error:", r[0])
+        time.sleep(5)  # Might solve transient EACCESS issue, who knows.
+        continue
+
+    failures = 0
+    ok = spark.createDataFrame(ok, schema=["filename"])
+    ok.write.mode("append").saveAsTable("dpbk_dev.panorama.silver_pictures_processed")
 
 # COMMAND ----------
 
-ok = spark.createDataFrame([(filename, t) for filename, exc, t in r if exc is None], schema=["filename"])
-ok.write.mode("append").saveAsTable("dpbk_dev.panorama.silver_pictures_processed")
+# MAGIC %sql
+# MAGIC select count(filename) from dpbk_dev.panorama.silver_pictures_processed
