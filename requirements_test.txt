@@ -6,8 +6,6 @@
 #
 --extra-index-url https://download.pytorch.org/whl/cpu
 
-cffi==1.16.0
-    # via mozjpeg-lossless-optimization
 exceptiongroup==1.1.3
     # via pytest
 filelock==3.12.3
@@ -16,60 +14,27 @@ fsspec==2024.3.1
     # via torch
 iniconfig==2.0.0
     # via pytest
-jinja2==3.1.2
+jinja2==3.1.4
     # via torch
-kornia==0.7.0
-    # via -r requirements_common.in
 markupsafe==2.1.3
     # via jinja2
-mozjpeg-lossless-optimization==1.1.3
-    # via -r requirements_common.in
 mpmath==1.3.0
     # via sympy
 networkx==3.1
     # via torch
-numpy==1.25.1
-    # via
-    #   -r requirements_common.in
-    #   pandas
-    #   scipy
 packaging==23.1
-    # via
-    #   kornia
-    #   pytest
-pandas==2.0.3
-    # via -r requirements_common.in
-pillow==10.2.0
-    # via -r requirements_common.in
+    # via pytest
 pluggy==1.3.0
     # via pytest
-py4j==0.10.9.7
-    # via pyspark
-pycparser==2.21
-    # via cffi
-pyspark==3.5.0
-    # via -r requirements_common.in
 pytest==7.4.0
     # via -r requirements_test.in
-python-dateutil==2.8.2
-    # via pandas
-pytz==2023.3.post1
-    # via pandas
-scipy==1.11.2
-    # via -r requirements_common.in
-six==1.16.0
-    # via python-dateutil
 sympy==1.12
     # via torch
 tomli==2.0.1
     # via pytest
 torch==2.2.1+cpu
-    # via
-    #   -r requirements_test.in
-    #   kornia
+    # via -r requirements_test.in
 typing-extensions==4.10.0
     # via
     #   filelock
     #   torch
-tzdata==2023.3
-    # via pandas
