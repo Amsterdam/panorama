@@ -3,7 +3,7 @@ from processing import metadata
 
 # COMMAND ----------
 
-panos = metadata.read_panos(spark, "dbfs:/FileStore/tables/panorama/*/*/*/*/panorama1.csv")
+panos = metadata.read_panos_old(spark, "dbfs:/FileStore/tables/panorama/*/*/*/*/panorama1.csv")
 panos.write.saveAsTable("dpbk_dev.panorama.bronze_panoramas")
 miss = metadata.read_missiegegevens(spark, "dbfs:/FileStore/tables/panorama/*/missiegegevens.csv")
 miss.write.saveAsTable("dpbk_dev.panorama.bronze_missions")

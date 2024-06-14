@@ -1,3 +1,8 @@
+"""Metadata processing code.
+
+See ../../notebooks/process_metadata.py for usage.
+"""
+
 from typing import Iterator
 
 import pandas as pd
@@ -118,10 +123,7 @@ def _prepare_panos_for_join(df: DataFrame) -> DataFrame:
     return df
 
 
-def read_missiegegevens(
-    spark: SparkSession,
-    path: str = "/tmp/testdata/*/missiegegevens.csv",
-) -> DataFrame:
+def read_missiegegevens(spark: SparkSession, path: str) -> DataFrame:
     """Read the missiegegevens file.
 
     This file contains information about missions. It is constructed by
@@ -161,10 +163,7 @@ def read_missiegegevens(
     return df
 
 
-def read_panos(
-    spark: SparkSession,
-    path: str = "/tmp/testdata/*/*/*/*/panorama1.csv",
-) -> DataFrame:
+def read_panos_old(spark: SparkSession, path: str) -> DataFrame:
     """Reads all the panorama1.csv files from path.
 
     The path should be a glob pattern, say "somewhere/*/*/*/*/panorama1.csv".
@@ -188,10 +187,7 @@ def read_panos(
     return df
 
 
-def read_panos_kavel10(
-    spark: SparkSession,
-    path: str = "/tmp/testdata/*_MOSAIC_*.*",
-) -> DataFrame:
+def read_panos_kavel10(spark: SparkSession, path: str) -> DataFrame:
     """Read Kavel 10's metadata files."""
     schema = StructType(
         [
@@ -219,16 +215,20 @@ def read_panos_kavel10(
         ]
     )
 
-    # The extension is .mxeo, but these are plain CSVs.
     df = spark.read.csv(path, schema=schema, header=True)
+    df = _parse_dates_from_filenames(df)
+    return df
 
+
+def _normalize_panos_kavel10(df: DataFrame):
+    """Transform Kavel10 metadata to something closer to our old format."""
     # ImageName is the base filename, including ".jpg".
-    df = df.withColumnRenamed("ImageName", "filename")
+    df = df.withColumnRenamed("ImageName", "panorama_file_name")
 
-    df = df.withColumn("pano_id", F.expr("substring(filename, 1, len(filename) - 4)"))
+    df = df.withColumn("pano_id", F.expr("substring(panorama_file_name, 1, len(panorama_file_name) - 4)"))
 
     # UTC_Date_Time is ${date}_${time}, but with the leading digits
-    # of the year missing. Assume it's the 21st, century for now.
+    # of the year missing. Assume it's the 21st century for now.
     df = df.withColumn(
         "timestamp",
         F.expr(
@@ -247,8 +247,8 @@ def read_panos_kavel10(
         df = df.withColumnRenamed(col, col.lower())
 
     return df.select(
-        "filename",
-        # "path",
+        "panorama_file_name",
+        "timestamp",
         "geolocation",
         "roll",
         "pitch",
